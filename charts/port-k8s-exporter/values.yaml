@@ -1,0 +1,47 @@
+image:
+  repository: ghcr.io/port-labs/port-k8s-exporter
+  pullPolicy: IfNotPresent
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+secret:
+  annotations: {}
+  name: ""
+  secrets:
+    portClientId: ""
+    portClientSecret: ""
+
+configMap:
+  annotations: {}
+  name: ""
+  config:
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+clusterRole:
+  annotations: {}
+  name: ""
+
+clusterRoleBinding:
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
