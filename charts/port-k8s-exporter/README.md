@@ -45,35 +45,35 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configuration parameters of the `port-k8s-exporter` chart and default values.
 
-| Parameter                         | Description                                                       | Default                               |
-|-----------------------------------|-------------------------------------------------------------------|---------------------------------------|
-| `image.repository`                | Image repository                                                  | `ghcr.io/port-labs/port-k8s-exporter` |
-| `image.pullPolicy`                | Image pull policy                                                 | `IfNotPresent`                        |
-| `image.tag`                       | Image tag                                                         | `""`                                  |
-| `imagePullSecrets`                | Image pull secrets                                                | `[]`                                  |
-| `nameOverride`                    | Chart name override                                               | `""`                                  |
-| `fullnameOverride`                | fully qualified app name override                                 | `""`                                  |
-| `secret.annotations`              | Annotations for secret object                                     | `{}`                                  |
-| `secret.name`                     | Secret object name                                                | `""`                                  |
-| `secret.secrets.portClientId`     | Port Client ID - Required                                         | `""`                                  |
-| `secret.secrets.portClientSecret` | Port Client Secret - Required                                     | `""`                                  |
-| `configMap.annotations`           | Annotations for config map object                                 | `{}`                                  |
-| `configMap.name`                  | Config Map object name                                            | `""`                                  |
-| `configMap.config`                | Port K8s Exporter config.yaml - Required                          |                                       |
-| `serviceAccount.create`           | If `true`, create and use Service Account, Cluster Role & Binding | `true`                                |
-| `serviceAccount.annotations`      | Annotations for service account object                            | `{}`                                  |
-| `serviceAccount.name`             | Secret object name                                                | `""`                                  |
-| `clusterRole.annotations`         | Annotations for secret object                                     | `{}`                                  |
-| `clusterRole.name`                | Secret object name                                                | `""`                                  |
-| `clusterRoleBinding.annotations`  | Annotations for secret object                                     | `{}`                                  |
-| `clusterRoleBinding.name`         | Secret object name                                                | `""`                                  |
-| `podAnnotations`                  | Annotations to be added to the pod                                | `{}`                                  |
-| `podSecurityContext`              | Security context applied to the pod                               | `{}`                                  |
-| `securityContext`                 | Security context applied to the container                         | `{}`                                  |
-| `resources`                       | Container resource requests & limits                              | `{}`                                  |
-| `nodeSelector`                    | NodeSelector applied to the pod                                   | `{}`                                  |
-| `tolerations`                     | Tolerations applied to the pod                                    | `[]`                                  |
-| `affinity`                        | Affinity applied to the pod                                       | `{}`                                  |
+| Parameter                             | Description                                                                | Default                               |
+|---------------------------------------|----------------------------------------------------------------------------|---------------------------------------|
+| `image.repository`                    | Image repository                                                           | `ghcr.io/port-labs/port-k8s-exporter` |
+| `image.pullPolicy`                    | Image pull policy                                                          | `IfNotPresent`                        |
+| `image.tag`                           | Image tag                                                                  | `""`                                  |
+| `imagePullSecrets`                    | Image pull secrets                                                         | `[]`                                  |
+| `nameOverride`                        | Chart name override                                                        | `""`                                  |
+| `fullnameOverride`                    | Fully qualified app name override                                          | `""`                                  |
+| `secret.annotations`                  | Annotations for Secret object                                              | `{}`                                  |
+| `secret.name`                         | Secret object name                                                         | `""`                                  |
+| **`secret.secrets.portClientId`**     | **Port Client ID - Required**                                              | `""`                                  |
+| **`secret.secrets.portClientSecret`** | **Port Client Secret - Required**                                          | `""`                                  |
+| `configMap.annotations`               | Annotations for ConfigMap object                                           | `{}`                                  |
+| `configMap.name`                      | ConfigMap object name                                                      | `""`                                  |
+| **`configMap.config`**                | **Port K8s Exporter `config.yaml` - Required**                             |                                       |
+| `serviceAccount.create`               | If `true`, create and use ServiceAccount, ClusterRole & ClusterRoleBinding | `true`                                |
+| `serviceAccount.annotations`          | Annotations for ServiceAccount object                                      | `{}`                                  |
+| `serviceAccount.name`                 | ServiceAccount object name                                                 | `""`                                  |
+| `clusterRole.annotations`             | Annotations for ClusterRole object                                         | `{}`                                  |
+| `clusterRole.name`                    | ClusterRole object name                                                    | `""`                                  |
+| `clusterRoleBinding.annotations`      | Annotations for ClusterRoleBinding object                                  | `{}`                                  |
+| `clusterRoleBinding.name`             | ClusterRoleBinding object name                                             | `""`                                  |
+| `podAnnotations`                      | Annotations to be added to the pod                                         | `{}`                                  |
+| `podSecurityContext`                  | Security context applied to the pod                                        | `{}`                                  |
+| `securityContext`                     | Security context applied to the container                                  | `{}`                                  |
+| `resources`                           | Container resource requests & limits                                       | `{}`                                  |
+| `nodeSelector`                        | NodeSelector applied to the pod                                            | `{}`                                  |
+| `tolerations`                         | Tolerations applied to the pod                                             | `[]`                                  |
+| `affinity`                            | Affinity applied to the pod                                                | `{}`                                  |
 
 To override values in `helm install`, use either the `--set` flag or the `--set-file` flag to set individual values from a file.
 
@@ -97,23 +97,23 @@ resources: # List of K8s resources to list, watch, and export to Port.
         mappings: # Mappings between one K8s object to one or many Port Entities. Each value is a JQ query.
           - identifier: .metadata.name
             title: .metadata.name
-            blueprint: "\"k8s-export-test-bp\""
+            blueprint: '"DeployedServicePod"'
             properties:
-              text: "\"pod\""
+              text: '"Service Instance"'
               num: 1
               bool: true
               obj: .spec
               arr: .status.conditions
             relations:
-              relateTo: "\"target-entity\""
+              relateTo: '"target-entity"'
 ```
 
 #### JQ
 
 Read more about JQ JSON processor: https://stedolan.github.io/jq/manual/
 
-JQ Playground: https://jqplay.org/ 
+JQ Playground: https://jqplay.org/
 
 In order to get a K8s object to play with, you can run the following command against your K8s cluster:
-    
+
     kubectl get <resource> <name> -o json
