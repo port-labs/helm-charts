@@ -1,3 +1,6 @@
 .idea
 
 charts/port-k8s-exporter/config.yaml
+charts/port-self-hosted-github-app/myvalues.yaml
+
+*.pem

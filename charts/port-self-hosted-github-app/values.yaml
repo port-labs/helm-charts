@@ -1,0 +1,38 @@
+image:
+  repository: ghcr.io/port-labs/port-self-hosted-github-app
+  pullPolicy: IfNotPresent
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+secret:
+  annotations: {}
+  name: ""
+  secrets:
+    portClientId: ""
+    portClientSecret: ""
+    privateKey: ""
+    webhookSecret: ""
+
+environment:
+  gheHost: ""
+  appId: ""
+  port: ""
+  portUrl: ""
+
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
