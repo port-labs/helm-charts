@@ -37,6 +37,10 @@ spec:
           args:
             - -config
             - /config/config.yaml
+            {{- if gt (int .Values.resyncInterval) 0 }}
+            - -resync-interval
+            - {{ .Values.resyncInterval | quote }}
+            {{- end }}
           envFrom:
             - secretRef:
                 name: {{ include "port-k8s-exporter.secretName" . }}
