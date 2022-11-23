@@ -47,6 +47,7 @@ The following table lists the configuration parameters of the `port-k8s-exporter
 
 | Parameter                             | Description                                                                | Default                               |
 |---------------------------------------|----------------------------------------------------------------------------|---------------------------------------|
+| `resyncInterval`                      | The interval in minutes before sending a sync event for all known objects  | `0`                                   |
 | `image.repository`                    | Image repository                                                           | `ghcr.io/port-labs/port-k8s-exporter` |
 | `image.pullPolicy`                    | Image pull policy                                                          | `IfNotPresent`                        |
 | `image.tag`                           | Image tag                                                                  | `""`                                  |
