@@ -1,0 +1,11 @@
+apiVersion: v2
+name: port-self-hosted-github-app
+description: A Helm chart for Port Self Hosted GitHub App
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+home: https://getport.io/
+maintainers:
+  - name: Port
+    email: support@getport.io
+icon: https://port-graphical-assets.s3.eu-west-1.amazonaws.com/Port+Logo.svg
