@@ -45,36 +45,38 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configuration parameters of the `port-k8s-exporter` chart and default values.
 
-| Parameter                             | Description                                                                | Default                               |
-|---------------------------------------|----------------------------------------------------------------------------|---------------------------------------|
-| `resyncInterval`                      | The interval in minutes before sending a sync event for all known objects  | `0`                                   |
-| `image.repository`                    | Image repository                                                           | `ghcr.io/port-labs/port-k8s-exporter` |
-| `image.pullPolicy`                    | Image pull policy                                                          | `IfNotPresent`                        |
-| `image.tag`                           | Image tag                                                                  | `""`                                  |
-| `imagePullSecrets`                    | Image pull secrets                                                         | `[]`                                  |
-| `nameOverride`                        | Chart name override                                                        | `""`                                  |
-| `fullnameOverride`                    | Fully qualified app name override                                          | `""`                                  |
-| `secret.annotations`                  | Annotations for Secret object                                              | `{}`                                  |
-| `secret.name`                         | Secret object name                                                         | `""`                                  |
-| **`secret.secrets.portClientId`**     | **Port Client ID - Required**                                              | `""`                                  |
-| **`secret.secrets.portClientSecret`** | **Port Client Secret - Required**                                          | `""`                                  |
-| `configMap.annotations`               | Annotations for ConfigMap object                                           | `{}`                                  |
-| `configMap.name`                      | ConfigMap object name                                                      | `""`                                  |
-| **`configMap.config`**                | **Port K8s Exporter `config.yaml` - Required**                             |                                       |
-| `serviceAccount.create`               | If `true`, create and use ServiceAccount, ClusterRole & ClusterRoleBinding | `true`                                |
-| `serviceAccount.annotations`          | Annotations for ServiceAccount object                                      | `{}`                                  |
-| `serviceAccount.name`                 | ServiceAccount object name                                                 | `""`                                  |
-| `clusterRole.annotations`             | Annotations for ClusterRole object                                         | `{}`                                  |
-| `clusterRole.name`                    | ClusterRole object name                                                    | `""`                                  |
-| `clusterRoleBinding.annotations`      | Annotations for ClusterRoleBinding object                                  | `{}`                                  |
-| `clusterRoleBinding.name`             | ClusterRoleBinding object name                                             | `""`                                  |
-| `podAnnotations`                      | Annotations to be added to the pod                                         | `{}`                                  |
-| `podSecurityContext`                  | Security context applied to the pod                                        | `{}`                                  |
-| `securityContext`                     | Security context applied to the container                                  | `{}`                                  |
-| `resources`                           | Container resource requests & limits                                       | `{}`                                  |
-| `nodeSelector`                        | NodeSelector applied to the pod                                            | `{}`                                  |
-| `tolerations`                         | Tolerations applied to the pod                                             | `[]`                                  |
-| `affinity`                            | Affinity applied to the pod                                                | `{}`                                  |
+| Parameter                             | Description                                                                                          | Default                               |
+|---------------------------------------|------------------------------------------------------------------------------------------------------|---------------------------------------|
+| `resyncInterval`                      | The interval in minutes before sending a sync event for all known objects                            | `0`                                   |
+| `stateKey`                            | Unique state key to enable delete of stale Port entities (which not listed in `config.yaml` anymore) | `""` (when empty, replaced by uuid)   |
+| `deleteDependents`                    | A flag to enable deletion of dependent Port Entities.                                                | `false`                               |
+| `image.repository`                    | Image repository                                                                                     | `ghcr.io/port-labs/port-k8s-exporter` |
+| `image.pullPolicy`                    | Image pull policy                                                                                    | `IfNotPresent`                        |
+| `image.tag`                           | Image tag                                                                                            | `""`                                  |
+| `imagePullSecrets`                    | Image pull secrets                                                                                   | `[]`                                  |
+| `nameOverride`                        | Chart name override                                                                                  | `""`                                  |
+| `fullnameOverride`                    | Fully qualified app name override                                                                    | `""`                                  |
+| `secret.annotations`                  | Annotations for Secret object                                                                        | `{}`                                  |
+| `secret.name`                         | Secret object name                                                                                   | `""`                                  |
+| **`secret.secrets.portClientId`**     | **Port Client ID - Required**                                                                        | `""`                                  |
+| **`secret.secrets.portClientSecret`** | **Port Client Secret - Required**                                                                    | `""`                                  |
+| `configMap.annotations`               | Annotations for ConfigMap object                                                                     | `{}`                                  |
+| `configMap.name`                      | ConfigMap object name                                                                                | `""`                                  |
+| **`configMap.config`**                | **Port K8s Exporter `config.yaml` - Required**                                                       |                                       |
+| `serviceAccount.create`               | If `true`, create and use ServiceAccount, ClusterRole & ClusterRoleBinding                           | `true`                                |
+| `serviceAccount.annotations`          | Annotations for ServiceAccount object                                                                | `{}`                                  |
+| `serviceAccount.name`                 | ServiceAccount object name                                                                           | `""`                                  |
+| `clusterRole.annotations`             | Annotations for ClusterRole object                                                                   | `{}`                                  |
+| `clusterRole.name`                    | ClusterRole object name                                                                              | `""`                                  |
+| `clusterRoleBinding.annotations`      | Annotations for ClusterRoleBinding object                                                            | `{}`                                  |
+| `clusterRoleBinding.name`             | ClusterRoleBinding object name                                                                       | `""`                                  |
+| `podAnnotations`                      | Annotations to be added to the pod                                                                   | `{}`                                  |
+| `podSecurityContext`                  | Security context applied to the pod                                                                  | `{}`                                  |
+| `securityContext`                     | Security context applied to the container                                                            | `{}`                                  |
+| `resources`                           | Container resource requests & limits                                                                 | `{}`                                  |
+| `nodeSelector`                        | NodeSelector applied to the pod                                                                      | `{}`                                  |
+| `tolerations`                         | Tolerations applied to the pod                                                                       | `[]`                                  |
+| `affinity`                            | Affinity applied to the pod                                                                          | `{}`                                  |
 
 To override values in `helm install`, use either the `--set` flag or the `--set-file` flag to set individual values from a file.
 

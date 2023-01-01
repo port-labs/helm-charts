@@ -1,3 +1,9 @@
+{{- $config := default uuidv4 .Values.stateKey -}}
+{{- $config_lookup := (lookup "v1" "ConfigMap" .Release.Namespace (include "port-k8s-exporter.configMapName" .)) -}}
+{{- if $config_lookup -}}
+  {{- $config = $config_lookup.data.state_key -}}
+{{ end }}
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,3 +17,4 @@ metadata:
 data:
   config.yaml:
     {{- required "config.yaml is required" .Values.configMap.config | toYaml | nindent 4 }}
+  state_key: {{ $config }}
