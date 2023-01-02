@@ -39,8 +39,7 @@ spec:
             - /config/config.yaml
             - -state-key
             - $(STATE_KEY)
-            - -delete-dependents
-            - {{ .Values.deleteDependents | quote }}
+            - -delete-dependents={{ .Values.deleteDependents }}
             {{- if gt (int .Values.resyncInterval) 0 }}
             - -resync-interval
             - {{ .Values.resyncInterval | quote }}
