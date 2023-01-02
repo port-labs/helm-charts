@@ -1,4 +1,6 @@
 resyncInterval: 0
+stateKey: ""
+deleteDependents: false
 
 image:
   repository: ghcr.io/port-labs/port-k8s-exporter

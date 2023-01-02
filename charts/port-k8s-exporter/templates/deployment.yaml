@@ -37,6 +37,9 @@ spec:
           args:
             - -config
             - /config/config.yaml
+            - -state-key
+            - $(STATE_KEY)
+            - -delete-dependents={{ .Values.deleteDependents }}
             {{- if gt (int .Values.resyncInterval) 0 }}
             - -resync-interval
             - {{ .Values.resyncInterval | quote }}
@@ -44,6 +47,12 @@ spec:
           envFrom:
             - secretRef:
                 name: {{ include "port-k8s-exporter.secretName" . }}
+          env:
+            - name: STATE_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "port-k8s-exporter.configMapName" . }}
+                  key: state_key
           volumeMounts:
             - name: config-volume
               mountPath: "/config"
