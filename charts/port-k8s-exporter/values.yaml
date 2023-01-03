@@ -31,6 +31,10 @@ serviceAccount:
 clusterRole:
   annotations: {}
   name: ""
+  apiGroups:
+    - "*"
+  resources:
+    - "*"
 
 clusterRoleBinding:
   annotations: {}
