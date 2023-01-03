@@ -68,6 +68,8 @@ The following table lists the configuration parameters of the `port-k8s-exporter
 | `serviceAccount.name`                 | ServiceAccount object name                                                                           | `""`                                  |
 | `clusterRole.annotations`             | Annotations for ClusterRole object                                                                   | `{}`                                  |
 | `clusterRole.name`                    | ClusterRole object name                                                                              | `""`                                  |
+| `clusterRole.apiGroups`               | ClusterRole apiGroups                                                                                | `"{'*'}"`                             |
+| `clusterRole.resources`               | ClusterRole resources                                                                                | `"{'*'}"`                             |
 | `clusterRoleBinding.annotations`      | Annotations for ClusterRoleBinding object                                                            | `{}`                                  |
 | `clusterRoleBinding.name`             | ClusterRoleBinding object name                                                                       | `""`                                  |
 | `podAnnotations`                      | Annotations to be added to the pod                                                                   | `{}`                                  |
