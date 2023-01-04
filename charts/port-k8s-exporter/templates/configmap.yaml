@@ -1,6 +1,6 @@
 {{- $config := default (uuidv4 | replace "-" "") .Values.stateKey -}}
 {{- $config_lookup := (lookup "v1" "ConfigMap" .Release.Namespace (include "port-k8s-exporter.configMapName" .)) -}}
-{{- if and $config_lookup $config_lookup.data.state_key -}}
+{{- if and $config_lookup $config_lookup.data $config_lookup.data.state_key -}}
   {{- $config = $config_lookup.data.state_key -}}
 {{ end }}
 ---
