@@ -102,7 +102,7 @@ resources: # List of K8s resources to list, watch, and export to Port.
         mappings: # Mappings between one K8s object to one or many Port Entities. Each value is a JQ query.
           - identifier: .metadata.name
             title: .metadata.name
-            blueprint: '"DeployedServicePod"'
+            blueprint: '"deployedServicePod"'
             properties:
               text: '"Service Instance"'
               num: 1
