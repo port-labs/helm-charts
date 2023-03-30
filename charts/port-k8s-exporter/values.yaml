@@ -1,6 +1,8 @@
 resyncInterval: 0
 stateKey: ""
 deleteDependents: false
+createMissingRelatedEntities: false
+verbosity: 0
 
 image:
   repository: ghcr.io/port-labs/port-k8s-exporter

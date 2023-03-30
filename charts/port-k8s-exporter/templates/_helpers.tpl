@@ -79,12 +79,12 @@ Create the name of the secret to use
 Create the name of the cluster role to use
 */}}
 {{- define "port-k8s-exporter.clusterRoleName" -}}
-{{- default (include "port-k8s-exporter.fullname" .) .Values.secret.name }}
+{{- default (include "port-k8s-exporter.fullname" .) .Values.clusterRole.name }}
 {{- end }}
 
 {{/*
 Create the name of the cluster role binding to use
 */}}
 {{- define "port-k8s-exporter.clusterRoleBindingName" -}}
-{{- default (include "port-k8s-exporter.fullname" .) .Values.secret.name }}
+{{- default (include "port-k8s-exporter.fullname" .) .Values.clusterRoleBinding.name }}
 {{- end }}

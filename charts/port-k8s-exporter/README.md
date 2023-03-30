@@ -50,6 +50,8 @@ The following table lists the configuration parameters of the `port-k8s-exporter
 | `resyncInterval`                      | The interval in minutes before sending a sync event for all known objects                            | `0`                                   |
 | `stateKey`                            | Unique state key to enable delete of stale Port entities (which not listed in `config.yaml` anymore) | `""` (when empty, replaced by uuid)   |
 | `deleteDependents`                    | A flag to enable deletion of dependent Port Entities.                                                | `false`                               |
+| `createMissingRelatedEntities`        | A flag to enable creation of missing related Port Entities.                                          | `false`                               |
+| `verbosity`                           | A number for the log level verbosity. Set to `-1` to print less info logs.                           | `0`                                   |
 | `image.repository`                    | Image repository                                                                                     | `ghcr.io/port-labs/port-k8s-exporter` |
 | `image.pullPolicy`                    | Image pull policy                                                                                    | `IfNotPresent`                        |
 | `image.tag`                           | Image tag                                                                                            | `""`                                  |

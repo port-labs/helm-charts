@@ -40,6 +40,10 @@ spec:
             - -state-key
             - $(STATE_KEY)
             - -delete-dependents={{ .Values.deleteDependents }}
+            - -create-missing-related-entities={{ .Values.createMissingRelatedEntities }}
+            {{- if ne (int .Values.verbosity) 0 }}
+            - -v={{ .Values.verbosity | quote }}
+            {{- end }}
             {{- if gt (int .Values.resyncInterval) 0 }}
             - -resync-interval
             - {{ .Values.resyncInterval | quote }}
