@@ -13,6 +13,7 @@ secret:
 
 env:
   normal:
+    GITLAB_URL: "https://gitlab.com/"
     STREAMER_NAME: "KafkaToWebhookStreamer"
     PORT_ORG_ID: ""
     KAFKA_CONSUMER_GROUP_ID: ""
