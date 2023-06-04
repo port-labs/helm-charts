@@ -20,9 +20,9 @@ metadata:
   {{- end }}
 data:
   config.yaml: |
-  {{- if kindIs "string" .Values.configMap.config -}}
-  {{- required "config.yaml is required" .Values.configMap.config | fromYaml | toYaml | nindent 4 }}
-  {{ else }}
-  {{- required "config.yaml is required" .Values.configMap.config | toYaml | nindent 4 }}
-  {{ end }}
+    {{- if kindIs "string" .Values.configMap.config -}}
+    {{- required "config.yaml is required" .Values.configMap.config | fromYaml | toYaml | nindent 4 }}
+    {{ else }}
+    {{- required "config.yaml is required" .Values.configMap.config | toYaml | nindent 4 }}
+    {{ end }}
   state_key: {{ $config }}
