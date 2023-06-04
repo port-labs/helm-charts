@@ -19,6 +19,10 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 data:
-  config.yaml:
-    {{- required "config.yaml is required" .Values.configMap.config | toYaml | nindent 4 }}
+  config.yaml: |
+  {{- if kindIs "string" .Values.configMap.config -}}
+  {{- required "config.yaml is required" .Values.configMap.config | fromYaml | toYaml | nindent 4 }}
+  {{ else }}
+  {{- required "config.yaml is required" .Values.configMap.config | toYaml | nindent 4 }}
+  {{ end }}
   state_key: {{ $config }}
