@@ -1,0 +1,21 @@
+{{- range .Values.integrations }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ocean-{{ .type }}-{{ .identifier }}-config
+data:
+  config.yaml: |-
+  
+    port:
+      clientId: {{ $.Values.port.clientId }}
+      clientSecret: {{ $.Values.port.clientSecret }}
+      baseUrl: {{ $.Values.port.baseUrl | default "https://api.getport.io/v1" }}
+    triggerChannel: 
+      {{- range $key, $value := .triggerChannel }}
+      {{ $key }}: {{ $value }}
+      {{- end}}
+    config:
+      {{- range $key, $value := .config }}
+      {{ $key }}: {{ $value }}
+      {{- end}}
+{{- end}}

@@ -1,0 +1,13 @@
+apiVersion: v2
+name: port-ocean
+description: A Helm chart for Port Ocean integrations
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+home: https://getport.io/
+sources:
+  - https://github.com/port-labs/port-ocean
+maintainers:
+  - name: Port
+    email: support@getport.io
+icon: https://port-graphical-assets.s3.eu-west-1.amazonaws.com/Port+Logo.svg

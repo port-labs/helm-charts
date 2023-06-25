@@ -1,0 +1,24 @@
+nameOverride: ""
+fullnameOverride: ""
+podAnnotations: {}
+podSecurityContext: {}
+securityContext: {}
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+port:
+  clientId: ""
+  clientSecret: ""
+  baseUrl: "http://api.getport.io/v1"
+integrations:
+  - identifier: "test"
+    version: "latest"
+    type: "pager-duty"
+    config:
+      token: "asdf"
+      appUrl: "https://asdf.pagerduty.com"
+    triggerChannel:
+      type: "KAFKA"
+      brokers: "localhost:9092"

@@ -1,0 +1,44 @@
+{{- range .Values.integrations }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ocean{{ .type }}{{ .identifier }}deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ocean-{{ .type }}
+  template:
+    metadata:
+      labels:
+        app: ocean-{{ .type }}
+    spec:
+      containers:
+      - name: ocean-{{ .type }}-{{ .identifier }}-container
+        image: "ghcr.io/port-labs/ocean-{{ .type }}:{{ .version }}"
+        volumeMounts:
+          - name: config-volume
+            mountPath: "/app/config.yaml"
+            subPath: "config.yaml"
+      volumes:
+        - name: config-volume
+          configMap:
+            name: ocean-{{ .type }}-{{ .identifier }}-config
+      {{- with $.Values.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $.Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $.Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $.Values.resources }}
+      resources:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
+
