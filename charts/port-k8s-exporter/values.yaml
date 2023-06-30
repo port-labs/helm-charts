@@ -19,11 +19,15 @@ secret:
   secrets:
     portClientId: ""
     portClientSecret: ""
+  # secret.useExistingSecret -- Enable this if you wish to create your own secret with credentials.
+  useExistingSecret: false
 
 configMap:
   annotations: {}
-  name: ""
   config:
+  name: ""
+  # configMap.create -- Disable to specify your own configmap to be used.
+  create: true
 
 serviceAccount:
   create: true
