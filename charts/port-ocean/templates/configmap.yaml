@@ -2,20 +2,22 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ocean-{{ .type }}-{{ .identifier }}-config
+  name: {{ include "port-ocean.configMapName" . }}
 data:
   config.yaml: |-
-  
     port:
-      clientId: {{ $.Values.port.clientId }}
-      clientSecret: {{ $.Values.port.clientSecret }}
-      baseUrl: {{ $.Values.port.baseUrl | default "https://api.getport.io/v1" }}
+      {{- range $key, $value := $.Values.port }}
+      {{ $key }}: {{ include "port-ocean.getOceanConfigYamlValue" $value }}
+      {{- end}}
     triggerChannel: 
       {{- range $key, $value := .triggerChannel }}
-      {{ $key }}: {{ $value }}
+      {{ $key }}: {{ include "port-ocean.getOceanConfigYamlValue" $value }}
       {{- end}}
-    config:
-      {{- range $key, $value := .config }}
-      {{ $key }}: {{ $value }}
-      {{- end}}
+    integration:
+      identifier: {{ include "port-ocean.getOceanConfigYamlValue" .identifier }}
+      type: {{ include "port-ocean.getOceanConfigYamlValue" .type }}
+      config:
+        {{- range $key, $value := .config }}
+        {{ $key }}: {{ include "port-ocean.getOceanConfigYamlValue" $value }}
+        {{- end}}
 {{- end}}

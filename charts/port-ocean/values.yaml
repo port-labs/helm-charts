@@ -11,14 +11,19 @@ affinity: {}
 port:
   clientId: ""
   clientSecret: ""
-  baseUrl: "http://api.getport.io/v1"
+  baseUrl: "https://app.getport.io/v1"
+
 integrations:
-  - identifier: "test"
+  - identifier: "identifier"
+    ingress:
+      enabled: false
+      annotations: {}
+      host: ""
     version: "latest"
     type: "pager-duty"
     config:
-      token: "asdf"
-      appUrl: "https://asdf.pagerduty.com"
+      token: ""
+      appUrl: ""
     triggerChannel:
       type: "KAFKA"
       brokers: "localhost:9092"

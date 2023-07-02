@@ -1,0 +1,28 @@
+{{- range .Values.integrations }}
+{{- if .ingress  }}
+{{- if  (default .ingress.enabled true) }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "port-ocean.ingressName" . }}
+  labels:
+    {{- include "port-ocean.labels" $ | nindent 4 }}
+  annotations:
+  {{- if .ingress.annotations }}
+    {{- toYaml .ingress.annotations | nindent 4 }}
+  {{- end }}
+spec:
+    rules:
+        - host: {{ .ingress.host }}
+          http:
+              paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                    service:
+                        name: {{ include "port-ocean.serviceName" . }}
+                        port:
+                            number: {{ .service.port }}
+{{- end }}
+{{- end }}
+{{- end }}

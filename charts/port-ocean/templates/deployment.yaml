@@ -2,28 +2,36 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ocean{{ .type }}{{ .identifier }}deployment
+  name: {{ include "port-ocean.deploymentName" . }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ocean-{{ .type }}
+      app: {{ include "port-ocean.deploymentName" . }}
   template:
     metadata:
       labels:
-        app: ocean-{{ .type }}
+        app: {{ include "port-ocean.deploymentName" .}}
     spec:
       containers:
-      - name: ocean-{{ .type }}-{{ .identifier }}-container
-        image: "ghcr.io/port-labs/ocean-{{ .type }}:{{ .version }}"
+      - name: {{ include "port-ocean.containerName" . }}
+        image: "ghcr.io/port-labs/port-ocean-{{ .type }}:{{ .version }}"
+        {{- if .service.enabled }}
+        ports:
+        - containerPort: {{.service.port}}
+          protocol: TCP
+        {{- end }}
         volumeMounts:
           - name: config-volume
             mountPath: "/app/config.yaml"
             subPath: "config.yaml"
+        envFrom:
+          - secretRef:
+              name: {{ include "port-ocean.secretName" . }}
       volumes:
         - name: config-volume
           configMap:
-            name: ocean-{{ .type }}-{{ .identifier }}-config
+            name: {{ include "port-ocean.configMapName" . }}
       {{- with $.Values.nodeSelector }}
       nodeSelector:
       {{- toYaml . | nindent 8 }}

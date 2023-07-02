@@ -1,0 +1,21 @@
+{{- range .Values.integrations }}
+{{- if .service  }}
+{{- if  (default .service.enabled true) }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "port-ocean.serviceName" . }}
+  labels:
+    {{- include "port-ocean.labels" $ | nindent 4 }}
+spec:
+  type: {{ .service.type }}
+  ports:
+    - name: ocean-port
+      protocol: TCP
+      port: {{ .service.port }} 
+      targetPort: {{ .service.port }}
+  selector:
+    app: {{ include "port-ocean.deploymentName" . }}
+{{- end }}
+{{- end }}
+{{- end }}
