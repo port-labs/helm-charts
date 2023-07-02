@@ -67,7 +67,7 @@ Get ocean config.yaml value
 Get prefix of ocean resource metadata.name
 */}}
 {{- define "port-ocean.metadataNamePrefix" -}}
-{{- printf "ocean-%s-%s" .type .identifier }}
+{{- printf "ocean-%s-%s" .Values.integration.type .Values.integration.identifier }}
 {{- end }}
 
 {{/*

@@ -1,4 +1,3 @@
-{{- range .Values.integrations }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -6,18 +5,17 @@ metadata:
 data:
   config.yaml: |-
     port:
-      {{- range $key, $value := $.Values.port }}
+      {{- range $key, $value := .Values.port }}
       {{ $key }}: {{ include "port-ocean.getOceanConfigYamlValue" $value }}
       {{- end}}
     triggerChannel: 
-      {{- range $key, $value := .triggerChannel }}
+      {{- range $key, $value := .Values.integration.triggerChannel }}
       {{ $key }}: {{ include "port-ocean.getOceanConfigYamlValue" $value }}
       {{- end}}
     integration:
-      identifier: {{ include "port-ocean.getOceanConfigYamlValue" .identifier }}
-      type: {{ include "port-ocean.getOceanConfigYamlValue" .type }}
+      identifier: {{ include "port-ocean.getOceanConfigYamlValue" .Values.integration.identifier }}
+      type: {{ include "port-ocean.getOceanConfigYamlValue" .Values.integration.type }}
       config:
-        {{- range $key, $value := .config }}
+        {{- range $key, $value := .Values.integration.config }}
         {{ $key }}: {{ include "port-ocean.getOceanConfigYamlValue" $value }}
         {{- end}}
-{{- end}}

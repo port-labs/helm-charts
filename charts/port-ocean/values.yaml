@@ -1,29 +1,45 @@
 nameOverride: ""
 fullnameOverride: ""
-podAnnotations: {}
-podSecurityContext: {}
-securityContext: {}
-resources: {}
-nodeSelector: {}
-tolerations: []
-affinity: {}
 
 port:
-  clientId: ""
-  clientSecret: ""
-  baseUrl: "https://app.getport.io/v1"
+  clientId: 
+    type: secret
+    key: PORT_CLIENT_ID
+    value: ""
+  clientSecret: 
+    type: secret
+    key: PORT_CLIENT_SECRET
+    value: ""
+  baseUrl: https://api.getport.io/v1
 
-integrations:
-  - identifier: "identifier"
-    ingress:
-      enabled: false
-      annotations: {}
-      host: ""
-    version: "latest"
-    type: "pager-duty"
-    config:
-      token: ""
-      appUrl: ""
-    triggerChannel:
-      type: "KAFKA"
-      brokers: "localhost:9092"
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 8000
+  
+ingress:
+  enabled: false
+  annotations: {}
+  host: null
+  
+integration:
+  identifier: ""
+  version: ""
+  type: ""
+  config: {}
+  triggerChannel:
+    type: "KAFKA"
