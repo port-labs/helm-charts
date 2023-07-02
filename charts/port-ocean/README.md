@@ -24,7 +24,7 @@ port-labs` to see the charts.
 Use your `PORT_CLIENT_ID` & `PORT_CLIENT_SECRET` to install the chart, with the following command:
 
 ```bash showLineNumbers
-helm upgrade --install my-ocean-integration port-labs/port-k8s-exporter \
+helm upgrade --install my-ocean-integration port-labs/port-ocean \
   --create-namespace --namespace port-ocean \
   --set integration.config.<sensitiveConfigKeyName>.key="KEY_OF_CHOICE" \
   --set integration.config.<sensitiveConfigKeyName>.type="secret" \
