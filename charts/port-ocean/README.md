@@ -1,6 +1,6 @@
 # Port Ocean
 
-Port K8s Exporter allows to list, watch and export K8s objects to Port entities of existing blueprints.
+Port Ocean chart allow you to deploy Port intergations that were developed with [Port Ocean Framewok](https://github.com/port-labs/port-ocean.git) .
 
 ## Introduction
 
@@ -26,11 +26,10 @@ Use your `PORT_CLIENT_ID` & `PORT_CLIENT_SECRET` to install the chart, with the 
 ```bash showLineNumbers
 helm upgrade --install my-ocean-integration port-labs/port-k8s-exporter \
   --create-namespace --namespace port-ocean \
-  --set integration.config.appUrl="https://pagerduty-danielsinai.cloud.okteto.net" \
-  --set integration.config.<configKeyName>.key="KEY_OF_CHOICE" \
-  --set integration.config.<configKeyName>.type="secret" \
-  --set integration.config.<configKeyValue>.value="INTEGRATION_SECRET" \
-  --set integration.config.url="RAW_STRING" \
+  --set integration.config.<sensitiveConfigKeyName>.key="KEY_OF_CHOICE" \
+  --set integration.config.<sensitiveConfigKeyName>.type="secret" \
+  --set integration.config.<sensitiveConfigKeyName>.value="INTEGRATION_SECRET" \
+  --set integration.config.<notSensitiveConfigKeyName>="RAW_STRING" \
   --set integration.identifier="my-integration-identifier" \
   --set integration.triggerChannel.type="KAFKA" \
   --set integration.type="integration type (i.e pager-duty, gitlab)" \
