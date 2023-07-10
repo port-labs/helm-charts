@@ -4,7 +4,6 @@
   {{- if (($config_lookup).data).state_key -}}
   {{- $config = $config_lookup.data.state_key -}}
   {{ end }}
-{{ end }}
 ---
 apiVersion: v1
 kind: ConfigMap
