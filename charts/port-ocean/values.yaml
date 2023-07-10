@@ -2,14 +2,8 @@ nameOverride: ""
 fullnameOverride: ""
 
 port:
-  clientId: 
-    type: secret
-    key: PORT_CLIENT_ID
-    value: ""
-  clientSecret: 
-    type: secret
-    key: PORT_CLIENT_SECRET
-    value: ""
+  clientId: ""
+  clientSecret: ""
   baseUrl: https://api.getport.io/v1
 
 podAnnotations: {}
@@ -26,6 +20,8 @@ tolerations: []
 
 affinity: {}
 
+imagePullPolicy: IfNotPresent
+
 service:
   enabled: true
   type: ClusterIP
@@ -41,5 +37,6 @@ integration:
   version: ""
   type: ""
   config: {}
+  secrets: {}
   triggerChannel:
     type: "KAFKA"

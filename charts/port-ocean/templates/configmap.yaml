@@ -5,17 +5,24 @@ metadata:
 data:
   config.yaml: |-
     port:
-      {{- range $key, $value := .Values.port }}
-      {{ $key }}: {{ include "port-ocean.getOceanConfigYamlValue" $value }}
-      {{- end}}
+      clientId: {{ printf "{{ from env PORT_CLIENT_ID }}"  }}
+      clientSecret: {{ printf "{{ from env PORT_CLIENT_SECRET }}" }}
+      baseUrl: {{ .Values.port.baseUrl | quote}}
     triggerChannel: 
       {{- range $key, $value := .Values.integration.triggerChannel }}
-      {{ $key }}: {{ include "port-ocean.getOceanConfigYamlValue" $value }}
+      {{ $key }}: {{ $value }}
       {{- end}}
     integration:
-      identifier: {{ include "port-ocean.getOceanConfigYamlValue" .Values.integration.identifier }}
-      type: {{ include "port-ocean.getOceanConfigYamlValue" .Values.integration.type }}
+      identifier: {{ .Values.integration.identifier }}
+      type: {{ .Values.integration.type }}
       config:
+        {{- if .Values.integration.config -}}
         {{- range $key, $value := .Values.integration.config }}
-        {{ $key }}: {{ include "port-ocean.getOceanConfigYamlValue" $value }}
-        {{- end}}
+        {{ $key }}: {{ $value | quote }}
+        {{- end -}}
+        {{- end -}}
+        {{- if .Values.integration.secrets -}}
+        {{- range $key, $value := .Values.integration.secrets }}
+        {{ $key }}: {{ printf "{{ from env %s }}" $key }}
+        {{- end -}}
+        {{- end -}}

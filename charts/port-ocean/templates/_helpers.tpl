@@ -51,19 +51,6 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Get ocean config.yaml value
-*/}}
-{{- define "port-ocean.getOceanConfigYamlValue" -}}
-{{- if (kindIs "string" .) }}
-{{- . }}
-{{- else if eq .type "secret" }}
-{{- printf "{{ from env %s }}" .key  }}
-{{- else if eq .type "env" }}
-{{- printf "{{ from env %s }}" .key  }}
-{{- end }}
-{{- end }}
-
-{{/*
 Get prefix of ocean resource metadata.name
 */}}
 {{- define "port-ocean.metadataNamePrefix" -}}
@@ -116,13 +103,4 @@ Get deployment name per integration
 {{- define "port-ocean.deploymentName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
 {{- printf "%s-deployment" $prefix }}
-{{- end }}
-
-{{- define "port-ocean.secretValue" -}}
-{{- if (kindIs "string" .) }}
-{{- else if eq .type "secret" }}
-{{- $formattedKey := printf "%s" .key | upper | replace "-" "_" }}
-{{- $value := .value -}}
-{{ $formattedKey | nindent 4 }}: {{ $value | b64enc }}
-{{- end }}
 {{- end }}
