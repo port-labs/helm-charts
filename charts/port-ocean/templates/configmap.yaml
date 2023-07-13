@@ -8,8 +8,8 @@ data:
       clientId: {{ printf "{{ from env PORT_CLIENT_ID }}"  }}
       clientSecret: {{ printf "{{ from env PORT_CLIENT_SECRET }}" }}
       baseUrl: {{ .Values.port.baseUrl | quote }}
-    triggerChannel: 
-      {{- range $key, $value := .Values.integration.triggerChannel }}
+    eventListener: 
+      {{- range $key, $value := .Values.integration.eventListener }}
       {{ $key }}: {{ $value | quote }}
       {{- end}}
     integration:

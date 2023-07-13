@@ -29,7 +29,7 @@ helm upgrade --install my-ocean-integration port-labs/port-ocean \
   --set integration.secrets.<sensitiveConfigKeyName>="INTEGRATION_SECRET" \
   --set integration.config.<notSensitiveConfigKeyName>="RAW_STRING" \
   --set integration.identifier="my-integration-identifier" \
-  --set integration.triggerChannel.type="KAFKA" \
+  --set eventListener.type="KAFKA" \
   --set integration.type="integration type (i.e pager-duty, gitlab)" \
   --set port.clientId="PORT_CLIENT_ID" \
   --set port.clientSecret="PORT_CLIENT_SECRET"
@@ -68,10 +68,10 @@ The following table lists the configuration parameters of the `port-ocean` chart
 | `ingress.host`                        | Hostname for the ingress.                                                                            | `null`                                |
 | `integration.identifier`              | Identifier for the integration.                                                                      | `""`                                  |
 | `integration.version`                 | Version of the integration.                                                                          | `""`                                  |
-| `integration.type`                    | Type of the integration. i.e (`pager-duty`)                                                                            | `""`                                  |
+| `integration.type`                    | Type of the integration. i.e (`pager-duty`)                                                                            | `""`                  |
 | `integration.config`                  | Configuration for the integration.                                                                    | `{}`                                  |
-| `integration.secrets`                 | secret for the integration.                                                                    | `{}`                                  |
-| `integration.triggerChannel.type`     | Type of the trigger channel for the integration.                                                     | `"KAFKA"`                             |
+| `integration.secrets`                 | secret for the integration.                                                                           | `{}`                                  |
+| `eventListener.type`                 | Type of the event listener for the integration, one of the following "WEBHOOK" / "KAFKA" / "SAMPLE"                                                      | `"KAFKA"`                             |
 
 To override values in `helm install`, use either the `--set` flag.
 

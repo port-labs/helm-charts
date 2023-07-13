@@ -38,5 +38,5 @@ integration:
   type: ""
   config: {}
   secrets: {}
-  triggerChannel:
+  eventListener:
     type: "KAFKA"
