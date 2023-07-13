@@ -26,16 +26,13 @@ Use your `PORT_CLIENT_ID` & `PORT_CLIENT_SECRET` to install the chart, with the 
 ```bash showLineNumbers
 helm upgrade --install my-ocean-integration port-labs/port-ocean \
   --create-namespace --namespace port-ocean \
-  --set integration.config.<sensitiveConfigKeyName>.key="KEY_OF_CHOICE" \
-  --set integration.config.<sensitiveConfigKeyName>.type="secret" \
-  --set integration.config.<sensitiveConfigKeyName>.value="INTEGRATION_SECRET" \
+  --set integration.secrets.<sensitiveConfigKeyName>="INTEGRATION_SECRET" \
   --set integration.config.<notSensitiveConfigKeyName>="RAW_STRING" \
   --set integration.identifier="my-integration-identifier" \
   --set integration.triggerChannel.type="KAFKA" \
   --set integration.type="integration type (i.e pager-duty, gitlab)" \
-  --set port.baseUrl="https://api.stg-01.getport.io/v1" \
-  --set port.clientId.value="PORT_CLIENT_ID" \
-  --set port.clientSecret.value="PORT_CLIENT_SECRET"
+  --set port.clientId="PORT_CLIENT_ID" \
+  --set port.clientSecret="PORT_CLIENT_SECRET"
 ```
 
 To uninstall the chart use:
@@ -73,6 +70,7 @@ The following table lists the configuration parameters of the `port-ocean` chart
 | `integration.version`                 | Version of the integration.                                                                          | `""`                                  |
 | `integration.type`                    | Type of the integration. i.e (`pager-duty`)                                                                            | `""`                                  |
 | `integration.config`                  | Configuration for the integration.                                                                    | `{}`                                  |
+| `integration.secrets`                 | secret for the integration.                                                                    | `{}`                                  |
 | `integration.triggerChannel.type`     | Type of the trigger channel for the integration.                                                     | `"KAFKA"`                             |
 
 To override values in `helm install`, use either the `--set` flag.
