@@ -10,6 +10,7 @@ fullnameOverride: ""
 secret:
   annotations: {}
   name: ""
+  useExistingSecret: false
 
 env:
   normal:
