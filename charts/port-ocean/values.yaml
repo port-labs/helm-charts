@@ -22,6 +22,8 @@ affinity: {}
 
 imagePullPolicy: IfNotPresent
 
+initializePortResources: true
+
 service:
   enabled: true
   type: ClusterIP

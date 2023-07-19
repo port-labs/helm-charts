@@ -53,6 +53,7 @@ The following table lists the configuration parameters of the `port-ocean` chart
 | `port.clientId`                       | Type: secret<br>Key: PORT_CLIENT_ID<br>Value: "".<br>Client ID for Port API authentication.          |                                       |
 | `port.clientSecret`                   | Type: secret<br>Key: PORT_CLIENT_SECRET<br>Value: "".<br>Client secret for Port API authentication.  |                                       |
 | `port.baseUrl`                        | Base URL for the Port API.                                                                           | `https://api.getport.io/v1`           |
+| `initializePortResources`             | Use the default port resources                                                                       | `true`           |
 | `podAnnotations`                      | Annotations to be added to the pod.                                                                  | `{}`                                  |
 | `podSecurityContext`                  | Security context applied to the pod.                                                                 | `{}`                                  |
 | `securityContext`                     | Security context applied to the container.                                                           | `{}`                                  |
