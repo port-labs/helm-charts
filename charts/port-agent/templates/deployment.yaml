@@ -32,6 +32,11 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             {{- include "port-agent.envVariables" . | indent 12 }}
+          {{- if eq .Values.secret.useExistingSecret true }}
+          envFrom:
+            - secretRef:
+                name: {{ include "port-agent.secretName" . }}
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 

@@ -61,6 +61,7 @@ Create the name of the secret to use
 Create the list of environment variables
 */}}
 {{- define "port-agent.envVariables"}}
+{{- if eq .Values.secret.useExistingSecret false }}
 {{- range $key, $val := .Values.env.secret }}
 - name: {{ $key }}
   valueFrom:
@@ -68,6 +69,7 @@ Create the list of environment variables
       name: {{ include "port-agent.secretName" $ }}
       key: {{ $key }}
 {{- end}}
+{{- end }}
 {{- range $key, $val := .Values.env.normal }}
 - name: {{ $key }}
   value: {{ $val | quote }}
