@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "port-ocean.deploymentName" . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "port-ocean.deploymentName" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "port-ocean.deploymentName" .}}
+    spec:
+      containers:
+      - name: {{ include "port-ocean.containerName" . }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        image: ghcr.io/port-labs/port-ocean-{{ .Values.integration.type }}:{{ .Values.integration.version | default "latest" }}
+        {{- if .Values.service.enabled }}
+        ports:
+        - containerPort: {{.Values.service.port}}
+          protocol: TCP
+        {{- end }}
+        volumeMounts:
+          - name: config-volume
+            mountPath: "/app/config.yaml"
+            subPath: "config.yaml"
+        envFrom:
+          - secretRef:
+              name: {{ include "port-ocean.secretName" . }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ include "port-ocean.configMapName" . }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.resources }}
+      resources:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+

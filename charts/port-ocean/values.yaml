@@ -1,0 +1,44 @@
+nameOverride: ""
+fullnameOverride: ""
+
+port:
+  clientId: ""
+  clientSecret: ""
+  baseUrl: https://api.getport.io
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+imagePullPolicy: Always
+
+initializePortResources: true
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 8000
+  
+ingress:
+  enabled: false
+  annotations: {}
+  host: null
+  
+integration:
+  identifier: ""
+  version: ""
+  type: ""
+  config: {}
+  secrets: {}
+  eventListener:
+    type: "KAFKA"
