@@ -5,8 +5,8 @@ metadata:
 data:
   config.yaml: |-
     port:
-      clientId: {{ printf "{{ from env PORT_CLIENT_ID }}"  }}
-      clientSecret: {{ printf "{{ from env PORT_CLIENT_SECRET }}" }}
+      clientId: "{{ printf "{{ from env PORT_CLIENT_ID }}" }}"
+      clientSecret: "{{ printf "{{ from env PORT_CLIENT_SECRET }}" }}"
       baseUrl: {{ .Values.port.baseUrl | quote }}
     initializePortResources: {{ .Values.initializePortResources | default false }}
     eventListener: 
@@ -24,6 +24,6 @@ data:
         {{- end -}}
         {{- if .Values.integration.secrets -}}
         {{- range $key, $value := .Values.integration.secrets }}
-        {{ $key }}: {{ printf "{{ from env %s }}" $key }}
+        {{ $key }}: "{{ printf "{{ from env %s }}" $key }}"
         {{- end -}}
         {{- end -}}
