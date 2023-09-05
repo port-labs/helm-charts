@@ -81,6 +81,10 @@ The following table lists the configuration parameters of the `port-k8s-exporter
 | `nodeSelector`                        | NodeSelector applied to the pod                                                                      | `{}`                                  |
 | `tolerations`                         | Tolerations applied to the pod                                                                       | `[]`                                  |
 | `affinity`                            | Affinity applied to the pod                                                                          | `{}`                                  |
+| `extraEnv`                            | extraEnv applied to the pod                                                                          | `[]`                                  |
+| `extraObjects`                        | extraObjects applied to the namespace                                                                | `[]`                                  |
+| `extraVolumes`                        | extraVolumes applied to the pod                                                                      | `[]`                                  |
+| `extraVolumeMounts`                   | extraVolumeMounts applied to the pod                                                                 | `[]`                                  |
 
 To override values in `helm install`, use either the `--set` flag or the `--set-file` flag to set individual values from a file.
 
