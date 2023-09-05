@@ -59,3 +59,24 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+extraEnv: []
+  # - name: "KUBECONFIG"
+  #   value: /tmp/.kube/config
+
+extraObjects: []
+# - apiVersion: v1
+#   kind: Secret
+#   metadata:
+#     name: kubeconfig
+#   type: Opaque
+#   stringData:
+
+extraVolumes: []
+  # - name: kubeconfig
+  #   secret:
+  #     secretName: kubeconfig
+
+extraVolumeMounts: []
+  # - name: kubeconfig
+  #   mountPath: "/tmp/.kube"
