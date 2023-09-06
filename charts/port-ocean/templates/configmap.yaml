@@ -9,6 +9,7 @@ data:
       clientSecret: "{{ printf "{{ from env PORT_CLIENT_SECRET }}" }}"
       baseUrl: {{ .Values.port.baseUrl | quote }}
     initializePortResources: {{ .Values.initializePortResources | default false }}
+    scheduledResyncInterval: {{ .Values.scheduledResyncInterval | default 60 }}
     eventListener: 
       {{- range $key, $value := .Values.integration.eventListener }}
       {{ $key }}: {{ $value | quote }}

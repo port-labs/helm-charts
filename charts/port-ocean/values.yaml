@@ -24,6 +24,8 @@ imagePullPolicy: Always
 
 initializePortResources: true
 
+scheduledResyncInterval: 60
+
 service:
   enabled: true
   type: ClusterIP
