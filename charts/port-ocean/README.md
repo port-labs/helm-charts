@@ -54,6 +54,7 @@ The following table lists the configuration parameters of the `port-ocean` chart
 | `port.clientSecret`                   | Type: secret<br>Key: PORT_CLIENT_SECRET<br>Value: "".<br>Client secret for Port API authentication.  |                                       |
 | `port.baseUrl`                        | Base URL for the Port API.                                                                           | `https://api.getport.io/v1`           |
 | `initializePortResources`             | When set to true, creates a default JQ mapping and the relevant blueprints                           | `true`           |
+| `scheduledResyncInterval`             | The number in minutes to reschedule and poll data from the 3rd party system                           | `null`           |
 | `podAnnotations`                      | Annotations to be added to the pod.                                                                  | `{}`                                  |
 | `podSecurityContext`                  | Security context applied to the pod.                                                                 | `{}`                                  |
 | `securityContext`                     | Security context applied to the container.                                                           | `{}`                                  |
