@@ -21,17 +21,11 @@ spec:
         - containerPort: {{.Values.service.port}}
           protocol: TCP
         {{- end }}
-        volumeMounts:
-          - name: config-volume
-            mountPath: "/app/config.yaml"
-            subPath: "config.yaml"
         envFrom:
+          - configMapRef:
+              name: {{ include "port-ocean.configMapName" . }}
           - secretRef:
               name: {{ include "port-ocean.secretName" . }}
-      volumes:
-        - name: config-volume
-          configMap:
-            name: {{ include "port-ocean.configMapName" . }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
       {{- toYaml . | nindent 8 }}
