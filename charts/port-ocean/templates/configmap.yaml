@@ -3,28 +3,20 @@ kind: ConfigMap
 metadata:
   name: {{ include "port-ocean.configMapName" . }}
 data:
-  config.yaml: |-
-    port:
-      clientId: "{{ printf "{{ from env PORT_CLIENT_ID }}" }}"
-      clientSecret: "{{ printf "{{ from env PORT_CLIENT_SECRET }}" }}"
-      baseUrl: {{ .Values.port.baseUrl | quote }}
-    initializePortResources: {{ .Values.initializePortResources | default false }}
-    scheduledResyncInterval: {{ .Values.scheduledResyncInterval }}
-    eventListener: 
-      {{- range $key, $value := .Values.integration.eventListener }}
-      {{ $key }}: {{ $value | quote }}
-      {{- end}}
-    integration:
-      identifier: {{ .Values.integration.identifier }}
-      type: {{ .Values.integration.type }}
-      config:
-        {{- if .Values.integration.config -}}
-        {{- range $key, $value := .Values.integration.config }}
-        {{ $key }}: {{ $value | quote }}
-        {{- end -}}
-        {{- end -}}
-        {{- if .Values.integration.secrets -}}
-        {{- range $key, $value := .Values.integration.secrets }}
-        {{ $key }}: "{{ printf "{{ from env %s }}" $key }}"
-        {{- end -}}
-        {{- end -}}
+  OCEAN__PORT__BASE_URL: {{ .Values.port.baseUrl | quote }}
+  OCEAN__INITIALIZE_PORT_RESOURCES: "{{ .Values.initializePortResources | default false }}"
+  {{- if .Values.scheduledResyncInterval }}
+  OCEAN__SCHEDULED_RESYNC_INTERVAL: "{{ .Values.scheduledResyncInterval }}"
+  {{- end }}
+  OCEAN__EVENT_LISTENER: {{ .Values.integration.eventListener | toJson | quote }}
+  {{- if .Values.integration.identifier }}
+  OCEAN__INTEGRATION__IDENTIFIER: "{{ .Values.integration.identifier }}"
+  {{- end }}
+  {{- if .Values.integration.type }}
+  OCEAN__INTEGRATION__TYPE: "{{ .Values.integration.type }}"
+  {{- end }}
+  {{- if .Values.integration.config }}
+  {{- range $key, $value := .Values.integration.config }}
+  OCEAN__INTEGRATION__CONFIG__{{ $key | snakecase | upper }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
