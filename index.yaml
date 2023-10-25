@@ -89,6 +89,23 @@ entries:
   port-k8s-exporter:
   - apiVersion: v2
     appVersion: 0.1.14
+    created: "2023-10-25T11:16:20.039946103Z"
+    description: A Helm chart for Port Kubernetes Exporter
+    digest: 3d605ecb2f2d2e89ab6fd86e22e5f53648ff2b7651b18be14c4a71f4ac326b99
+    home: https://getport.io/
+    icon: https://port-graphical-assets.s3.eu-west-1.amazonaws.com/Port+Logo.svg
+    maintainers:
+    - email: support@getport.io
+      name: Port
+    name: port-k8s-exporter
+    sources:
+    - https://github.com/port-labs/port-k8s-exporter
+    type: application
+    urls:
+    - https://github.com/port-labs/helm-charts/releases/download/port-k8s-exporter-0.2.1/port-k8s-exporter-0.2.1.tgz
+    version: 0.2.1
+  - apiVersion: v2
+    appVersion: 0.1.14
     created: "2023-09-05T12:10:30.529350594Z"
     description: A Helm chart for Port Kubernetes Exporter
     digest: 84195b1897af4328fa2f8178b0a7c980214967f4de89465f8b680b7e83ed9d81
@@ -464,6 +481,23 @@ entries:
   port-ocean:
   - apiVersion: v2
     appVersion: 0.1.0
+    created: "2023-10-25T11:16:20.2337197Z"
+    description: A Helm chart for Port Ocean integrations
+    digest: 1cc450d99a13659bd92b5f5110a5647ba5b44a0665713eedf947e74af2013093
+    home: https://getport.io/
+    icon: https://port-graphical-assets.s3.eu-west-1.amazonaws.com/Port+Logo.svg
+    maintainers:
+    - email: support@getport.io
+      name: Port
+    name: port-ocean
+    sources:
+    - https://github.com/port-labs/port-ocean
+    type: application
+    urls:
+    - https://github.com/port-labs/helm-charts/releases/download/port-ocean-0.1.5/port-ocean-0.1.5.tgz
+    version: 0.1.5
+  - apiVersion: v2
+    appVersion: 0.1.0
     created: "2023-10-16T13:49:29.622566831Z"
     description: A Helm chart for Port Ocean integrations
     digest: 2d1c0eccb7396c9bcdcb22794b32aa36e51cce6d842eb691af01079d06a5a6e0
@@ -547,4 +581,4 @@ entries:
     urls:
     - https://github.com/port-labs/helm-charts/releases/download/port-ocean-0.1.0/port-ocean-0.1.0.tgz
     version: 0.1.0
-generated: "2023-10-16T13:49:29.622874633Z"
+generated: "2023-10-25T11:16:20.23389811Z"
