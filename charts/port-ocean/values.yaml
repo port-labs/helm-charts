@@ -26,6 +26,10 @@ initializePortResources: true
 
 scheduledResyncInterval: null
 
+secret:
+  name: ""
+  useExistingSecret: false
+
 service:
   enabled: true
   type: ClusterIP

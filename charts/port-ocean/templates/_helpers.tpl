@@ -70,7 +70,7 @@ Get secret name per integration
 */}}
 {{- define "port-ocean.secretName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-secret" $prefix }}
+{{- default (printf "%s-secret" $prefix) .Values.secret.name }}
 {{- end }}
 
 {{/*
