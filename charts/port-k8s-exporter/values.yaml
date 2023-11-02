@@ -2,6 +2,7 @@ resyncInterval: 0
 stateKey: ""
 deleteDependents: false
 createMissingRelatedEntities: false
+portBaseUrl: https://api.getport.io
 verbosity: 0
 
 image:
