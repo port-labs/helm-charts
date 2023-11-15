@@ -1,9 +1,9 @@
-{{ if .Values.controlThePayloadConfigFile }}
+{{ if .Values.controlThePayloadConfig }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-configmap
 data:
-  controlThePayloadConfig: |
-    {{- .Files.Get .Values.controlThePayloadConfigFile | nindent 4 }}
+  controlThePayloadConfig: |-
+    {{- .Values.controlThePayloadConfig | nindent 4 }}
 {{- end }}

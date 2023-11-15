@@ -7,7 +7,7 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-controlThePayloadConfigFile: ""
+controlThePayloadConfig: ""
 secret:
   annotations: {}
   name: ""

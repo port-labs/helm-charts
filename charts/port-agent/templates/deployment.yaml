@@ -40,13 +40,13 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            {{- if .Values.controlThePayloadConfigFile }}
+            {{- if .Values.controlThePayloadConfig }}
             - mountPath: /app/control_the_payload_config.json
               name: {{ .Release.Name }}-configmap
               subPath: controlThePayloadConfig
             {{- end }}
       volumes:
-        {{- if .Values.controlThePayloadConfigFile }}
+        {{- if .Values.controlThePayloadConfig }}
         - name: {{ .Release.Name }}-configmap
           configMap:
             name: {{ .Release.Name }}-configmap
