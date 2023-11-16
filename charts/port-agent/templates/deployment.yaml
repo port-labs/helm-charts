@@ -39,7 +39,18 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-
+          volumeMounts:
+            {{- if .Values.controlThePayloadConfig }}
+            - mountPath: /app/control_the_payload_config.json
+              name: {{ include "port-agent.fullname" . }}
+              subPath: controlThePayloadConfig
+            {{- end }}
+      volumes:
+        {{- if .Values.controlThePayloadConfig }}
+        - name: {{ include "port-agent.fullname" . }}
+          configMap:
+            name: {{ include "port-agent.fullname" . }}
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
