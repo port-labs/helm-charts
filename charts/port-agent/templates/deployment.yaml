@@ -42,14 +42,14 @@ spec:
           volumeMounts:
             {{- if .Values.controlThePayloadConfig }}
             - mountPath: /app/control_the_payload_config.json
-              name: {{ .Release.Name }}-configmap
+              name: {{ include "port-agent.fullname" . }}
               subPath: controlThePayloadConfig
             {{- end }}
       volumes:
         {{- if .Values.controlThePayloadConfig }}
-        - name: {{ .Release.Name }}-configmap
+        - name: {{ include "port-agent.fullname" . }}
           configMap:
-            name: {{ .Release.Name }}-configmap
+            name: {{ include "port-agent.fullname" . }}
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
