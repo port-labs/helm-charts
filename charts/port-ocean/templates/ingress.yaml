@@ -18,8 +18,8 @@ spec:
           {{- end }}
           http:
               paths:
-              - path: /
-                pathType: Prefix
+              - path: {{ .Values.ingress.path }}
+                pathType: {{ .Values.ingress.pathType }}
                 backend:
                     service:
                         name: {{ include "port-ocean.serviceName" . }}
