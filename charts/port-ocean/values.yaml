@@ -39,6 +39,9 @@ ingress:
   enabled: false
   annotations: {}
   host: null
+  path: /
+  pathType: Prefix
+
   
 integration:
   identifier: ""
