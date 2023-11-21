@@ -27,10 +27,12 @@ For example, to use the `KafkaToWebhookStreamer` Streamer, use the following com
         --set env.normal.STREAMER_NAME=KafkaToWebhookStreamer \
         --set env.normal.PORT_ORG_ID=YOUR_PORT_ORG_ID
         --set env.normal.KAFKA_CONSUMER_GROUP_ID=YOUR_KAFKA_CONSUMER_GROUP_ID \
-        --set env.secret.KAFKA_CONSUMER_USERNAME=YOUR_KAFKA_CONSUMER_USERNAME \
-        --set env.secret.KAFKA_CONSUMER_PASSWORD=YOUR_KAFKA_CONSUMER_PASSWORD
+        --set env.secret.PORT_CLIENT_ID=YOUR_PORT_CLIENT_ID \
+        --set env.secret.PORT_CLIENT_SECRET=YOUR_PORT_CLIENT_SECRET
 
-* Replace `YOUR_PORT_ORG_ID`, `YOUR_KAFKA_CONSUMER_GROUP_ID`, `YOUR_KAFKA_CONSUMER_USERNAME`, `YOUR_KAFKA_CONSUMER_PASSWORD` with the values that Port supplied you.
+*
+Replace `YOUR_PORT_ORG_ID`, `YOUR_KAFKA_CONSUMER_GROUP_ID`, `YOUR_PORT_CLIENT_ID`, `YOUR_PORT_CLIENT_SECRET`
+with the values that Port supplied you.
 
 To uninstall the chart use:
 
@@ -60,8 +62,8 @@ The following table lists the configuration parameters of the `port-agent` chart
 | `env.normal.KAFKA_CONSUMER_SECURITY_PROTOCOL`        | Kafka consumer security protocol                                                           | `"SASL_SSL"`                                                                                                                                                                                                                      |
 | `env.normal.KAFKA_CONSUMER_AUTHENTICATION_MECHANISM` | Kafka consumer authentication mechanism                                                    | `"SCRAM-SHA-512"`                                                                                                                                                                                                                 |
 | `env.normal.KAFKA_CONSUMER_AUTO_OFFSET_RESET`        | Kafka consumer auto offset reset                                                           | `"largest"`                                                                                                                                                                                                                       |
-| `env.secret.KAFKA_CONSUMER_USERNAME`                 | Kafka Username - **Required if using any Kafka streamer**                                  | `""`                                                                                                                                                                                                                              |
-| `env.secret.KAFKA_CONSUMER_PASSWORD`                 | Kafka Password - **Required if using any Kafka streamer**                                  | `""`                                                                                                                                                                                                                              |
+| `env.secret.PORT_CLIENT_ID`                          | Port API client id                                                                         | `""`                                                                                                                                                                                                                              |
+| `env.secret.PORT_CLIENT_SECRET`                      | Port API client secret                                                                     | `""`                                                                                                                                                                                                                              |
 | `controlThePayloadConfig`                            | Override the default control the payload configuration file with custom json configuration | `""`                                                                                                                                                                                                                              |
 | `podAnnotations`                                     | Annotations to be added to the pod                                                         | `{}`                                                                                                                                                                                                                              |
 | `podSecurityContext`                                 | Security context applied to the pod                                                        | `{}`                                                                                                                                                                                                                              |
