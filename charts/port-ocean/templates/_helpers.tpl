@@ -104,3 +104,11 @@ Get deployment name per integration
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
 {{- printf "%s-deployment" $prefix }}
 {{- end }}
+
+{{/*
+Get self signed cert secret name
+*/}}
+{{- define "port-ocean.selfSignedCertName" -}}
+{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
+{{- printf "%s-cert" $prefix }}
+{{- end }}

@@ -77,6 +77,8 @@ The following table lists the configuration parameters of the `port-ocean` chart
 | `integration.type`         | Type of the integration. i.e (`pager-duty`)                                                                                                                                                                                                                                                                                                                                                                                                                                                        | `""`                        |
 | `integration.config`       | Configuration for the integration.                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | `{}`                        |
 | `integration.secrets`      | Secrets for the integration (irrelevant if secret.useExistingSecret=true).                                                                                                                                                                                                                                                                                                                                                                                                                         | `{}`                        |
+| `integration.selfSignedCertificate.enabled`      | Enable self-signed certificate trust for the integration.                                                                                                                                                                                                                                                                                                                                                                                                                       | `false`                        |
+| `integration.selfSignedCertificate.certificate`      |  The value of the self-signed certificate (only when `integration.selfSignedCertificate.enabled=true`)                                                                                                                                                                                                                                                                                                                                                                                                                        | `""`                        |
 | `eventListener.type`       | Type of the event listener for the integration, one of the following "WEBHOOK" / "KAFKA" / "SAMPLE"                                                                                                                                                                                                                                                                                                                                                                                                | `"KAFKA"`                   |
 
 To override values in `helm install`, use either the `--set` flag.
@@ -86,3 +88,18 @@ Alternatively, you can use a YAML file that specifies the values while installin
     helm install my-ocean-integration port-labs/port-ocean \
        --create-namespace --namespace port-ocean \
        -f custom_values.yaml
+
+
+### Self-signed certificate trust
+For self-hosted 3rd-party applications with self-signed certificates, you will need to add your CA to the integration's configuration. 
+To do so, you will need to run the `helm install` command with the following flags:
+
+```sh
+helm install my-ocean-integration port-labs/port-ocean \
+   --create-namespace --namespace port-ocean \
+   -f custom_values.yaml \ 
+   # Flag for enabling self signed certificates
+   --set integration.selfSignedCertificate.enabled=true \ 
+   # Flag for passing the certificate file
+   --set-file integration.selfSignedCertificate.certificate=/PATH/TO/CERTIFICATE.crt
+```
