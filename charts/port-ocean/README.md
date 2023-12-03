@@ -91,8 +91,8 @@ Alternatively, you can use a YAML file that specifies the values while installin
 
 
 ### Self-signed certificate trust
-For self-hosted integrations with self-signed certificates, you will need to add your CA to the integration's OS. 
-To do so, you will need to run the install command with the following flags:
+For self-hosted 3rd-party applications, with self-signed certificates, you will need to add your CA to the integration's configuration. 
+To do so, you will need to run the `helm install` command with the following flags:
 
 ```sh
 helm install my-ocean-integration port-labs/port-ocean \
