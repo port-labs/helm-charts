@@ -29,7 +29,8 @@ spec:
         volumeMounts:
         {{- if .Values.integration.selfSignedCertificate.enabled }}
           - name: certificates
-            mountPath: /usr/local/share/ca-certificates
+            mountPath: /etc/ssl/certs/cert.pem
+            subPath: cert.pem
             readOnly: true
         {{- end }}
       volumes:
@@ -38,12 +39,10 @@ spec:
           projected:
             sources:
               - secret:
-                  name: {{ include "port-ocean.selfSignedCertName" }}
+                  name: {{ include "port-ocean.selfSignedCertName" . }}
                   items:
-                    - key: tls.crt
-                      path: tls.crt
-                    - key: tls.key
-                      path: tls.key
+                    - key: crt
+                      path: cert.pem
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
