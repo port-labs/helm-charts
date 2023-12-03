@@ -26,6 +26,25 @@ spec:
               name: {{ include "port-ocean.configMapName" . }}
           - secretRef:
               name: {{ include "port-ocean.secretName" . }}
+        volumeMounts:
+        {{- if .Values.integration.selfSignedCertificate.enabled }}
+          - name: certificates
+            mountPath: /usr/local/share/ca-certificates
+            readOnly: true
+        {{- end }}
+      volumes:
+        {{- if .Values.integration.selfSignedCertificate.enabled }}
+        - name: certificates
+          projected:
+            sources:
+              - secret:
+                  name: {{ include "port-ocean.selfSignedCertName" }}
+                  items:
+                    - key: tls.crt
+                      path: tls.crt
+                    - key: tls.key
+                      path: tls.key
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
       {{- toYaml . | nindent 8 }}
