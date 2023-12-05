@@ -21,6 +21,11 @@ spec:
         - containerPort: {{.Values.service.port}}
           protocol: TCP
         {{- end }}
+        {{- if .Values.integration.selfSignedCertificate.enabled }}
+        env:
+          - name: SSL_CERT_DIR
+            value: /etc/ssl/certs/
+        {{- end }}
         envFrom:
           - configMapRef:
               name: {{ include "port-ocean.configMapName" . }}
