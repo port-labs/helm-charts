@@ -23,8 +23,8 @@ spec:
         {{- end }}
         {{- if .Values.integration.selfSignedCertificate.enabled }}
         env:
-          - name: SSL_CERT_FILE
-            value: /etc/ssl/certs/cert.pem
+          - name: SSL_CERT_DIR
+            value: /etc/ssl/certs/
         {{- end }}
         envFrom:
           - configMapRef:
