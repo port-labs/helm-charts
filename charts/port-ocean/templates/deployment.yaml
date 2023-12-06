@@ -15,6 +15,9 @@ spec:
       containers:
       - name: {{ include "port-ocean.containerName" . }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- if .Values.integration.selfSignedCertificate.enabled }}
+        command: ["sh", "-c", "update-ca-certificates && ocean sail"]
+        {{- end }}
         image: ghcr.io/port-labs/port-ocean-{{ .Values.integration.type }}:{{ .Values.integration.version | default "latest" }}
         {{- if .Values.service.enabled }}
         ports:
@@ -23,8 +26,8 @@ spec:
         {{- end }}
         {{- if .Values.integration.selfSignedCertificate.enabled }}
         env:
-          - name: SSL_CERT_DIR
-            value: /etc/ssl/certs/
+          - name: SSL_CERT_FILE
+            value: /etc/ssl/certs/ca-certificates.crt
         {{- end }}
         envFrom:
           - configMapRef:
@@ -34,8 +37,8 @@ spec:
         volumeMounts:
         {{- if .Values.integration.selfSignedCertificate.enabled }}
           - name: certificates
-            mountPath: /etc/ssl/certs/cert.pem
-            subPath: cert.pem
+            mountPath: /usr/local/share/ca-certificates/cert.crt
+            subPath: cert.crt
             readOnly: true
         {{- end }}
       volumes:
@@ -47,7 +50,7 @@ spec:
                   name: {{ include "port-ocean.selfSignedCertName" . }}
                   items:
                     - key: crt
-                      path: cert.pem
+                      path: cert.crt
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
