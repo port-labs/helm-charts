@@ -31,6 +31,7 @@ For example, to use the `KafkaToWebhookStreamer` Streamer, use the following com
         --set env.secret.PORT_CLIENT_SECRET=YOUR_PORT_CLIENT_SECRET
 
 *
+
 Replace `YOUR_PORT_ORG_ID`, `YOUR_KAFKA_CONSUMER_GROUP_ID`, `YOUR_PORT_CLIENT_ID`, `YOUR_PORT_CLIENT_SECRET`
 with the values that Port supplied you.
 
@@ -72,11 +73,29 @@ The following table lists the configuration parameters of the `port-agent` chart
 | `nodeSelector`                                       | NodeSelector applied to the pod                                                            | `{}`                                                                                                                                                                                                                              |
 | `tolerations`                                        | Tolerations applied to the pod                                                             | `[]`                                                                                                                                                                                                                              |
 | `affinity`                                           | Affinity applied to the pod                                                                | `{}`                                                                                                                                                                                                                              |
+| `selfSignedCertificate.enabled`                      | Enable self-signed certificate trust for the integration.                                  | `false`                                                                                                                                                                                                                           |
+| `selfSignedCertificate.certificate`                  | The value of the self-signed certificate (only when `selfSignedCertificate.enabled=true`)  | `""`                                                                                                                                                                                                                              |
 
-To override values in `helm install`, use either the `--set` flag or the `--set-file` flag to set individual values from a file.
+To override values in `helm install`, use either the `--set` flag or the `--set-file` flag to set individual values from
+a file.
 
 Alternatively, you can use a YAML file that specifies the values while installing the chart. For example:
 
     helm install my-port-agent port-labs/port-agent \
        --create-namespace --namespace port-agent \
        -f custom_values.yaml
+
+
+### Self-signed certificate trust
+For self-hosted 3rd-party applications with self-signed certificates, you will need to add your CA to the integration's configuration. 
+To do so, you will need to run the `helm install` command with the following flags:
+
+```sh
+helm install my-port-agent port-labs/port-agent \
+   --create-namespace --namespace port-agent \
+   -f custom_values.yaml
+   # Flag for enabling self signed certificates
+   --set selfSignedCertificate.enabled=true \ 
+   # Flag for passing the certificate file
+   --set-file selfSignedCertificate.certificate=/PATH/TO/CERTIFICATE.crt
+```
