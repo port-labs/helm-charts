@@ -35,6 +35,10 @@ spec:
           {{- end }}
           env:
             {{- if .Values.selfSignedCertificate.enabled }}
+            {{/* Used for requests library in python */}}
+            - name: REQUESTS_CA_BUNDLE
+              value: /etc/ssl/certs/ca-certificates.crt
+            {{/* Used for httpx library in python */}}
             - name: SSL_CERT_FILE
               value: /etc/ssl/certs/ca-certificates.crt
             {{- end }}
