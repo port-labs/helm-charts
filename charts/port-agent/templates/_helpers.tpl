@@ -75,3 +75,12 @@ Create the list of environment variables
   value: {{ $val | quote }}
 {{- end}}
 {{- end }}
+
+
+{{/*
+Get self signed cert secret name
+*/}}
+{{- define "port-ocean.selfSignedCertName" -}}
+{{ $prefix:= include "port-agent.fullname" . }}
+{{- printf "%s-cert" $prefix }}
+{{- end }}

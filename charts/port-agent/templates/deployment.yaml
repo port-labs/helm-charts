@@ -30,7 +30,14 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.selfSignedCertificate.enabled }}
+          command: [ "sh", "-c", "update-ca-certificates && python3 main.py" ]
+          {{- end }}
           env:
+            {{- if .Values.selfSignedCertificate.enabled }}
+            - name: SSL_CERT_FILE
+              value: /etc/ssl/certs/ca-certificates.crt
+            {{- end }}
             {{- include "port-agent.envVariables" . | indent 12 }}
           {{- if eq .Values.secret.useExistingSecret true }}
           envFrom:
@@ -45,11 +52,27 @@ spec:
               name: {{ include "port-agent.fullname" . }}
               subPath: controlThePayloadConfig
             {{- end }}
+          {{- if .Values.selfSignedCertificate.enabled }}
+            - name: certificates
+              mountPath: /usr/local/share/ca-certificates/cert.crt
+              subPath: cert.crt
+              readOnly: true
+          {{- end }}
       volumes:
         {{- if .Values.controlThePayloadConfig }}
         - name: {{ include "port-agent.fullname" . }}
           configMap:
             name: {{ include "port-agent.fullname" . }}
+        {{- end }}
+        {{- if .Values.selfSignedCertificate.enabled }}
+        - name: certificates
+          projected:
+            sources:
+              - secret:
+                  name: {{ include "port-ocean.selfSignedCertName" . }}
+                  items:
+                    - key: crt
+                      path: cert.crt
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

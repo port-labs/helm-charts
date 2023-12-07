@@ -40,3 +40,7 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+selfSignedCertificate:
+  enabled: false
+  certificate: ""
