@@ -80,7 +80,7 @@ Create the list of environment variables
 {{/*
 Get self signed cert secret name
 */}}
-{{- define "port-ocean.selfSignedCertName" -}}
+{{- define "selfSignedCertName" -}}
 {{ $prefix:= include "port-agent.fullname" . }}
 {{- printf "%s-cert" $prefix }}
 {{- end }}

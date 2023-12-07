@@ -70,7 +70,7 @@ spec:
           projected:
             sources:
               - secret:
-                  name: {{ include "port-ocean.selfSignedCertName" . }}
+                  name: {{ include "selfSignedCertName" . }}
                   items:
                     - key: crt
                       path: cert.crt
