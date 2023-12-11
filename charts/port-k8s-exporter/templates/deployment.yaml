@@ -37,6 +37,7 @@ spec:
           args:
             - -config=/config/config.yaml
             - -state-key=$(STATE_KEY)
+            - -port-base-url={{ .Values.portBaseUrl }}
             - -delete-dependents={{ .Values.deleteDependents }}
             - -create-missing-related-entities={{ .Values.createMissingRelatedEntities }}
             {{- if ne (int .Values.verbosity) 0 }}
