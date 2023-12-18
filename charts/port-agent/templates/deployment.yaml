@@ -5,6 +5,12 @@ metadata:
   labels:
     {{- include "port-agent.labels" . | nindent 4 }}
 spec:
+  strategty:
+    type: {{ .Values.rolloutStrategy }}
+  securityContext: 
+  {{- if .Values.podSecurityContext }}
+    {{- toYaml .Values.podSecurityContext | nindent 4 }}
+  {{- end }}
   replicas: 1
   selector:
     matchLabels:
@@ -22,16 +28,16 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.selfSignedCertificate.enabled }}
           command: [ "sh", "-c", "update-ca-certificates && python3 main.py" ]
+          {{- end }}
+          securityContext:
+          {{- if .Values.containerSecurityContext }}
+            {{- toYaml .Values.containerSecurityContext | nindent 14 }}
           {{- end }}
           env:
             {{- if .Values.selfSignedCertificate.enabled }}

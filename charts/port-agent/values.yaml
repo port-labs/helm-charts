@@ -30,10 +30,28 @@ env:
 podAnnotations: {}
 
 podSecurityContext: {}
+# Example 
+  # runAsGroup: 1001
+  # runAsUser: 1001
+  # fsGroup: 1001
+  # fsGroupChangePolicy: "OnRootMismatch"
+containerSecurityContext: {}
+# Example 
+  # runAsGroup: 1001
+  # runAsUser: 1001
+  # allowPrivilegeEscalation: false
 
-securityContext: {}
 
-resources: {}
+
+rolloutStrategy: "Recreate"
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "200m"
 
 nodeSelector: {}
 
