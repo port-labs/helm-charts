@@ -29,11 +29,21 @@ env:
 
 podAnnotations: {}
 
-podSecurityContext: {}
+podSecurityContext:
+  enabled: true
+  securityContext:
+    fsGroup: 1001
+    runAsUser: 1001
 
 securityContext: {}
 
-resources: {}
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "200m"
 
 nodeSelector: {}
 

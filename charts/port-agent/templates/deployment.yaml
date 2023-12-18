@@ -27,7 +27,9 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+            {{ - if .Values.podSecurityContext.enabled }}
+            {{- toYaml .Values.podSecurityContext.securityContext | nindent 12 }}
+            {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.selfSignedCertificate.enabled }}
