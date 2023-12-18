@@ -9,10 +9,26 @@ port:
 podAnnotations: {}
 
 podSecurityContext: {}
+# Example 
+  # runAsGroup: 1001
+  # runAsUser: 1001
+  # fsGroup: 1001
+  # fsGroupChangePolicy: "OnRootMismatch"
+containerSecurityContext: {}
+# Example 
+  # runAsGroup: 1001
+  # runAsUser: 1001
+  # allowPrivilegeEscalation: false
 
-securityContext: {}
+rolloutStrategy: "Recreate"
+resources: 
+  requests:
+    memory: "512Mi"
+    cpu: "200m"
+  limits:
+    memory: "1024Mi"
+    cpu: "500m"
 
-resources: {}
 
 nodeSelector: {}
 
