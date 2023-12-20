@@ -8,6 +8,11 @@ port:
 
 podAnnotations: {}
 
+extraEnv:
+# Example
+#   - name: HTTPS_PROXY
+#     value: http://myproxy.com
+
 podSecurityContext: {}
 # Example 
   # runAsGroup: 1001
