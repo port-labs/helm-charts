@@ -21,9 +21,6 @@ spec:
       containers:
       - name: {{ include "port-ocean.containerName" . }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
-        {{- if .Values.selfSignedCertificate.enabled }}
-        command: ["sh", "-c", "update-ca-certificates && ocean sail"]
-        {{- end }}
         image: ghcr.io/port-labs/port-ocean-{{ .Values.integration.type }}:{{ .Values.integration.version | default "latest" }}
         {{- if .Values.service.enabled }}
         securityContext:
