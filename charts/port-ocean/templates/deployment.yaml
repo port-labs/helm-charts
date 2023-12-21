@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "port-ocean.deploymentName" . }}
 spec:
-  strategty:
+  strategy:
     type: {{ .Values.rolloutStrategy | default "Recreate" }}
   securityContext: 
   {{- if .Values.podSecurityContext }}
