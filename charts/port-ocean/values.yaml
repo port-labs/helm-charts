@@ -26,7 +26,6 @@ containerSecurityContext: {}
   # allowPrivilegeEscalation: false
 
 rolloutStrategy: "Recreate"
-
 resources: 
   requests:
     memory: "512Mi"
