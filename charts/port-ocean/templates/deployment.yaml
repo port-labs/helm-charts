@@ -3,6 +3,12 @@ kind: Deployment
 metadata:
   name: {{ include "port-ocean.deploymentName" . }}
 spec:
+  strategy:
+    type: {{ .Values.rolloutStrategy | default "Recreate" }}
+  securityContext: 
+  {{- if .Values.podSecurityContext }}
+    {{- toYaml .Values.podSecurityContext | nindent 4 }}
+  {{- end }}
   replicas: 1
   selector:
     matchLabels:
@@ -20,14 +26,21 @@ spec:
         {{- end }}
         image: ghcr.io/port-labs/port-ocean-{{ .Values.integration.type }}:{{ .Values.integration.version | default "latest" }}
         {{- if .Values.service.enabled }}
+        securityContext:
+        {{- if .Values.containerSecurityContext }}
+          {{- toYaml .Values.containerSecurityContext | nindent 10 }}
+        {{- end }}
         ports:
         - containerPort: {{.Values.service.port}}
           protocol: TCP
         {{- end }}
-        {{- if .Values.selfSignedCertificate.enabled }}
         env:
+        {{- if .Values.selfSignedCertificate.enabled }}
           - name: SSL_CERT_FILE
             value: /etc/ssl/certs/ca-certificates.crt
+        {{- end }}
+        {{- with .Values.extraEnv }}
+          {{- toYaml . | nindent 10 }}
         {{- end }}
         envFrom:
           - configMapRef:
@@ -64,8 +77,8 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.resources }}
       resources:
-        {{- toYaml . | nindent 8 }}
+      {{- if .Values.resources }}
+        {{- toYaml .Values.resources | nindent 8 }}
       {{- end }}
 

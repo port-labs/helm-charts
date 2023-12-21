@@ -52,7 +52,9 @@ spec:
                 name: {{ include "port-agent.secretName" . }}
           {{- end }}
           resources:
+          {{- if .Values.resources }}
             {{- toYaml .Values.resources | nindent 12 }}
+          {{- end }}
           volumeMounts:
             {{- if .Values.controlThePayloadConfig }}
             - mountPath: /app/control_the_payload_config.json
