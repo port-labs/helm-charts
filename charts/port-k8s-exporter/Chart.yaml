@@ -2,8 +2,8 @@ apiVersion: v2
 name: port-k8s-exporter
 description: A Helm chart for Port Kubernetes Exporter
 type: application
-version: 0.2.2
-appVersion: "0.1.14"
+version: 0.2.3
+appVersion: "0.2.0"
 home: https://getport.io/
 sources:
   - https://github.com/port-labs/port-k8s-exporter
