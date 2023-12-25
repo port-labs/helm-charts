@@ -13,17 +13,17 @@ extraEnv:
 #   - name: HTTPS_PROXY
 #     value: http://myproxy.com
 
-podSecurityContext: {}
+podSecurityContext: 
 # Example 
-  # runAsGroup: 1001
-  # runAsUser: 1001
-  # fsGroup: 1001
-  # fsGroupChangePolicy: "OnRootMismatch"
-containerSecurityContext: {}
+  runAsGroup: 1001
+  runAsUser: 1001
+  fsGroup: 1001
+  fsGroupChangePolicy: "OnRootMismatch"
+containerSecurityContext:
 # Example 
-  # runAsGroup: 1001
-  # runAsUser: 1001
-  # allowPrivilegeEscalation: false
+  runAsGroup: 1001
+  runAsUser: 1001
+  allowPrivilegeEscalation: false
 
 rolloutStrategy: "Recreate"
 

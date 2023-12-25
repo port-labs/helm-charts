@@ -24,7 +24,7 @@ jobs:
       uses: helm/kind-action@v1.5.0
 
     - name: Lint Helm Chart
-      run: helm lint ./Chart.yaml
+      run: helm lint .
 
     - name: Validate Helm Chart
       run: |
