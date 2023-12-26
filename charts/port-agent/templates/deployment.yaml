@@ -7,7 +7,6 @@ metadata:
 spec:
   strategy:
     type: {{ .Values.rolloutStrategy }}
-
   replicas: 1
   selector:
     matchLabels:
