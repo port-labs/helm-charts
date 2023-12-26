@@ -7,10 +7,7 @@ metadata:
 spec:
   strategy:
     type: {{ .Values.rolloutStrategy }}
-  securityContext: 
-  {{- if .Values.podSecurityContext }}
-    {{- toYaml .Values.podSecurityContext | nindent 4 }}
-  {{- end }}
+
   replicas: 1
   selector:
     matchLabels:
@@ -27,6 +24,10 @@ spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext: 
+      {{- if .Values.podSecurityContext }}
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
