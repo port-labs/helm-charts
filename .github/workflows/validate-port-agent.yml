@@ -3,13 +3,13 @@ name: Helm Chart Validation
 on:
   pull_request:
     paths:
-      - charts/port-ocean/**
+      - charts/port-agent/**
 
 jobs:
   validate:
     defaults:
       run:
-        working-directory: charts/port-ocean/
+        working-directory: charts/port-agent/
     runs-on: ubuntu-latest
     name: Validate Helm Chart
 
@@ -28,4 +28,7 @@ jobs:
 
     - name: Validate Helm Chart
       run: |
-        helm template --set secret.secrets.portClientId=test --set secret.secrets.portClientSecret=test --set configMap.config=test . | kubectl apply --dry-run=client -f -
+        helm template --set env.normal.PORT_ORG_ID=test_org \
+        --set env.normal.KAFKA_CONSUMER_GROUP_ID=test_group_id \
+        --set env.secret.PORT_CLIENT_ID=test \
+        --set env.secret.PORT_CLIENT_SECRET=test . | kubectl apply --dry-run=client -f -
