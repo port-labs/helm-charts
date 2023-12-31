@@ -32,7 +32,7 @@ secret:
 
 configMap:
   annotations: {}
-  config:
+  config: ""
   name: ""
   # configMap.create -- Disable to specify your own configmap to be used.
   create: true
