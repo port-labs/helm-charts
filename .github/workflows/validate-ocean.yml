@@ -28,4 +28,4 @@ jobs:
 
     - name: Validate Helm Chart
       run: |
-        helm template --set secret.secrets.portClientId=test --set secret.secrets.portClientSecret=test --set configMap.config=test . | kubectl apply --dry-run=client -f -
+        helm template --set port.clientId=test --set port.clientSecret=test --set configMap.config=test . | kubectl apply --dry-run=client -f -

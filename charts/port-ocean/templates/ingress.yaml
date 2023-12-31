@@ -11,6 +11,9 @@ metadata:
       {{- toYaml .Values.ingress.annotations | nindent 4 }}
     {{- end }}
 spec:
+    {{- if .Values.ingress.className }}
+    ingressClassName: {{ .Values.ingress.className | quote }}
+    {{- end }}
     rules:
         - 
           {{- if .Values.ingress.host }}
