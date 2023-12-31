@@ -36,6 +36,8 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           args:
             - -config=/config/config.yaml
+            - -delete-dependents={{ .Values.deleteDependents }}
+            - -create-missing-related-entities={{ .Values.createMissingRelatedEntities }}
             {{- if ne (int .Values.verbosity) 0 }}
             - -v={{ .Values.verbosity }}
             {{- end }}

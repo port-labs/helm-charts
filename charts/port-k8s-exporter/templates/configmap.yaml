@@ -1,5 +1,5 @@
 {{- if eq .Values.configMap.create true -}}
-{{- $stateKey := default (uuidv4 | replace "-" "") .Values.stateKey -}}
+{{- $stateKey := lower (default (uuidv4 | replace "-" "") .Values.stateKey) -}}
 {{- $config_lookup := (lookup "v1" "ConfigMap" .Release.Namespace (include "port-k8s-exporter.configMapName" .)) -}}
 {{- if $config_lookup -}}
   {{- if $config_lookup.data -}}
@@ -26,5 +26,5 @@ data:
     {{ else }}
       {{- .Values.configMap.config | toYaml | nindent 6 }}
   {{- end }}
-  state_key: {{ lower $stateKey }}
+  state_key: {{ $stateKey }}
 {{- end }}

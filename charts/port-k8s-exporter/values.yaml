@@ -1,5 +1,9 @@
 resyncInterval: 0
 stateKey: ""
+# Deprecated. Will be used only for installation, configure this from the ui / migration from older versions.
+deleteDependents: false
+# Deprecated. Will be used only for installation, configure this from the ui / migration from older versions.
+createMissingRelatedEntities: false
 portBaseUrl: https://api.getport.io
 verbosity: 0
 createDefaultResources: true
