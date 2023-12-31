@@ -1,9 +1,12 @@
 resyncInterval: 0
 stateKey: ""
+# Deprecated. Will be used only for installation, configure this from the ui / migration from older versions.
 deleteDependents: false
+# Deprecated. Will be used only for installation, configure this from the ui / migration from older versions.
 createMissingRelatedEntities: false
 portBaseUrl: https://api.getport.io
 verbosity: 0
+createDefaultResources: true
 
 image:
   repository: ghcr.io/port-labs/port-k8s-exporter
@@ -13,6 +16,14 @@ image:
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
+
+eventListener:
+  type: "KAFKA"
+  brokers: "b-1-public.publicclusterprod.t9rw6w.c1.kafka.eu-west-1.amazonaws.com:9196,b-2-public.publicclusterprod.t9rw6w.c1.kafka.eu-west-1.amazonaws.com:9196,b-3-public.publicclusterprod.t9rw6w.c1.kafka.eu-west-1.amazonaws.com:9196"
+  securityProtocol: "SASL_SSL"
+  authenticationMechanism: "SCRAM-SHA-512"
+# type: "POLLING"
+# pollingRate: 60
 
 secret:
   annotations: {}
@@ -25,7 +36,7 @@ secret:
 
 configMap:
   annotations: {}
-  config:
+  config: ""
   name: ""
   # configMap.create -- Disable to specify your own configmap to be used.
   create: true
