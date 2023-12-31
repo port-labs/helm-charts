@@ -57,6 +57,8 @@ spec:
                   key: state_key
             - name: CREATE_DEFAULT_RESOURCES
               value: {{ .Values.createDefaultResources | quote }}
+            - name: EVENT_LISTENER_TYPE
+              value: .Values.eventListener.type
             {{- if eq .Values.eventListener.type "POLLING" }}
             - name: POLLING_INTERVAL
               value: {{ .Values.eventListener.pollingRate | quote }}
