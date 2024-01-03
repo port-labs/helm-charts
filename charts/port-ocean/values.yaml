@@ -64,7 +64,11 @@ ingress:
   host: null
   path: /
   pathType: Prefix
-
+  tls: []
+  # Example
+  #   - secretName: my-secret
+  #     hosts:
+  #       - "my-host.my-domain.com"
   
 integration:
   identifier: ""

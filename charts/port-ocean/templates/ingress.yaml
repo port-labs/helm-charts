@@ -28,5 +28,9 @@ spec:
                         name: {{ include "port-ocean.serviceName" . }}
                         port:
                             number: {{ .Values.service.port }}
+    {{- if .Values.ingress.tls }}
+    tls:
+      {{- toYaml .Values.ingress.tls | nindent 6 }}
+    {{- end }}
 {{- end }}
 {{- end }}
