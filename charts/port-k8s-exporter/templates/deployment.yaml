@@ -60,7 +60,7 @@ spec:
             - name: EVENT_LISTENER_TYPE
               value: {{ .Values.eventListener.type }}
             {{- if eq .Values.eventListener.type "POLLING" }}
-            - name: POLLING_INTERVAL
+            - name: EVENT_LISTENER_POLLING_RATE
               value: {{ .Values.eventListener.pollingRate | quote }}
             {{- else if eq .Values.eventListener.type "KAFKA" }}
             - name: EVENT_LISTENER_BROKERS
