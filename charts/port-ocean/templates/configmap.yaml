@@ -9,7 +9,7 @@ data:
   OCEAN__SCHEDULED_RESYNC_INTERVAL: "{{ .Values.scheduledResyncInterval }}"
   {{- end }}
   {{- if .Values.clientTimeout }}
-    OCEAN__CLIENT_TIMEOUT: "{{ .Values.clientTimeout }}"
+  OCEAN__CLIENT_TIMEOUT: "{{ .Values.clientTimeout }}"
   {{- end }}
   OCEAN__EVENT_LISTENER: {{ .Values.integration.eventListener | toJson | quote }}
   {{- if .Values.integration.identifier }}
