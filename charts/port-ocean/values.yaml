@@ -48,6 +48,8 @@ initializePortResources: true
 
 scheduledResyncInterval: null
 
+clientTimeout: null
+
 secret:
   name: ""
   useExistingSecret: false
