@@ -2,6 +2,23 @@ apiVersion: v1
 entries:
   port-agent:
   - apiVersion: v2
+    appVersion: v0.6.7
+    created: "2024-01-16T16:01:30.562666215Z"
+    description: A Helm chart for Port Agent
+    digest: 389511e3e342067081cd4733e72f934e6181892cb48c509f5ee36619f9247cd4
+    home: https://getport.io/
+    icon: https://port-graphical-assets.s3.eu-west-1.amazonaws.com/Port+Logo.svg
+    maintainers:
+    - email: support@getport.io
+      name: Port
+    name: port-agent
+    sources:
+    - https://github.com/port-labs/port-agent
+    type: application
+    urls:
+    - https://github.com/port-labs/helm-charts/releases/download/port-agent-0.7.6/port-agent-0.7.6.tgz
+    version: 0.7.6
+  - apiVersion: v2
     appVersion: v0.6.6
     created: "2024-01-03T12:54:18.540563296Z"
     description: A Helm chart for Port Agent
@@ -1193,4 +1210,4 @@ entries:
     urls:
     - https://github.com/port-labs/helm-charts/releases/download/port-ocean-0.1.0/port-ocean-0.1.0.tgz
     version: 0.1.0
-generated: "2024-01-16T09:49:22.499603527Z"
+generated: "2024-01-16T16:01:30.562966456Z"
