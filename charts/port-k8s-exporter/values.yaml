@@ -18,13 +18,12 @@ nameOverride: ""
 fullnameOverride: ""
 
 eventListener:
-  type: "KAFKA"
-  brokers: "b-1-public.publicclusterprod.t9rw6w.c1.kafka.eu-west-1.amazonaws.com:9196,b-2-public.publicclusterprod.t9rw6w.c1.kafka.eu-west-1.amazonaws.com:9196,b-3-public.publicclusterprod.t9rw6w.c1.kafka.eu-west-1.amazonaws.com:9196"
-  securityProtocol: "SASL_SSL"
-  authenticationMechanism: "SCRAM-SHA-512"
-# type: "POLLING"
-# pollingRate: 60
-
+  type: "POLLING"
+  pollingRate: 60
+  # type: "KAFKA"
+  # brokers: "b-1-public.publicclusterprod.t9rw6w.c1.kafka.eu-west-1.amazonaws.com:9196,b-2-public.publicclusterprod.t9rw6w.c1.kafka.eu-west-1.amazonaws.com:9196,b-3-public.publicclusterprod.t9rw6w.c1.kafka.eu-west-1.amazonaws.com:9196"
+  # securityProtocol: "SASL_SSL"
+  # authenticationMechanism: "SCRAM-SHA-512"
 secret:
   annotations: {}
   name: ""
