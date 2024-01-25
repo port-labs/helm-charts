@@ -21,7 +21,7 @@ spec:
       containers:
       - name: {{ include "port-ocean.containerName" . }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
-        image: ghcr.io/port-labs/port-ocean-{{ .Values.integration.type }}:{{ .Values.integration.version | default "latest" }}
+        image: {{ .Values.imageRegistry }}/port-ocean-{{ .Values.integration.type }}:{{ .Values.integration.version | default "latest" }}
         {{- if .Values.service.enabled }}
         securityContext:
         {{- if .Values.containerSecurityContext }}
