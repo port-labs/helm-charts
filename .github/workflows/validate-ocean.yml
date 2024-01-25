@@ -24,7 +24,7 @@ jobs:
       uses: helm/kind-action@v1.5.0
 
     - name: Lint Helm Chart
-      run: helm lint .
+      run: helm lint . --set port.clientId=test --set port.clientSecret=test
 
     - name: Validate Helm Chart
       run: |
