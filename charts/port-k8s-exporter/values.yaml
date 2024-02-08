@@ -7,6 +7,7 @@ createMissingRelatedEntities: false
 portBaseUrl: https://api.getport.io
 verbosity: 0
 createDefaultResources: true
+overwriteConfigurationOnRestart: false
 
 image:
   repository: ghcr.io/port-labs/port-k8s-exporter

@@ -21,7 +21,8 @@ port-labs` to see the charts.
 
 Next, prepare your own exporter `config.yaml` file, as explained [below](#Exporter).
 
-Then, use the `config.yaml` and your `PORT_CLIENT_ID` & `PORT_CLIENT_SECRET` to install the chart, with the following command:
+Then, use the `config.yaml` and your `PORT_CLIENT_ID` & `PORT_CLIENT_SECRET` to install the chart, with the following
+command:
 
     helm install my-port-k8s-exporter port-labs/port-k8s-exporter \
         --create-namespace --namespace port-k8s-exporter \
@@ -53,6 +54,7 @@ The following table lists the configuration parameters of the `port-k8s-exporter
 | `createMissingRelatedEntities`          | Deprecated. Will be used only for installation, configure this from the ui / migration from older versions. A flag to enable creation of missing related Port Entities. | `false`                               |
 | `verbosity`                             | A number for the log level verbosity. Set to `-1` to print less info logs.                                                                                              | `0`                                   |
 | `createDefaultResources`                | If `true`, upon installing the exporter will try to initiate default blueprints & app configuration                                                                     | `true`                                |
+| `overwriteConfigurationOnRestart`       | If `true`, the exporter will overwrite the configuration in Port with the resources provided in `configMap.config` during restart                                      | `false`                               |
 | `eventListener.type`                    | Event listener type. currently supporting `KAFKA` & `POLLING`                                                                                                           | `KAFKA`                               |
 | `eventListener.brokers`                 | Kafka event listener brokers list                                                                                                                                       | Port EU kafka  brokers                |
 | `eventListener.securityProtocol`        | Kafka event listener security protocol                                                                                                                                  | `SASL_SSL`                            |
@@ -93,7 +95,8 @@ The following table lists the configuration parameters of the `port-k8s-exporter
 | `extraVolumes`                          | extraVolumes applied to the pod                                                                                                                                         | `[]`                                  |
 | `extraVolumeMounts`                     | extraVolumeMounts applied to the pod                                                                                                                                    | `[]`                                  |
 
-To override values in `helm install`, use either the `--set` flag or the `--set-file` flag to set individual values from a file.
+To override values in `helm install`, use either the `--set` flag or the `--set-file` flag to set individual values from
+a file.
 
 Alternatively, you can use a YAML file that specifies the values while installing the chart. For example:
 
