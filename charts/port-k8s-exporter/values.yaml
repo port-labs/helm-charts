@@ -14,7 +14,7 @@ image:
   pullPolicy: IfNotPresent
   tag: ""
 
-imagePullSecrets: [ ]
+imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
@@ -27,7 +27,7 @@ eventListener:
   securityProtocol: "SASL_SSL"
   authenticationMechanism: "SCRAM-SHA-512"
 secret:
-  annotations: { }
+  annotations: {}
   name: ""
   secrets:
     portClientId: ""
@@ -36,7 +36,7 @@ secret:
   useExistingSecret: false
 
 configMap:
-  annotations: { }
+  annotations: {}
   config: ""
   name: ""
   # configMap.create -- Disable to specify your own configmap to be used.
@@ -44,11 +44,11 @@ configMap:
 
 serviceAccount:
   create: true
-  annotations: { }
+  annotations: {}
   name: ""
 
 clusterRole:
-  annotations: { }
+  annotations: {}
   name: ""
   apiGroups:
     - "'*'"
@@ -56,14 +56,14 @@ clusterRole:
     - "'*'"
 
 clusterRoleBinding:
-  annotations: { }
+  annotations: {}
   name: ""
 
-podAnnotations: { }
+podAnnotations: {}
 
-podSecurityContext: { }
+podSecurityContext: {}
 
-securityContext: { }
+securityContext: {}
 
 resources:
   requests:
@@ -73,17 +73,17 @@ resources:
     memory: "1024Mi"
     cpu: "500m"
 
-nodeSelector: { }
+nodeSelector: {}
 
-tolerations: [ ]
+tolerations: []
 
-affinity: { }
+affinity: {}
 
-extraEnv: [ ]
+extraEnv: []
   # - name: "KUBECONFIG"
-#   value: /tmp/.kube/config
+  #   value: /tmp/.kube/config
 
-extraObjects: [ ]
+extraObjects: []
 # - apiVersion: v1
 #   kind: Secret
 #   metadata:
@@ -91,11 +91,11 @@ extraObjects: [ ]
 #   type: Opaque
 #   stringData:
 
-extraVolumes: [ ]
+extraVolumes: []
   # - name: kubeconfig
   #   secret:
-#     secretName: kubeconfig
+  #     secretName: kubeconfig
 
-extraVolumeMounts: [ ]
+extraVolumeMounts: []
   # - name: kubeconfig
-#   mountPath: "/tmp/.kube"
+  #   mountPath: "/tmp/.kube"
