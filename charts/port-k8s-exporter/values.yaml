@@ -9,6 +9,9 @@ verbosity: 0
 createDefaultResources: true
 overwriteConfigurationOnRestart: false
 
+extraLabels: {}
+# port: true
+
 image:
   repository: ghcr.io/port-labs/port-k8s-exporter
   pullPolicy: IfNotPresent
