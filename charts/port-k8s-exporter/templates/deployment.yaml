@@ -17,6 +17,7 @@ spec:
       {{- end }}
       labels:
         {{- include "port-k8s-exporter.selectorLabels" . | nindent 8 }}
+        {{- include "port-k8s-exporter.labels" . | nindent 8 }}
         config-hash: {{ .Values.configMap.config | toYaml | sha256sum | trunc 32 }}
     spec:
       {{- with .Values.imagePullSecrets }}
