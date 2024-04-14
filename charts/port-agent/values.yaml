@@ -27,16 +27,18 @@ env:
     PORT_CLIENT_ID: ""
     PORT_CLIENT_SECRET: ""
 
+extraLabels: {}
+
 podAnnotations: {}
 
 podSecurityContext: {}
-# Example 
+# Example
   # runAsGroup: 1001
   # runAsUser: 1001
   # fsGroup: 1001
   # fsGroupChangePolicy: "OnRootMismatch"
 containerSecurityContext: {}
-# Example 
+# Example
   # runAsGroup: 1001
   # runAsUser: 1001
   # allowPrivilegeEscalation: false
