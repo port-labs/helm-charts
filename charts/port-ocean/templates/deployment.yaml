@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "port-ocean.deploymentName" . }}
+  labels:
+    {{- include "port-ocean.labels" . | nindent 8 }}
 spec:
   strategy:
     type: {{ .Values.rolloutStrategy | default "Recreate" }}
@@ -9,10 +11,12 @@ spec:
   selector:
     matchLabels:
       app: {{ include "port-ocean.deploymentName" . }}
+      {{- include "port-ocean.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
         app: {{ include "port-ocean.deploymentName" .}}
+        {{- include "port-ocean.labels" . | nindent 8 }}
     spec:
       securityContext: 
         {{- if .Values.podSecurityContext }}
