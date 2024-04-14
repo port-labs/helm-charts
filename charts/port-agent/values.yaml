@@ -3,13 +3,13 @@ image:
   pullPolicy: IfNotPresent
   tag: ""
 
-imagePullSecrets: [ ]
+imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
 controlThePayloadConfig: ""
 secret:
-  annotations: { }
+  annotations: {}
   name: ""
   useExistingSecret: false
 
@@ -27,21 +27,21 @@ env:
     PORT_CLIENT_ID: ""
     PORT_CLIENT_SECRET: ""
 
-extraLabels: { }
+extraLabels: {}
 
-podAnnotations: { }
+podAnnotations: {}
 
-podSecurityContext: { }
-  # Example
+podSecurityContext: {}
+# Example
   # runAsGroup: 1001
   # runAsUser: 1001
   # fsGroup: 1001
-# fsGroupChangePolicy: "OnRootMismatch"
-containerSecurityContext: { }
-  # Example
+  # fsGroupChangePolicy: "OnRootMismatch"
+containerSecurityContext: {}
+# Example
   # runAsGroup: 1001
   # runAsUser: 1001
-# allowPrivilegeEscalation: false
+  # allowPrivilegeEscalation: false
 
 rolloutStrategy: "Recreate"
 
@@ -53,11 +53,11 @@ resources:
     memory: "256Mi"
     cpu: "200m"
 
-nodeSelector: { }
+nodeSelector: {}
 
-tolerations: [ ]
+tolerations: []
 
-affinity: { }
+affinity: {}
 
 selfSignedCertificate:
   enabled: false
