@@ -3,6 +3,23 @@ entries:
   port-agent:
   - apiVersion: v2
     appVersion: v0.6.10
+    created: "2024-04-15T09:27:41.747722913Z"
+    description: A Helm chart for Port Agent
+    digest: 9cb09486d78a4981ad0f0fffa9959a0ee3e8b22284fa967dce1ee5542b88a651
+    home: https://getport.io/
+    icon: https://port-graphical-assets.s3.eu-west-1.amazonaws.com/Port+Logo.svg
+    maintainers:
+    - email: support@getport.io
+      name: Port
+    name: port-agent
+    sources:
+    - https://github.com/port-labs/port-agent
+    type: application
+    urls:
+    - https://github.com/port-labs/helm-charts/releases/download/port-agent-0.7.10/port-agent-0.7.10.tgz
+    version: 0.7.10
+  - apiVersion: v2
+    appVersion: v0.6.10
     created: "2024-04-02T15:09:56.010398311Z"
     description: A Helm chart for Port Agent
     digest: d47356b9830e836400ad8e7082a2d69f3330e117225769e4f4036cce3737e37a
@@ -1144,6 +1161,23 @@ entries:
   port-ocean:
   - apiVersion: v2
     appVersion: 0.1.0
+    created: "2024-04-15T09:27:41.905091548Z"
+    description: A Helm chart for Port Ocean integrations
+    digest: 9b8e3defaacbe103c424333676b814fe0f173d4abed80e976f46552a3a926584
+    home: https://getport.io/
+    icon: https://port-graphical-assets.s3.eu-west-1.amazonaws.com/Port+Logo.svg
+    maintainers:
+    - email: support@getport.io
+      name: Port
+    name: port-ocean
+    sources:
+    - https://github.com/port-labs/port-ocean
+    type: application
+    urls:
+    - https://github.com/port-labs/helm-charts/releases/download/port-ocean-0.1.19/port-ocean-0.1.19.tgz
+    version: 0.1.19
+  - apiVersion: v2
+    appVersion: 0.1.0
     created: "2024-04-04T17:31:05.261150604Z"
     description: A Helm chart for Port Ocean integrations
     digest: 4ee32771f465cf2cc64d13b823e85076b92e7be396524757e3fbebe9312c762c
@@ -1465,4 +1499,4 @@ entries:
     urls:
     - https://github.com/port-labs/helm-charts/releases/download/port-ocean-0.1.0/port-ocean-0.1.0.tgz
     version: 0.1.0
-generated: "2024-04-11T12:32:26.534541486Z"
+generated: "2024-04-15T09:27:41.905480648Z"
