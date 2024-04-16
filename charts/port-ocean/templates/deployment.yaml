@@ -20,9 +20,9 @@ spec:
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
+        {{- toYaml . | nindent 10 }}
       {{- end }}
-      securityContext: 
+      securityContext:
         {{- if .Values.podSecurityContext }}
           {{- toYaml .Values.podSecurityContext | nindent 10 }}
         {{- end }}
