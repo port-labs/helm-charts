@@ -18,7 +18,11 @@ spec:
         app: {{ include "port-ocean.deploymentName" .}}
         {{- include "port-ocean.labels" . | nindent 8 }}
     spec:
-      securityContext: 
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 10 }}
+      {{- end }}
+      securityContext:
         {{- if .Values.podSecurityContext }}
           {{- toYaml .Values.podSecurityContext | nindent 10 }}
         {{- end }}
