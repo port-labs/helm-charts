@@ -48,6 +48,8 @@ imageRegistry: "ghcr.io/port-labs"
 
 imagePullPolicy: Always
 
+imagePullSecrets: [ ]
+
 initializePortResources: true
 
 scheduledResyncInterval: null
