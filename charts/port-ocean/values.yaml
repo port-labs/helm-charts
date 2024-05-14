@@ -92,3 +92,6 @@ integration:
 selfSignedCertificate:
   enabled: false
   certificate: ""
+  secret: ""
+  useExistingSecret: false
+  key: crt
