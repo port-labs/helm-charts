@@ -64,7 +64,7 @@ spec:
             readOnly: true
         {{- end }}
       volumes:
-        {{- if and .Values.selfSignedCertificate.enabled .Values.selfSignedCertificate.useExistingSecret }}
+        {{- if and .Values.selfSignedCertificate.enabled .Values.selfSignedCertificate.secret.useExistingSecret }}
         - name: certificates
           projected:
             sources:

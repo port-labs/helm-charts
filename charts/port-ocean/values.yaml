@@ -15,15 +15,15 @@ extraEnv:
 
 podSecurityContext: {}
 # Example
-  # runAsGroup: 1001
-  # runAsUser: 1001
-  # fsGroup: 1001
-  # fsGroupChangePolicy: "OnRootMismatch"
+# runAsGroup: 1001
+# runAsUser: 1001
+# fsGroup: 1001
+# fsGroupChangePolicy: "OnRootMismatch"
 containerSecurityContext: {}
 # Example
-  # runAsGroup: 1001
-  # runAsUser: 1001
-  # allowPrivilegeEscalation: false
+# runAsGroup: 1001
+# runAsUser: 1001
+# allowPrivilegeEscalation: false
 
 rolloutStrategy: "Recreate"
 
@@ -34,7 +34,6 @@ resources:
   limits:
     memory: "1024Mi"
     cpu: "500m"
-
 
 nodeSelector: {}
 
@@ -92,6 +91,7 @@ integration:
 selfSignedCertificate:
   enabled: false
   certificate: ""
-  secret: ""
-  useExistingSecret: false
-  key: crt
+  secret:
+    name: ""
+    key: crt
+    useExistingSecret: false
