@@ -73,7 +73,16 @@ spec:
           configMap:
             name: {{ include "port-agent.fullname" . }}
         {{- end }}
-        {{- if .Values.selfSignedCertificate.enabled }}
+        {{- if and .Values.selfSignedCertificate.enabled .Values.selfSignedCertificate.secret.useExistingSecret }}
+        - name: certificates
+          projected:
+            sources:
+              - secret:
+                  name: {{ .Values.selfSignedCertificate.secret.name }}
+                  items:
+                    - key: {{ .Values.selfSignedCertificate.secret.key }}
+                      path: cert.crt
+        {{- else if .Values.selfSignedCertificate.enabled }}
         - name: certificates
           projected:
             sources:
