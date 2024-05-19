@@ -62,3 +62,7 @@ affinity: {}
 selfSignedCertificate:
   enabled: false
   certificate: ""
+  secret:
+    name: ""
+    key: crt
+    useExistingSecret: false
