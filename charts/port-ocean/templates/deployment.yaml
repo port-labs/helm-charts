@@ -63,6 +63,28 @@ spec:
             subPath: cert.crt
             readOnly: true
         {{- end }}
+        {{- if .Values.livenessProbe.enabled}}
+        livenessProbe:
+          httpGet:
+            path: /docs
+            port: {{.Values.service.port}}
+          initialDelaySeconds: {{ default 30 (.Values.livenessProbe).initialDelaySeconds }}
+          periodSeconds: {{ default 10 (.Values.livenessProbe).periodSeconds }}
+          timeoutSeconds: {{ default 5 (.Values.livenessProbe).timeoutSeconds }}
+          successThreshold: 1
+          failureThreshold: {{ default 3 (.Values.livenessProbe).failureThreshold }}
+        {{- end }}
+        {{- if .Values.readinessProbe.enabled}}
+        readinessProbe:
+          httpGet:
+            path: /docs
+            port: {{.Values.service.port}}
+          initialDelaySeconds: {{ default 30 (.Values.readinessProbe).initialDelaySeconds }}
+          periodSeconds: {{ default 10 (.Values.readinessProbe).periodSeconds }}
+          timeoutSeconds: {{ default 5 (.Values.readinessProbe).timeoutSeconds }}
+          successThreshold: {{ default 2 (.Values.readinessProbe).successThreshold }}
+          failureThreshold: {{ default 3 (.Values.readinessProbe).failureThreshold }}
+        {{- end }}
       volumes:
         {{- if and .Values.selfSignedCertificate.enabled .Values.selfSignedCertificate.secret.useExistingSecret }}
         - name: certificates
