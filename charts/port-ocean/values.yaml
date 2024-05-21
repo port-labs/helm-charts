@@ -6,20 +6,20 @@ port:
   clientSecret: ""
   baseUrl: https://api.getport.io
 
-podAnnotations: {}
+podAnnotations: { }
 
 extraEnv:
 # Example
 #   - name: HTTPS_PROXY
 #     value: http://myproxy.com
 
-podSecurityContext: {}
+podSecurityContext: { }
 # Example
 # runAsGroup: 1001
 # runAsUser: 1001
 # fsGroup: 1001
 # fsGroupChangePolicy: "OnRootMismatch"
-containerSecurityContext: {}
+containerSecurityContext: { }
 # Example
 # runAsGroup: 1001
 # runAsUser: 1001
@@ -35,19 +35,19 @@ resources:
     memory: "1024Mi"
     cpu: "500m"
 
-nodeSelector: {}
+nodeSelector: { }
 
-tolerations: []
+tolerations: [ ]
 
-affinity: {}
+affinity: { }
 
-extraLabels: {}
+extraLabels: { }
 
 imageRegistry: "ghcr.io/port-labs"
 
 imagePullPolicy: Always
 
-imagePullSecrets: []
+imagePullSecrets: [ ]
 
 initializePortResources: true
 
@@ -63,16 +63,16 @@ service:
   enabled: true
   type: ClusterIP
   port: 8000
-  annotations: {}
+  annotations: { }
 
 ingress:
   enabled: false
   className: ""
-  annotations: {}
+  annotations: { }
   host: null
   path: /
   pathType: Prefix
-  tls: []
+  tls: [ ]
   # Example
   #   - secretName: my-secret
   #     hosts:
@@ -82,8 +82,8 @@ integration:
   identifier: ""
   version: ""
   type: ""
-  config: {}
-  secrets: {}
+  config: { }
+  secrets: { }
   eventListener:
     type: "KAFKA"
     brokers: "b-1-public.publicclusterprod.t9rw6w.c1.kafka.eu-west-1.amazonaws.com:9196,b-2-public.publicclusterprod.t9rw6w.c1.kafka.eu-west-1.amazonaws.com:9196,b-3-public.publicclusterprod.t9rw6w.c1.kafka.eu-west-1.amazonaws.com:9196"
@@ -95,3 +95,19 @@ selfSignedCertificate:
     name: ""
     key: crt
     useExistingSecret: false
+
+
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 2
