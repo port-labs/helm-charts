@@ -80,7 +80,7 @@ spec:
             path: /docs
             port: {{.Values.service.port}}
           initialDelaySeconds: {{ default 30 .Values.readinessProbe.initialDelaySeconds }}
-          periodSeconds: {{ default 10.Values.readinessProbe.periodSeconds }}
+          periodSeconds: {{ default 10 .Values.readinessProbe.periodSeconds }}
           timeoutSeconds: {{ default 5 .Values.readinessProbe.timeoutSeconds }}
           successThreshold: {{ default 2 .Values.readinessProbe.successThreshold }}
           failureThreshold: {{ default 3 .Values.readinessProbe.failureThreshold }}
