@@ -55,6 +55,8 @@ scheduledResyncInterval: null
 
 clientTimeout: null
 
+sendRawDataExamples: true
+
 secret:
   name: ""
   useExistingSecret: false

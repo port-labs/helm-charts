@@ -11,6 +11,7 @@ data:
   {{- if .Values.clientTimeout }}
   OCEAN__CLIENT_TIMEOUT: "{{ .Values.clientTimeout }}"
   {{- end }}
+  OCEAN__SEND_RAW_DATA_EXAMPLES: "{{ .Values.sendRawDataExamples | default true }}"
   OCEAN__EVENT_LISTENER: {{ .Values.integration.eventListener | toJson | quote }}
   {{- if .Values.integration.identifier }}
   OCEAN__INTEGRATION__IDENTIFIER: "{{ .Values.integration.identifier }}"
