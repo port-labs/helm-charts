@@ -1,5 +1,5 @@
 {{- $secretsArray := include "port-ocean.secretName" .}}
-{{- if not (kindIs "array" $secretsArray) }}
+{{- if kindIs "array" $secretsArray }}
 {{- $secretsArray := list $secretsArray }}
 {{- end }}
 apiVersion: apps/v1
