@@ -1,3 +1,7 @@
+{{- $secretsArray := include "port-ocean.secretName" .}}
+{{- if not (kindIs "array" $secretsArray) }}
+{{- $secretsArray := list $secretsArray }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -58,8 +62,10 @@ spec:
         envFrom:
           - configMapRef:
               name: {{ include "port-ocean.configMapName" . }}
+          {{- range $secretName := $secretsArray }}
           - secretRef:
-              name: {{ include "port-ocean.secretName" . }}
+              name: {{ $secretName }}
+          {{- end }}
         volumeMounts:
         {{- if .Values.selfSignedCertificate.enabled }}
           - name: certificates

@@ -4,6 +4,7 @@ fullnameOverride: ""
 port:
   clientId: ""
   clientSecret: ""
+
   baseUrl: https://api.getport.io
 
 podAnnotations: { }
