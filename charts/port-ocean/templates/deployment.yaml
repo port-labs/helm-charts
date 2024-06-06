@@ -1,7 +1,7 @@
-{{- $secretsArray := include "port-ocean.secretName" .}}
-{{/* If the secretName is already an array we dont wrap it in an array */}}
+{{- $secretsArray := (include "port-ocean.secretName" .) }}
+{{/* If the secretName is already an array we don't wrap it in an array */}}
 {{- if not (kindIs "array" $secretsArray) }}
-{{- $secretsArray := list $secretsArray }}
+  {{- $secretsArray = list $secretsArray }}
 {{- end }}
 apiVersion: apps/v1
 kind: Deployment
