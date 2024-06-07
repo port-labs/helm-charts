@@ -60,6 +60,10 @@ sendRawDataExamples: true
 
 secret:
   name: ""
+  #  name:
+  #    - "x"
+  #    - "y"
+  #    - "c"
   useExistingSecret: false
 
 service:

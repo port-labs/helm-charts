@@ -1,7 +1,7 @@
-{{- $secretsArray := (include "port-ocean.secretName" .) }}
+{{- $secretsArray := list (include "port-ocean.secretName" .) }}
 {{/* If the secretName is already an array we don't wrap it in an array */}}
-{{- if not (kindIs "array" $secretsArray) }}
-  {{- $secretsArray = list $secretsArray }}
+{{- if kindIs "slice" .Values.secret.name }}
+  {{- $secretsArray = .Values.secret.name }}
 {{- end }}
 apiVersion: apps/v1
 kind: Deployment
@@ -63,9 +63,9 @@ spec:
         envFrom:
           - configMapRef:
               name: {{ include "port-ocean.configMapName" . }}
-          {{- range $secretName := $secretsArray }}
+          {{- range $secretsArray }}
           - secretRef:
-              name: {{ $secretName }}
+              name: {{ . }}
           {{- end }}
         volumeMounts:
         {{- if .Values.selfSignedCertificate.enabled }}
