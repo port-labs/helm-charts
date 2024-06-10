@@ -33,7 +33,6 @@ workload:
 
   deployment:
     rolloutStrategy: "Recreate"
-    restartPolicy: "Always"
 
   cron:
     resyncTimeout: 60
