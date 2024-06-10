@@ -13,7 +13,7 @@ metadata:
 spec:
   failedJobsHistoryLimit: 5
   successfulJobsHistoryLimit: 1
-  schedule: {{ .Values.scheduledResyncInterval | quote }}
+  schedule: {{ required "scheduledResyncInterval is required when using CronJob workload kind" .Values.scheduledResyncInterval | quote }}
   concurrencyPolicy: Replace
   jobTemplate:
     metadata:
