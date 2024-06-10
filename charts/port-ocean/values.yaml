@@ -63,8 +63,8 @@ initializePortResources: true
 
 scheduledResyncInterval: null
 # Example
-#  scheduledResyncInterval 60 # minutes - Used for Deployment workload.kind
-#  scheduledResyncInterval"*/60 * * * *" # cron expression - Used for CronJob workload.kind
+#  scheduledResyncInterval: 60 # minutes - Used for Deployment workload.kind
+#  scheduledResyncInterval: "*/60 * * * *" # cron expression - Used for CronJob workload.kind
 
 
 clientTimeout: null
