@@ -34,8 +34,8 @@ workload:
   deployment:
     rolloutStrategy: "Recreate"
 
-  cron:
-    resyncTimeout: 60
+#  cron:
+#    resyncTimeout: 60
 
 resources:
   requests:
@@ -62,6 +62,10 @@ imagePullSecrets: [ ]
 initializePortResources: true
 
 scheduledResyncInterval: null
+# Example
+#  scheduledResyncInterval 60 # minutes - Used for Deployment workload.kind
+#  scheduledResyncInterval"*/60 * * * *" # cron expression - Used for CronJob workload.kind
+
 
 clientTimeout: null
 
