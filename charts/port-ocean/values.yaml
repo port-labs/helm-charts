@@ -26,7 +26,17 @@ containerSecurityContext: { }
 # runAsUser: 1001
 # allowPrivilegeEscalation: false
 
-rolloutStrategy: "Recreate"
+extraInitContainers: [ ]
+
+workload:
+  kind: "Deployment" # Deployment, CronJob
+
+  deployment:
+    rolloutStrategy: "Recreate"
+    restartPolicy: "Always"
+
+  cron:
+    resyncTimeout: 60
 
 resources:
   requests:
@@ -106,15 +116,15 @@ selfSignedCertificate:
 
 livenessProbe:
   enabled: true
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 3
+#  initialDelaySeconds: 30
+#  periodSeconds: 10
+#  timeoutSeconds: 5
+#  failureThreshold: 3
 
 readinessProbe:
   enabled: true
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 3
-  successThreshold: 2
+#  initialDelaySeconds: 30
+#  periodSeconds: 10
+#  timeoutSeconds: 5
+#  failureThreshold: 3
+#  successThreshold: 2

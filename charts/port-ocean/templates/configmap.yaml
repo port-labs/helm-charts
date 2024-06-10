@@ -1,3 +1,7 @@
+{{- $eventListener := .Values.integration.eventListener }}
+{{- if eq .Values.workload.kind "CronJob" }}
+  {{- $eventListener = dict "type" "ONCE" }}
+{{- end}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -5,19 +9,16 @@ metadata:
 data:
   OCEAN__PORT__BASE_URL: {{ .Values.port.baseUrl | quote }}
   OCEAN__INITIALIZE_PORT_RESOURCES: "{{ .Values.initializePortResources | default false }}"
-  {{- if .Values.scheduledResyncInterval }}
+  {{- if  and .Values.scheduledResyncInterval (not (eq .Values.workload.kind "CronJob")) }}
   OCEAN__SCHEDULED_RESYNC_INTERVAL: "{{ .Values.scheduledResyncInterval }}"
   {{- end }}
   {{- if .Values.clientTimeout }}
   OCEAN__CLIENT_TIMEOUT: "{{ .Values.clientTimeout }}"
   {{- end }}
   OCEAN__SEND_RAW_DATA_EXAMPLES: "{{ .Values.sendRawDataExamples | default true }}"
-  OCEAN__EVENT_LISTENER: {{ .Values.integration.eventListener | toJson | quote }}
+  OCEAN__EVENT_LISTENER: {{ $eventListener | toJson | quote }}
   {{- if .Values.integration.identifier }}
   OCEAN__INTEGRATION__IDENTIFIER: "{{ .Values.integration.identifier }}"
-  {{- end }}
-  {{- if .Values.integration.type }}
-  OCEAN__INTEGRATION__TYPE: "{{ .Values.integration.type }}"
   {{- end }}
   {{- if .Values.integration.config }}
   {{- range $key, $value := .Values.integration.config }}

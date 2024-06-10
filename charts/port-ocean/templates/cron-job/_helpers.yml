@@ -1,0 +1,1 @@
+{{ define "port-ocean.cron.job-query-rbac-prefix" }}{{.Release.Name}}-job-query{{ end }}
