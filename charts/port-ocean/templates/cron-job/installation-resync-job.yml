@@ -1,0 +1,30 @@
+{{- if and (eq .Values.workload.kind "CronJob") }}
+{{- $jobName := .Release.Revision }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    helm.sh/hook: post-install, post-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded, hook-failed
+  name: {{ include "port-ocean.cronJobName" . }}-init-resync-{{ .Release.Name }}-{{ $jobName }}
+spec:
+  ttlSecondsAfterFinished: 600
+  activeDeadlineSeconds: 30
+  backoffLimit: 1
+  template:
+    spec:
+      activeDeadlineSeconds: 30
+      containers:
+        - name: kubectl
+          image: bitnami/kubectl:latest
+          command: [ "sh", "-c" ]
+          env:
+            - name: TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "port-ocean.cron.job-query-rbac-prefix" . }}-sa-token
+                  key: token
+          args:
+            - kubectl create job --from=cronjob/{{ include "port-ocean.cronJobName" . }} init-resync-{{ .Release.Name }}-{{ $jobName }} --token=$TOKEN
+      restartPolicy: Never
+{{- end }}

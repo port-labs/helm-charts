@@ -35,7 +35,7 @@ Common labels
 */}}
 {{- define "port-ocean.labels" -}}
 helm.sh/chart: {{ include "port-ocean.chart" . }}
-{{ include "port-ocean.selectorLabels" . }}
+{{- include "port-ocean.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -48,7 +48,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "port-ocean.selectorLabels" -}}
+{{- define "port-ocean.selectorLabels" }}
 app.kubernetes.io/name: {{ include "port-ocean.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
@@ -61,7 +61,7 @@ Get prefix of ocean resource metadata.name
 {{- end }}
 
 {{/*
-Get config map name per integration
+Get config map name 
 */}}
 {{- define "port-ocean.configMapName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
@@ -69,7 +69,7 @@ Get config map name per integration
 {{- end }}
 
 {{/*
-Get secret name per integration
+Get secret name 
 */}}
 {{- define "port-ocean.secretName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
@@ -77,7 +77,7 @@ Get secret name per integration
 {{- end }}
 
 {{/*
-Get ingress name per integration
+Get ingress name 
 */}}
 {{- define "port-ocean.ingressName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
@@ -85,7 +85,7 @@ Get ingress name per integration
 {{- end }}
 
 {{/*
-Get service name per integration
+Get service name 
 */}}
 {{- define "port-ocean.serviceName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
@@ -93,7 +93,7 @@ Get service name per integration
 {{- end }}
 
 {{/*
-Get container name per integration
+Get container name
 */}}
 {{- define "port-ocean.containerName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
@@ -101,11 +101,19 @@ Get container name per integration
 {{- end }}
 
 {{/*
-Get deployment name per integration
+Get deployment name
 */}}
 {{- define "port-ocean.deploymentName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
 {{- printf "%s-deployment" $prefix }}
+{{- end }}
+
+{{/*
+Get cron job name
+*/}}
+{{- define "port-ocean.cronJobName" -}}
+{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
+{{- printf "%s-cron-job" $prefix }}
 {{- end }}
 
 {{/*
@@ -114,4 +122,16 @@ Get self signed cert secret name
 {{- define "port-ocean.selfSignedCertName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
 {{- printf "%s-cert" $prefix }}
+{{- end }}
+
+{{- define "port-ocean.additionalSecrets" }}
+{{- $secretsArray := list (include "port-ocean.secretName" .) }}
+{{- /* If the secretName is already an array we don't wrap it in an array */}}
+{{- if kindIs "slice" .Values.secret.name }}
+  {{- $secretsArray = .Values.secret.name }}
+{{- end }}
+{{- range $secretsArray }}
+- secretRef:
+    name: {{ . }}
+{{- end }}
 {{- end }}

@@ -1,0 +1,193 @@
+{{- if eq .Values.workload.kind "CronJob" }}
+{{- $maxRunTimeSeconds := "" }}
+{{- if (.Values.workload.cron).resyncTimeout }}
+{{- $minute := 60 }}
+{{- $maxRunTimeSeconds = (mul (.Values.workload.cron).resyncTimeout $minute )}}
+{{- end }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "port-ocean.cronJobName" . }}
+  labels:
+    {{- include "port-ocean.labels" . | nindent 4 }}
+spec:
+  failedJobsHistoryLimit: 5
+  successfulJobsHistoryLimit: 1
+  schedule: {{ required "scheduledResyncInterval is required when using CronJob workload kind" .Values.scheduledResyncInterval | quote }}
+  concurrencyPolicy: Replace
+  jobTemplate:
+    metadata:
+      generateName: {{ include "port-ocean.cronJobName" . }}-
+      namespace: {{ .Release.Namespace }}
+      labels:
+        app: {{ include "port-ocean.cronJobName" . }}
+        integrationUniqueCronKey: {{ .Release.Name }}
+        {{- include "port-ocean.selectorLabels" . | indent 8 }}
+    spec:
+      backoffLimit: 1
+      {{- if $maxRunTimeSeconds }}
+      activeDeadlineSeconds: {{ $maxRunTimeSeconds }}
+      {{- end }}
+      template:
+        metadata:
+          {{- with .Values.podAnnotations }}
+          annotations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          labels:
+            app: {{ include "port-ocean.cronJobName" . }}
+            {{- include "port-ocean.labels" . | nindent 12 }}
+        spec:
+          restartPolicy: Never
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext:
+            {{- if .Values.podSecurityContext }}
+            {{- toYaml .Values.podSecurityContext | nindent 12 }}
+            {{- end }}
+          initContainers:
+            {{- with .Values.extraInitContainers }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            - name: terminate-old-resync-jobs
+              image: bitnami/kubectl:latest
+              env:
+                - name: JOB_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.labels['job-name']
+                - name: TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "port-ocean.cron.job-query-rbac-prefix" . }}-sa-token
+                      key: token
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  #!/bin/bash
+                  echo "Starting init container"
+                  LABEL_SELECTOR="integrationUniqueCronKey={{ .Release.Name }}"
+                  NAMESPACE="{{ .Release.Namespace }}"
+                  CURRENT_JOB_NAME=$(JOB_NAME)
+                  DEADLINE=0  # 30 seconds deadline for the jobs to terminate
+                  echo "kubectl get job $CURRENT_JOB_NAME -o=json | jq -r '.metadata.creationTimestamp'"
+                  echo "kubectl get jobs -l ${LABEL_SELECTOR} -o=json | jq -r '.items[] | select(.metadata.creationTimestamp < '$CURRENT_JOB_CREATION_TIMESTAMP') | .metadata.name'"
+                  CURRENT_JOB_CREATION_TIMESTAMP=$(kubectl get job $CURRENT_JOB_NAME -o=json --token=$TOKEN | jq -r '.metadata.creationTimestamp')
+
+                  check_for_jobs() {
+                    kubectl get jobs -l ${LABEL_SELECTOR} -o=json --token=$TOKEN | jq -r '.items[] | select(.metadata.creationTimestamp < "'$CURRENT_JOB_CREATION_TIMESTAMP'") | .metadata.name'
+                  }
+
+                  set_deadline_for_jobs() {
+                  JOBS=$(check_for_jobs)
+                  echo "Found jobs: $JOBS"
+                  if [ -n "$JOBS" ]; then
+                      for JOB in $JOBS; do
+                      if [ "$JOB" != "$CURRENT_JOB_NAME" ]; then
+                          echo "Setting deadline for job: $JOB"
+                          kubectl patch job $JOB -n ${NAMESPACE} -p "{\"spec\":{\"activeDeadlineSeconds\":$DEADLINE}, \"metadata\":{\"labels\":{\"canceled\": \"$CURRENT_JOB_NAME\"}}}" --token=$TOKEN
+                          echo "Waiting for job $JOB to terminate"
+                          timeout 60s kubectl wait --for=delete pod --selector=job-name=$JOB -n ${NAMESPACE} --token=$TOKEN || (echo "Job $JOB did not terminate in time. Cannot start new job: $CURRENT_JOB_NAME" && exit 1)
+                      else
+                          echo "No running resync jobs found. Starting new job: $CURRENT_JOB_NAME"
+                      fi
+                      done
+                  fi
+                  }
+
+                  set_deadline_for_jobs
+                  echo "Exiting init container"
+          containers:
+          - name: {{ include "port-ocean.containerName" . }}
+            imagePullPolicy: {{ .Values.imagePullPolicy }}
+            image: '{{ .Values.imageRegistry }}/port-ocean-{{ .Values.integration.type }}:{{ .Values.integration.version | default "latest" }}'
+            {{- if .Values.service.enabled }}
+            securityContext:
+              {{- if .Values.containerSecurityContext }}
+              {{- toYaml .Values.containerSecurityContext | nindent 14 }}
+              {{- end }}
+            resources:
+              {{- if .Values.resources }}
+              {{- toYaml .Values.resources | nindent 14 }}
+              {{- end }}
+            ports:
+            - containerPort: {{.Values.service.port}}
+              protocol: TCP
+            {{- end }}
+            env:
+            {{- if .Values.selfSignedCertificate.enabled }}
+              - name: SSL_CERT_FILE
+                value: /etc/ssl/certs/ca-certificates.crt
+            {{- end }}
+            {{- with .Values.extraEnv }}
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
+            envFrom:
+              - configMapRef:
+                  name: {{ include "port-ocean.configMapName" . }}
+              {{- include "port-ocean.additionalSecrets" . | nindent 14 }}
+            volumeMounts:
+            {{- if .Values.selfSignedCertificate.enabled }}
+              - name: certificates
+                mountPath: /usr/local/share/ca-certificates/cert.crt
+                subPath: cert.crt
+                readOnly: true
+            {{- end }}
+            {{- if (.Values.livenessProbe).enabled}}
+            livenessProbe:
+              httpGet:
+                path: /docs
+                port: {{.Values.service.port}}
+              initialDelaySeconds: {{ default 10 .Values.livenessProbe.initialDelaySeconds }}
+              periodSeconds: {{ default 10 .Values.livenessProbe.periodSeconds }}
+              timeoutSeconds: {{ default 5 .Values.livenessProbe.timeoutSeconds }}
+              successThreshold: 1
+              failureThreshold: {{ default 3 .Values.livenessProbe.failureThreshold }}
+            {{- end }}
+            {{- if (.Values.readinessProbe).enabled}}
+            readinessProbe:
+              httpGet:
+                path: /docs
+                port: {{.Values.service.port}}
+              initialDelaySeconds: {{ default 10 .Values.readinessProbe.initialDelaySeconds }}
+              periodSeconds: {{ default 10 .Values.readinessProbe.periodSeconds }}
+              timeoutSeconds: {{ default 5 .Values.readinessProbe.timeoutSeconds }}
+              successThreshold: {{ default 1 .Values.readinessProbe.successThreshold }}
+              failureThreshold: {{ default 3 .Values.readinessProbe.failureThreshold }}
+            {{- end }}
+          volumes:
+            {{- if and .Values.selfSignedCertificate.enabled .Values.selfSignedCertificate.secret.useExistingSecret }}
+            - name: certificates
+              projected:
+                sources:
+                  - secret:
+                      name: {{ .Values.selfSignedCertificate.secret.name }}
+                      items:
+                        - key: {{ .Values.selfSignedCertificate.secret.key }}
+                          path: cert.crt
+            {{- else if .Values.selfSignedCertificate.enabled }}
+            - name: certificates
+              projected:
+                sources:
+                  - secret:
+                      name: {{ include "port-ocean.selfSignedCertName" . }}
+                      items:
+                        - key: crt
+                          path: cert.crt
+            {{- end }}
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+{{- end }}

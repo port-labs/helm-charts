@@ -26,7 +26,16 @@ containerSecurityContext: { }
 # runAsUser: 1001
 # allowPrivilegeEscalation: false
 
-rolloutStrategy: "Recreate"
+extraInitContainers: [ ]
+
+workload:
+  kind: "Deployment" # Deployment, CronJob
+
+  deployment:
+    rolloutStrategy: "Recreate"
+
+#  cron:
+#    resyncTimeout: 60
 
 resources:
   requests:
@@ -53,6 +62,10 @@ imagePullSecrets: [ ]
 initializePortResources: true
 
 scheduledResyncInterval: null
+# Example
+#  scheduledResyncInterval: 60 # minutes - Used for Deployment workload.kind
+#  scheduledResyncInterval: "*/60 * * * *" # cron expression - Used for CronJob workload.kind
+
 
 clientTimeout: null
 
@@ -106,15 +119,15 @@ selfSignedCertificate:
 
 livenessProbe:
   enabled: true
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 3
+#  initialDelaySeconds: 30
+#  periodSeconds: 10
+#  timeoutSeconds: 5
+#  failureThreshold: 3
 
 readinessProbe:
   enabled: true
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 3
-  successThreshold: 2
+#  initialDelaySeconds: 30
+#  periodSeconds: 10
+#  timeoutSeconds: 5
+#  failureThreshold: 3
+#  successThreshold: 2
