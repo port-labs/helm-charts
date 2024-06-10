@@ -1,8 +1,8 @@
 {{- if eq .Values.workload.kind "CronJob" }}
 {{- $maxRunTimeSeconds := "" }}
-{{- if .Values.workload.cron.resyncTimeout }}
+{{- if (.Values.workload.cron).resyncTimeout }}
 {{- $minute := 60 }}
-{{- $maxRunTimeSeconds = (mul .Values.workload.cron.resyncTimeout $minute )}}
+{{- $maxRunTimeSeconds = (mul (.Values.workload.cron).resyncTimeout $minute )}}
 {{- end }}
 apiVersion: batch/v1
 kind: CronJob
