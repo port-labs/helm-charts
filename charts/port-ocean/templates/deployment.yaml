@@ -56,6 +56,8 @@ spec:
         {{- if .Values.selfSignedCertificate.enabled }}
           - name: SSL_CERT_FILE
             value: /etc/ssl/certs/ca-certificates.crt
+          - name: REQUESTS_CA_BUNDLE
+            value: /etc/ssl/certs/ca-certificates.crt
         {{- end }}
         {{- with .Values.extraEnv }}
           {{- toYaml . | nindent 10 }}
