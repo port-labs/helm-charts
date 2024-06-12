@@ -76,12 +76,13 @@ clientTimeout: null
 sendRawDataExamples: true
 
 secret:
+  create: true
+  useExistingSecret: false
   name: ""
   #  name:
   #    - "x"
   #    - "y"
   #    - "c"
-  useExistingSecret: false
 
 service:
   enabled: true
