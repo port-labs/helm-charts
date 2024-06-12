@@ -28,6 +28,10 @@ containerSecurityContext: { }
 
 extraInitContainers: [ ]
 
+extraVolumes: [ ]
+
+extraVolumeMounts: [ ]
+
 workload:
   kind: "Deployment" # Deployment, CronJob
 

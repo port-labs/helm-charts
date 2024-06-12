@@ -48,8 +48,8 @@ spec:
             {{- toYaml .Values.podSecurityContext | nindent 12 }}
             {{- end }}
           initContainers:
-            {{- with .Values.extraInitContainers }}
-            {{- toYaml . | nindent 12 }}
+            {{- if .Values.extraInitContainers }}
+            {{- tpl (toYaml .Values.extraInitContainers) . | nindent 12 }}
             {{- end }}
             - name: terminate-old-resync-jobs
               image: bitnami/kubectl:latest
@@ -130,6 +130,9 @@ spec:
                   name: {{ include "port-ocean.configMapName" . }}
               {{- include "port-ocean.additionalSecrets" . | nindent 14 }}
             volumeMounts:
+            {{- if .Values.extraVolumeMounts }}
+              {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 14 }}
+            {{- end }}
             {{- if .Values.selfSignedCertificate.enabled }}
               - name: certificates
                 mountPath: /usr/local/share/ca-certificates/cert.crt
@@ -159,6 +162,9 @@ spec:
               failureThreshold: {{ default 3 .Values.readinessProbe.failureThreshold }}
             {{- end }}
           volumes:
+            {{- if .Values.extraVolumes }}
+            {{- tpl (toYaml .Values.extraVolumes) . | nindent 12 }}
+            {{- end }}
             {{- if and .Values.selfSignedCertificate.enabled .Values.selfSignedCertificate.secret.useExistingSecret }}
             - name: certificates
               projected:
