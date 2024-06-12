@@ -38,8 +38,11 @@ workload:
   deployment:
     rolloutStrategy: "Recreate"
 
-#  cron:
-#    resyncTimeout: 60
+  cron:
+    # number of minutes to wait before cancelling the resync
+    resyncTimeoutMinutes: null
+    resyncOnInstall: true
+    resyncOnUpgrade: true
 
 resources:
   requests:
