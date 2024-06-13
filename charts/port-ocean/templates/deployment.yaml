@@ -32,8 +32,8 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
         {{- end }}
       initContainers:
-        {{- with .Values.extraInitContainers }}
-        {{- toYaml . | nindent 8 }}
+        {{- if .Values.extraInitContainers }}
+        {{- tpl (toYaml .Values.extraInitContainers) . | nindent 8 }}
         {{- end }}
       containers:
       - name: {{ include "port-ocean.containerName" . }}
@@ -59,14 +59,19 @@ spec:
           - name: REQUESTS_CA_BUNDLE
             value: /etc/ssl/certs/ca-certificates.crt
         {{- end }}
-        {{- with .Values.extraEnv }}
-          {{- toYaml . | nindent 10 }}
+        {{- if .Values.extraEnv }}
+          {{- tpl (toYaml .Values.extraEnv) . | nindent 10 }}
         {{- end }}
         envFrom:
           - configMapRef:
               name: {{ include "port-ocean.configMapName" . }}
+          {{- if .Values.secret.useExistingSecret }}
           {{- include "port-ocean.additionalSecrets" . | nindent 10 }}
+          {{- end }}
         volumeMounts:
+        {{- if .Values.extraVolumeMounts }}
+        {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 8 }}
+        {{- end }}
         {{- if .Values.selfSignedCertificate.enabled }}
           - name: certificates
             mountPath: /usr/local/share/ca-certificates/cert.crt
@@ -96,6 +101,9 @@ spec:
           failureThreshold: {{ default 3 .Values.readinessProbe.failureThreshold }}
         {{- end }}
       volumes:
+        {{- if .Values.extraVolumes }}
+        {{- tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
+        {{- end }}
         {{- if and .Values.selfSignedCertificate.enabled .Values.selfSignedCertificate.secret.useExistingSecret }}
         - name: certificates
           projected:
