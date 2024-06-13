@@ -28,14 +28,21 @@ containerSecurityContext: { }
 
 extraInitContainers: [ ]
 
+extraVolumes: [ ]
+
+extraVolumeMounts: [ ]
+
 workload:
   kind: "Deployment" # Deployment, CronJob
 
   deployment:
     rolloutStrategy: "Recreate"
 
-#  cron:
-#    resyncTimeout: 60
+  cron:
+    # number of minutes to wait before cancelling the resync
+    resyncTimeoutMinutes: null
+    resyncOnInstall: true
+    resyncOnUpgrade: true
 
 resources:
   requests:
@@ -72,12 +79,13 @@ clientTimeout: null
 sendRawDataExamples: true
 
 secret:
+  create: true
+  useExistingSecret: false
   name: ""
   #  name:
   #    - "x"
   #    - "y"
   #    - "c"
-  useExistingSecret: false
 
 service:
   enabled: true
