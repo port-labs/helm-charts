@@ -65,8 +65,8 @@ spec:
         envFrom:
           - configMapRef:
               name: {{ include "port-ocean.configMapName" . }}
-          {{- if .Values.secret.useExistingSecret }}
-          {{- include "port-ocean.additionalSecrets" . | nindent 10 }}
+          {{- if "port-ocean.additionalSecrets" }}
+            {{- include "port-ocean.additionalSecrets" . | nindent 10 }}
           {{- end }}
         volumeMounts:
         {{- if .Values.extraVolumeMounts }}
