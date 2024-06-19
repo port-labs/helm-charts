@@ -9,6 +9,9 @@ port:
 
 podAnnotations: { }
 
+podServiceAccount:
+  name: null
+
 extraEnv:
 # Example
 #   - name: HTTPS_PROXY
