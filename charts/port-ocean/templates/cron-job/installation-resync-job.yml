@@ -1,7 +1,7 @@
 {{- $resyncOnInstall := (.Values.workload.cron).resyncOnInstall | default true }}
 {{- $resyncOnUpgrade := (.Values.workload.cron).resyncOnUpgrade | default true }}
 {{- if and (eq .Values.workload.kind "CronJob") (or $resyncOnInstall $resyncOnUpgrade) }}
-{{- $jobName := print (randAlphaNum 4) .Release.Revision }}
+{{- $jobName := print (randAlphaNum 4) "-" .Release.Revision }}
 apiVersion: batch/v1
 kind: Job
 metadata:
