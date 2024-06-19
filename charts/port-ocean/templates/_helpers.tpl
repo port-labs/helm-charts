@@ -125,7 +125,10 @@ Get self signed cert secret name
 {{- end }}
 
 {{- define "port-ocean.additionalSecrets" }}
-{{- $secretsArray := list (include "port-ocean.secretName" .) }}
+{{- $secretsArray := list }}
+{{- if .Values.secret.create }}
+  {{- $secretsArray = list (include "port-ocean.secretName" .) }}
+{{- end }}
 {{- /* If the secretName is already an array we don't wrap it in an array */}}
 {{- if kindIs "slice" .Values.secret.name }}
   {{- $secretsArray = .Values.secret.name }}
