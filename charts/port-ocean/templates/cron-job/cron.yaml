@@ -130,9 +130,7 @@ spec:
             envFrom:
               - configMapRef:
                   name: {{ include "port-ocean.configMapName" . }}
-              {{- if .Values.secret.useExistingSecret }}
               {{- include "port-ocean.additionalSecrets" . | nindent 14 }}
-              {{- end }}
             volumeMounts:
             {{- if .Values.extraVolumeMounts }}
               {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 14 }}

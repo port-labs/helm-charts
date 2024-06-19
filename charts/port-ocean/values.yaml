@@ -80,7 +80,6 @@ sendRawDataExamples: true
 
 secret:
   create: true
-  useExistingSecret: false
   name: ""
   #  name:
   #    - "x"
