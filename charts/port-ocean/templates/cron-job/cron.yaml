@@ -17,7 +17,7 @@ spec:
   concurrencyPolicy: Replace
   jobTemplate:
     metadata:
-      generateName: {{ include "port-ocean.cronJobName" . }}-
+      generateName: {{ include "port-ocean.metadataNamePrefixShort" . }}-
       namespace: {{ .Release.Namespace }}
       labels:
         app: {{ include "port-ocean.cronJobName" . }}
