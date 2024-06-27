@@ -60,6 +60,10 @@ Get prefix of ocean resource metadata.name
 {{- printf "ocean-%s-%s" .Values.integration.type .Values.integration.identifier }}
 {{- end }}
 
+{{- define "port-ocean.metadataNamePrefixShort" -}}
+{{- printf "%s-%s" .Values.integration.type .Values.integration.identifier }}
+{{- end }}
+
 {{/*
 Get config map name 
 */}}

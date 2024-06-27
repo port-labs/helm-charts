@@ -8,7 +8,7 @@ metadata:
   annotations:
     helm.sh/hook: post-install, post-upgrade
     helm.sh/hook-delete-policy: hook-succeeded, hook-failed
-  name: {{ include "port-ocean.cronJobName" . }}-init-resync-{{ .Release.Name }}-{{ $jobName }}
+  name: init-sync-{{ .Release.Name }}-{{ $jobName }}
 spec:
   ttlSecondsAfterFinished: 600
   activeDeadlineSeconds: 30
@@ -27,6 +27,6 @@ spec:
                   name: {{ include "port-ocean.cron.job-query-rbac-prefix" . }}-sa-token
                   key: token
           args:
-            - kubectl create job --from=cronjob/{{ include "port-ocean.cronJobName" . }} init-resync-{{ .Release.Name }}-{{ $jobName }} --token=$TOKEN
+            - kubectl create job --from=cronjob/{{ include "port-ocean.cronJobName" . }} init-sync-{{ $jobName }} --token=$TOKEN
       restartPolicy: Never
 {{- end }}
