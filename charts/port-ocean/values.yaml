@@ -71,6 +71,8 @@ imagePullSecrets: [ ]
 
 initializePortResources: true
 
+allowEnvironmentVariablesJqAccess: true
+
 scheduledResyncInterval: null
 # Example
 #  scheduledResyncInterval: 60 # minutes - Used for Deployment workload.kind

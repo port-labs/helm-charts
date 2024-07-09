@@ -9,6 +9,7 @@ metadata:
 data:
   OCEAN__PORT__BASE_URL: {{ .Values.port.baseUrl | quote }}
   OCEAN__INITIALIZE_PORT_RESOURCES: "{{ .Values.initializePortResources | default false }}"
+  OCEAN__ALLOW_ENVIRONMENT_VARIABLES_JQ_ACCESS: "{{ .Values.allowEnvironmentVariablesJqAccess | default true }}"
   {{- if  and .Values.scheduledResyncInterval (not (eq .Values.workload.kind "CronJob")) }}
   OCEAN__SCHEDULED_RESYNC_INTERVAL: "{{ .Values.scheduledResyncInterval }}"
   {{- end }}
