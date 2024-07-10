@@ -46,6 +46,7 @@ workload:
     resyncTimeoutMinutes: null
     resyncOnInstall: true
     resyncOnUpgrade: true
+    suspend: false
 
 resources:
   requests:
