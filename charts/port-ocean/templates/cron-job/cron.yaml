@@ -95,7 +95,7 @@ spec:
                     echo "No running resync jobs found. Starting new job: $CURRENT_JOB_NAME"
                   fi
                   echo "Exiting init container"
-            containers:
+          containers:
           - name: {{ include "port-ocean.containerName" . }}
             imagePullPolicy: {{ .Values.imagePullPolicy }}
             image: '{{ .Values.imageRegistry }}/port-ocean-{{ .Values.integration.type }}:{{ .Values.integration.version | default "latest" }}'
