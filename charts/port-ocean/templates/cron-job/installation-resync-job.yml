@@ -12,7 +12,7 @@ metadata:
 spec:
   ttlSecondsAfterFinished: 600
   activeDeadlineSeconds: 30
-  backoffLimit: 1
+  backoffLimit: 0
   template:
     spec:
       activeDeadlineSeconds: 30

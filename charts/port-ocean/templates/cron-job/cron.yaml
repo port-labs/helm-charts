@@ -25,7 +25,7 @@ spec:
         integrationUniqueCronKey: {{ .Release.Name }}
         {{- include "port-ocean.selectorLabels" . | indent 8 }}
     spec:
-      backoffLimit: 1
+      backoffLimit: 0
       {{- if $maxRunTimeSeconds }}
       activeDeadlineSeconds: {{ $maxRunTimeSeconds }}
       {{- end }}
@@ -77,32 +77,23 @@ spec:
                   NAMESPACE="{{ .Release.Namespace }}"
                   CURRENT_JOB_NAME=$(JOB_NAME)
                   DEADLINE=0  # 30 seconds deadline for the jobs to terminate
-                  echo "kubectl get job $CURRENT_JOB_NAME -o=json | jq -r '.metadata.creationTimestamp'"
-                  echo "kubectl get jobs -l ${LABEL_SELECTOR} -o=json | jq -r '.items[] | select(.metadata.creationTimestamp < '$CURRENT_JOB_CREATION_TIMESTAMP') | .metadata.name'"
-                  CURRENT_JOB_CREATION_TIMESTAMP=$(kubectl get job $CURRENT_JOB_NAME -o=json --token=$TOKEN | jq -r '.metadata.creationTimestamp')
 
-                  check_for_jobs() {
-                    kubectl get jobs -l ${LABEL_SELECTOR} -o=json --token=$TOKEN | jq -r '.items[] | select(.metadata.creationTimestamp < "'$CURRENT_JOB_CREATION_TIMESTAMP'") | .metadata.name'
-                  }
-
-                  set_deadline_for_jobs() {
-                  JOBS=$(check_for_jobs)
+                  echo "kubectl get jobs -l ${LABEL_SELECTOR} -o=json | jq -r \".items[] | select(.status.active > 0) | select(.metadata.name != \"$CURRENT_JOB_NAME\") | .metadata.name\""
+                  JOBS=$(kubectl get jobs -l ${LABEL_SELECTOR} -o=json --token=$TOKEN | jq -r ".items[] | select(.status.active > 0) | select(.metadata.name != \"$CURRENT_JOB_NAME\") | .metadata.name")
                   echo "Found jobs: $JOBS"
                   if [ -n "$JOBS" ]; then
-                      for JOB in $JOBS; do
-                      if [ "$JOB" != "$CURRENT_JOB_NAME" ]; then
-                          echo "Setting deadline for job: $JOB"
-                          kubectl patch job $JOB -n ${NAMESPACE} -p "{\"spec\":{\"activeDeadlineSeconds\":$DEADLINE}, \"metadata\":{\"labels\":{\"canceled\": \"$CURRENT_JOB_NAME\"}}}" --token=$TOKEN
-                          echo "Waiting for job $JOB to terminate"
-                          timeout 60s kubectl wait --for=delete pod --selector=job-name=$JOB -n ${NAMESPACE} --token=$TOKEN || (echo "Job $JOB did not terminate in time. Cannot start new job: $CURRENT_JOB_NAME" && exit 1)
-                      else
-                          echo "No running resync jobs found. Starting new job: $CURRENT_JOB_NAME"
-                      fi
-                      done
+                    for JOB in $JOBS; do
+                      echo "Setting deadline for job: $JOB"
+                      kubectl patch job $JOB -n ${NAMESPACE} -p "{\"spec\":{\"activeDeadlineSeconds\":$DEADLINE}, \"metadata\":{\"labels\":{\"canceled\": \"$CURRENT_JOB_NAME\"}}}" --token=$TOKEN
+                    done
+                    for JOB in $JOBS; do
+                      echo "Waiting for job $JOB to terminate"
+                      kubectl wait --for=delete pod --selector=job-name=$JOB --timeout=60s -n ${NAMESPACE} --token=$TOKEN || (echo "Job $JOB did not terminate in time. Cannot start new job: $CURRENT_JOB_NAME" && exit 1)
+                      echo "Done"
+                    done
+                  else
+                    echo "No running resync jobs found. Starting new job: $CURRENT_JOB_NAME"
                   fi
-                  }
-
-                  set_deadline_for_jobs
                   echo "Exiting init container"
           containers:
           - name: {{ include "port-ocean.containerName" . }}
