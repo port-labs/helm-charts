@@ -1,12 +1,8 @@
 {{- if eq .Values.configMap.create true -}}
 {{- $stateKey := lower (default (uuidv4 | replace "-" "") .Values.stateKey) -}}
 {{- $config_lookup := (lookup "v1" "ConfigMap" .Release.Namespace (include "port-k8s-exporter.configMapName" .)) -}}
-{{- if $config_lookup -}}
-  {{- if $config_lookup.data -}}
-    {{- if $config_lookup.data.state_key -}}
-      {{- $stateKey = $config_lookup.data.state_key -}}
-    {{ end }}
-  {{ end }}
+{{- if (($config_lookup).data).state_key -}}
+  {{- $stateKey = $config_lookup.data.state_key -}}
 {{ end }}
 ---
 apiVersion: v1
