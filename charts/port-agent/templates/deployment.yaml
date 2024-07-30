@@ -20,6 +20,9 @@ spec:
       labels:
         {{- include "port-agent.labels" . | nindent 8 }}
     spec:
+      {{- with .Values.podServiceAccount.name }}
+      serviceAccountName: {{ . }}
+      {{- end }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
