@@ -1,7 +1,7 @@
 image:
-  repository: port-agent
+  repository: ghcr.io/port-labs/port-agent
   pullPolicy: IfNotPresent
-  tag: "local"
+  tag: ""
 
 imagePullSecrets: []
 nameOverride: ""
