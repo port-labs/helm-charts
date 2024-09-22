@@ -19,12 +19,10 @@ If you had already added this repo earlier, run `helm repo update` to retrieve
 the latest versions of the packages. You can then run `helm search repo
 port-labs` to see the charts.
 
-Then, install the chart.
-For example, to use the `KafkaToWebhookStreamer` Streamer, use the following command:
+Then, install the chart using the following command:
 
     helm upgrade --install my-port-agent port-labs/port-agent \
         --create-namespace --namespace port-agent \
-        --set env.normal.STREAMER_NAME=KafkaToWebhookStreamer \
         --set env.normal.PORT_ORG_ID=YOUR_PORT_ORG_ID
         --set env.normal.PORT_API_BASE_URL=https://api.getport.io \
         --set env.normal.KAFKA_CONSUMER_GROUP_ID=YOUR_KAFKA_CONSUMER_GROUP_ID \
@@ -58,7 +56,7 @@ The following table lists the configuration parameters of the `port-agent` chart
 | `secret.name`                                        | Secret object name                                                                         | `""`                                                                                                                                                                                                                              |
 | `secret.useExistingSecret`                           | Enable this if you wish to create your own secret with credentials                         | `false`                                                                                                                                                                                                                           |
 | `podServiceAccount.name`                             | Service account to attach to the pod.                                                      | `null`                                                                                                                                                                                                                            |
-| `env.normal.STREAMER_NAME`                           | Streamer name, one of: [`KafkaToWebhookStreamer`] - **Required**                           | `"KafkaToWebhookStreamer"`                                                                                                                                                                                                        |
+| `env.normal.STREAMER_NAME`                           | Streamer name, available: [`KAFKA`]                                                        | `"KafkaToWebhookStreamer"`                                                                                                                                                                                                        |
 | `env.normal.PORT_ORG_ID`                             | Your Port org id - **Required**                                                            | `""`                                                                                                                                                                                                                              |
 | `env.normal.PORT_API_BASE_URL`                       | Port API base url                                                                          | `"https://api.getport.io"`                                                                                                                                                                                                        |
 | `env.normal.KAFKA_CONSUMER_GROUP_ID`                 | Kafka consumer group id - **Required if using any Kafka streamer**                         | `""`                                                                                                                                                                                                                              |
