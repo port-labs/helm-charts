@@ -35,9 +35,6 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if .Values.selfSignedCertificate.enabled }}
-          command: [ "sh", "-c", "update-ca-certificates && python3 main.py" ]
-          {{- end }}
           securityContext:
           {{- if .Values.containerSecurityContext }}
             {{- toYaml .Values.containerSecurityContext | nindent 14 }}
