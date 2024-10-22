@@ -80,6 +80,7 @@ spec:
             readOnly: true
         {{- end }}
         {{- if (.Values.livenessProbe).enabled}}
+        terminationGracePeriodSeconds: {{ default 30 .Values.terminationGracePeriodSeconds }}
         livenessProbe:
           httpGet:
             path: /docs
