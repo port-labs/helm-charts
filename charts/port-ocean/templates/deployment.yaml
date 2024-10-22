@@ -26,6 +26,7 @@ spec:
       {{- with .Values.podServiceAccount.name }}
       serviceAccountName: {{ . }}
       {{- end }}
+      terminationGracePeriodSeconds: {{ default 30 .Values.terminationGracePeriodSeconds }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
