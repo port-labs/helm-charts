@@ -78,8 +78,8 @@ spec:
           volumeMounts:
             - name: config-volume
               mountPath: "/config"
-            {{- with .Values.extraVolumeMounts }}
-              {{- toYaml . | nindent 12 }}
+            {{- if .Values.extraVolumeMounts }}
+              {{- tpl (toYaml .) $ | nindent 12 }}
             {{- end }}
       volumes:
         - name: config-volume
