@@ -72,14 +72,14 @@ spec:
             - name: EVENT_LISTENER_AUTHENTICATION_MECHANISM
               value: {{ .Values.eventListener.authenticationMechanism | quote }}
             {{- end }}
-          {{- with .Values.extraEnv }}
-            {{- toYaml . | nindent 12 }}
+          {{- if .Values.extraEnv }}
+            {{- tpl (toYaml .) $ | nindent 12 }}
           {{- end }}
           volumeMounts:
             - name: config-volume
               mountPath: "/config"
-            {{- if .Values.extraVolumeMounts }}
-              {{- tpl (toYaml .) $ | nindent 12 }}
+            {{- with .Values.extraVolumeMounts }}
+              {{- toYaml . | nindent 12 }}
             {{- end }}
       volumes:
         - name: config-volume
