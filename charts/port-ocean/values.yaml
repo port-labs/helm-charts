@@ -79,6 +79,7 @@ scheduledResyncInterval: null
 #  scheduledResyncInterval: 60 # minutes - Used for Deployment workload.kind
 #  scheduledResyncInterval: "*/60 * * * *" # cron expression - Used for CronJob workload.kind
 
+terminationGracePeriodSeconds: 30
 
 clientTimeout: null
 
