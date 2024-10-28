@@ -73,7 +73,7 @@ spec:
               value: {{ .Values.eventListener.authenticationMechanism | quote }}
             {{- end }}
           {{- if .Values.extraEnv }}
-            {{- tpl (toYaml .) $ | nindent 12 }}
+            {{- tpl (toYaml .Values.extraEnv) $ | nindent 12 }}
           {{- end }}
           volumeMounts:
             - name: config-volume
