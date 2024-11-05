@@ -3,7 +3,7 @@ name: port-agent
 description: A Helm chart for Port Agent
 type: application
 version: 0.8.4
-appVersion: "v0.7.7"
+appVersion: "v0.7.8"
 home: https://getport.io/
 sources:
   - https://github.com/port-labs/port-agent
