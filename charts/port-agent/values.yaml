@@ -3,6 +3,8 @@ image:
   pullPolicy: IfNotPresent
   tag: ""
 
+replicaCount: 1
+
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
