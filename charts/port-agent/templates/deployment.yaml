@@ -7,7 +7,7 @@ metadata:
 spec:
   strategy:
     type: {{ .Values.rolloutStrategy }}
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       {{- include "port-agent.selectorLabels" . | nindent 6 }}

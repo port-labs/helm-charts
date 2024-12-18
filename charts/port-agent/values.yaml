@@ -3,6 +3,9 @@ image:
   pullPolicy: IfNotPresent
   tag: ""
 
+# If you increase this number, you will need to make sure that the kafka topic has enough partitions
+replicaCount: 1
+
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
