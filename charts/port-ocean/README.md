@@ -99,6 +99,11 @@ The following table lists the configuration parameters of the `port-ocean` chart
 | `selfSignedCertificate.secret.key`               | The key in the existing self-signed certificate secret                                                                                                                                                                                                                                                                                                                                                                                                                                             | `crt`                       |
 | `selfSignedCertificate.secret.name`              | The name of an existing secret containing the self-signed certificate                                                                                                                                                                                                                                                                                                                                                                                                                              | `""`                        |
 | `eventListener.type`                             | Type of the event listener for the integration, one of the following "WEBHOOK" / "KAFKA" / "SAMPLE"                                                                                                                                                                                                                                                                                                                                                                                                | `"KAFKA"`                   |
+| `liveEvents.worker.enabled`                             | Enable stand-alone live events worker | `false`                   |
+| `liveEvents.worker.replicaCount`                        | Number of stand-alone live events worker replicas  | `1`                   |
+| `liveEvents.worker.resources`                           | Container resource requests and limits for stand-alone live events worker | `{}` |
+
+
 
 To override values in `helm install`, use either the `--set` flag.
 
