@@ -1,4 +1,5 @@
-{{- if eq .Values.workload.kind "CronJob" }}
+{{- if or (eq .Values.workload.kind "CronJob") (eq .Values.workload.kind "DeploymentAndCronJob") }}
+
 {{- $maxRunTimeSeconds := "" }}
 {{- if (.Values.workload.cron).resyncTimeoutMinutes }}
 {{- $minute := 60 }}

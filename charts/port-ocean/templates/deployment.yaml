@@ -1,4 +1,4 @@
-{{- if eq .Values.workload.kind "Deployment" }}
+{{- if or (eq .Values.workload.kind "Deployment") (eq .Values.workload.kind "DeploymentAndCronJob") }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
