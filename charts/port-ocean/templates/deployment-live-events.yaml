@@ -9,7 +9,7 @@ metadata:
 spec:
   strategy:
     type: {{ .Values.workload.deployment.rolloutStrategy | default "Recreate" }}
-  replicas: 1
+  replicas: {{ .Values.liveEvents.replicaCount | default 1 }}
   selector:
     matchLabels:
       app: "{{ include "port-ocean.deploymentName" . }}-live-events"
