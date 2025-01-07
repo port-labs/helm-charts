@@ -1,17 +1,18 @@
-{{- if eq .Values.workload.kind "Deployment" }}
+{{- if .Values.liveEvents.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "port-ocean.deploymentName" . }}
+  name: "{{ include "port-ocean.deploymentName" . }}-live-events"
   labels:
     {{- include "port-ocean.labels" . | nindent 4 }}
+    {{- include "port-ocean.liveEventsLabels" . | nindent 4 }}
 spec:
   strategy:
     type: {{ .Values.workload.deployment.rolloutStrategy | default "Recreate" }}
   replicas: 1
   selector:
     matchLabels:
-      app: {{ include "port-ocean.deploymentName" . }}
+      app: "{{ include "port-ocean.deploymentName" . }}-live-events"
       {{- include "port-ocean.selectorLabels" . | indent 6 }}
   template:
     metadata:
@@ -20,7 +21,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        app: {{ include "port-ocean.deploymentName" . }}
+        app: "{{ include "port-ocean.deploymentName" . }}-live-events"
         {{- include "port-ocean.labels" . | nindent 8 }}
     spec:
       {{- with .Values.podServiceAccount.name }}
@@ -49,8 +50,8 @@ spec:
           {{- toYaml .Values.containerSecurityContext | nindent 10 }}
           {{- end }}
         resources:
-          {{- if .Values.resources }}
-          {{- toYaml .Values.resources | nindent 10 }}
+          {{- if .Values.liveEvents.resources }}
+          {{- toYaml .Values.liveEvents.resources | nindent 10 }}
           {{- end }}
         ports:
         - containerPort: {{.Values.service.port}}

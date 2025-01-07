@@ -46,6 +46,15 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
+Live Events labels
+*/}}
+{{- define "port-ocean.liveEventsLabels" -}}
+{{- if .Values.liveEvents.enabled -}}
+liveEvents: "true"
+{{- end }}
+{{- end }}
+
+{{/*
 Selector labels
 */}}
 {{- define "port-ocean.selectorLabels" }}
