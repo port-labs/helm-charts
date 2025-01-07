@@ -1,4 +1,4 @@
-{{- if .Values.liveEvents.enabled }}
+{{- if .Values.liveEvents.worker.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -9,7 +9,7 @@ metadata:
 spec:
   strategy:
     type: {{ .Values.workload.deployment.rolloutStrategy | default "Recreate" }}
-  replicas: {{ .Values.liveEvents.replicaCount | default 1 }}
+  replicas: {{ .Values.liveEvents.worker.replicaCount | default 1 }}
   selector:
     matchLabels:
       app: "{{ include "port-ocean.deploymentName" . }}-live-events"
@@ -50,8 +50,8 @@ spec:
           {{- toYaml .Values.containerSecurityContext | nindent 10 }}
           {{- end }}
         resources:
-          {{- if .Values.liveEvents.resources }}
-          {{- toYaml .Values.liveEvents.resources | nindent 10 }}
+          {{- if .Values.liveEvents.worker.resources }}
+          {{- toYaml .Values.liveEvents.worker.resources | nindent 10 }}
           {{- end }}
         ports:
         - containerPort: {{.Values.service.port}}

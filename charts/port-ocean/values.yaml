@@ -131,16 +131,17 @@ selfSignedCertificate:
     useExistingSecret: false
 
 liveEvents:
-  enabled: false
-  replicaCount: 1
+  worker:
+    enabled: false
+    replicaCount: 1
 
-  resources:
-    requests:
-      memory: "512Mi"
-      cpu: "200m"
-    limits:
-      memory: "1024Mi"
-      cpu: "500m"
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "200m"
+      limits:
+        memory: "1024Mi"
+        cpu: "500m"
 
 livenessProbe:
   enabled: true
