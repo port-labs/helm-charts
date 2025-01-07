@@ -132,7 +132,6 @@ selfSignedCertificate:
 
 liveEvents:
   enabled: false
-  ingestBaseUrl: ""
   replicaCount: 1
 
   resources:
