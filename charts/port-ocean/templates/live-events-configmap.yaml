@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ include "port-ocean.configMapName" . }}-live-events"
+data:
+  OCEAN__PORT__BASE_URL: {{ .Values.port.baseUrl | quote }}
+  OCEAN__INITIALIZE_PORT_RESOURCES: "{{ .Values.liveEvents.initializePortResources | default false }}"
+  OCEAN__ALLOW_ENVIRONMENT_VARIABLES_JQ_ACCESS: "{{ .Values.allowEnvironmentVariablesJqAccess | default true }}"
+  {{- if .Values.clientTimeout }}
+  OCEAN__CLIENT_TIMEOUT: "{{ .Values.clientTimeout }}"
+  {{- end }}
+  OCEAN__EVENT_LISTENER: {{ .Values.liveEvents.eventListener | toJson | quote }}
+  {{- if .Values.integration.identifier }}
+  OCEAN__INTEGRATION__IDENTIFIER: "{{ .Values.integration.identifier }}"
+  {{- end }}
+  {{- if .Values.integration.config }}
+  {{- range $key, $value := .Values.integration.config }}
+  OCEAN__INTEGRATION__CONFIG__{{ $key | snakecase | upper }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}

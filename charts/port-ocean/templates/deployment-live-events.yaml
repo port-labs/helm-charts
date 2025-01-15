@@ -1,4 +1,4 @@
-{{- if .Values.liveEvents.worker.enabled }}
+{{- if .Values.liveEvents.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -69,7 +69,7 @@ spec:
         {{- end }}
         envFrom:
           - configMapRef:
-              name: {{ include "port-ocean.configMapName" . }}
+              name: "{{ include "port-ocean.configMapName" . }}-live-events"
           {{- include "port-ocean.additionalSecrets" . | nindent 10 }}
         volumeMounts:
         {{- if .Values.extraVolumeMounts }}

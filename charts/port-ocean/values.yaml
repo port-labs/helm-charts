@@ -131,8 +131,12 @@ selfSignedCertificate:
     useExistingSecret: false
 
 liveEvents:
+  uuid: ""
+  enabled: false
+  initializePortResources: false
+  eventListener:
+    type: "WEBHOOKS_ONLY"
   worker:
-    enabled: false
     replicaCount: 1
 
     resources:
