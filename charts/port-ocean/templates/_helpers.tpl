@@ -57,11 +57,11 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Get prefix of ocean resource metadata.name
 */}}
 {{- define "port-ocean.metadataNamePrefix" -}}
-{{- printf "ocean-%s-%s" .Values.integration.type .Values.integration.identifier }}
+{{- printf "ocean-%s-%s" .Values.integration.type .Values.integration.identifier | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{- define "port-ocean.metadataNamePrefixShort" -}}
-{{- printf "%s-%s" .Values.integration.type .Values.integration.identifier }}
+{{- printf "%s-%s" .Values.integration.type .Values.integration.identifier | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
