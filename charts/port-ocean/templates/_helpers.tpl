@@ -57,7 +57,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Get prefix of ocean resource metadata.name
 */}}
 {{- define "port-ocean.metadataNamePrefix" -}}
-{{- printf "ocean-%s-%s" .Values.integration.type .Values.integration.identifier | trunc 63 | trimSuffix "-" }}
+{{- printf "ocean-%s-%s" .Values.integration.type .Values.integration.identifier }}
 {{- end }}
 
 {{- define "port-ocean.metadataNamePrefixShort" -}}
@@ -69,7 +69,7 @@ Get config map name
 */}}
 {{- define "port-ocean.configMapName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-config" $prefix }}
+{{- printf "%s-config" $prefix | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -77,7 +77,7 @@ Get secret name
 */}}
 {{- define "port-ocean.secretName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- default (printf "%s-secret" $prefix) .Values.secret.name }}
+{{- default (printf "%s-secret" $prefix) .Values.secret.name | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -85,7 +85,7 @@ Get ingress name
 */}}
 {{- define "port-ocean.ingressName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-ingress" $prefix }}
+{{- printf "%s-ingress" $prefix | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -93,7 +93,7 @@ Get service name
 */}}
 {{- define "port-ocean.serviceName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-service" $prefix }}
+{{- printf "%s-service" $prefix | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -101,7 +101,7 @@ Get container name
 */}}
 {{- define "port-ocean.containerName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-container" $prefix }}
+{{- printf "%s-container" $prefix | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -109,7 +109,7 @@ Get deployment name
 */}}
 {{- define "port-ocean.deploymentName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-deployment" $prefix }}
+{{- printf "%s-deployment" $prefix | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -117,7 +117,7 @@ Get cron job name
 */}}
 {{- define "port-ocean.cronJobName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-cron-job" $prefix }}
+{{- printf "%s-cron-job" $prefix | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
