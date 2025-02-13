@@ -134,6 +134,7 @@ liveEvents:
   worker:
     enabled: false
     replicaCount: 1
+    initializePortResources: false
     resources:
       requests:
         memory: "512Mi"
