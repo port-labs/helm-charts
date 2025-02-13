@@ -1,0 +1,27 @@
+{{- if .Values.liveEvents.worker.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ include "port-ocean.liveEvents.configMapName" . }}"
+data:
+  OCEAN__PORT__BASE_URL: {{ .Values.port.baseUrl | quote }}
+  # Make sure only sync pods will initialize resources if both are enabled
+  {{- if eq .Values.initializePortResources true}}
+  OCEAN__INITIALIZE_PORT_RESOURCES: "false"
+  {{- else }}
+  OCEAN__INITIALIZE_PORT_RESOURCES: "{{ .Values.liveEvents.initializePortResources | default false }}"
+  {{- end }}
+  OCEAN__ALLOW_ENVIRONMENT_VARIABLES_JQ_ACCESS: "{{ .Values.allowEnvironmentVariablesJqAccess | default true }}"
+  {{- if .Values.clientTimeout }}
+  OCEAN__CLIENT_TIMEOUT: "{{ .Values.clientTimeout }}"
+  {{- end }}
+  OCEAN__EVENT_LISTENER: '{"type":"WEBHOOKS_ONLY"}'
+  {{- if .Values.integration.identifier }}
+  OCEAN__INTEGRATION__IDENTIFIER: "{{ .Values.integration.identifier }}"
+  {{- end }}
+  {{- if .Values.integration.config }}
+  {{- range $key, $value := .Values.integration.config }}
+  OCEAN__INTEGRATION__CONFIG__{{ $key | snakecase | upper }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
+{{- end }}
