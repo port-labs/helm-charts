@@ -48,9 +48,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Live Events labels
 */}}
-{{- define "port-ocean.liveEventsLabels" -}}
-{{- if .Values.liveEvents.enabled -}}
-liveEvents: "true"
+{{- define "port-ocean.liveEvents.labels" -}}
+helm.sh/chart: {{ include "port-ocean.chart" . }}
+{{- if .Values.liveEvents.worker.enabled -}}
+{{- include "port-ocean.liveEvents.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- range $key, $value := .Values.extraLabels }}
+{{$key}}: {{ $value }}
+{{- end }}
 {{- end }}
 {{- end }}
 
@@ -59,6 +67,10 @@ Selector labels
 */}}
 {{- define "port-ocean.selectorLabels" }}
 app.kubernetes.io/name: {{ include "port-ocean.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{- define "port-ocean.liveEvents.selectorLabels" }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
@@ -81,6 +93,11 @@ Get config map name
 {{- printf "%s-config" $prefix }}
 {{- end }}
 
+{{- define "port-ocean.liveEvents.configMapName" -}}
+{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
+{{- printf "%s-live-events-config" $prefix }}
+{{- end }}
+
 {{/*
 Get secret name 
 */}}
@@ -97,12 +114,22 @@ Get ingress name
 {{- printf "%s-ingress" $prefix }}
 {{- end }}
 
+{{- define "port-ocean.liveEvents.ingressName" -}}
+{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
+{{- printf "%s-live-events-ingress" $prefix }}
+{{- end }}
+
 {{/*
 Get service name 
 */}}
 {{- define "port-ocean.serviceName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
 {{- printf "%s-service" $prefix }}
+{{- end }}
+
+{{- define "port-ocean.liveEvents.serviceName" -}}
+{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
+{{- printf "%s-live-events-service" $prefix }}
 {{- end }}
 
 {{/*
@@ -119,6 +146,11 @@ Get deployment name
 {{- define "port-ocean.deploymentName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
 {{- printf "%s-deployment" $prefix }}
+{{- end }}
+
+{{- define "port-ocean.liveEvents.deploymentName" -}}
+{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
+{{- printf "%s-live-events-deployment" $prefix }}
 {{- end }}
 
 {{/*

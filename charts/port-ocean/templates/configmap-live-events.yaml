@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: "{{ include "port-ocean.configMapName" . }}-live-events"
+  name: "{{ include "port-ocean.liveEvents.configMapName" . }}"
 data:
   OCEAN__PORT__BASE_URL: {{ .Values.port.baseUrl | quote }}
   OCEAN__INITIALIZE_PORT_RESOURCES: "false"

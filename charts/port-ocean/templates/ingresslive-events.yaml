@@ -1,0 +1,36 @@
+{{- if .Values.liveEvents.ingress }}
+{{- if (eq .Values.liveEvents.ingress.enabled true) }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "port-ocean.liveEvents.ingressName" . }}
+  labels:
+    {{- include "port-ocean.liveEvents.labels" $ | nindent 4 }}
+  annotations:
+    {{- if .Values.liveEvents.ingress.annotations }}
+      {{- toYaml .Values.liveEvents.ingress.annotations | nindent 4 }}
+    {{- end }}
+spec:
+    {{- if .Values.liveEvents.ingress.className }}
+    ingressClassName: {{ .Values.liveEvents.ingress.className | quote }}
+    {{- end }}
+    rules:
+        - 
+          {{- if .Values.liveEvents.ingress.host }}
+          host: {{ .Values.liveEvents.ingress.host }}
+          {{- end }}
+          http:
+              paths:
+              - path: {{ .Values.liveEvents.ingress.path }}
+                pathType: {{ .Values.liveEvents.ingress.pathType }}
+                backend:
+                    service:
+                        name: {{ include "port-ocean.liveEvents.serviceName" . }}
+                        port:
+                            number: {{ .Values.liveEvents.service.port }}
+    {{- if .Values.liveEvents.ingress.tls }}
+    tls:
+      {{- toYaml .Values.liveEvents.ingress.tls | nindent 6 }}
+    {{- end }}
+{{- end }}
+{{- end }}

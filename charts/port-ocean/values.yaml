@@ -141,6 +141,24 @@ liveEvents:
       limits:
         memory: "1024Mi"
         cpu: "500m"
+  service:
+    enabled: true
+    type: ClusterIP
+    port: 8000
+    annotations: {}
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    host: null
+    path: /
+    pathType: Prefix
+    tls: []
+    # Example
+    #   - secretName: my-secret
+    #     hosts:
+    #       - "my-host.my-domain.com"
+  extraLabels: {}
 
 livenessProbe:
   enabled: true

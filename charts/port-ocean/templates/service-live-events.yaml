@@ -1,0 +1,23 @@
+{{- if .Values.liveEvents.service }}
+{{- if (eq .Values.liveEvents.service.enabled true) }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "port-ocean.liveEvents.serviceName" . }}
+  labels:
+    {{- include "port-ocean.liveEvents.labels" $ | nindent 4 }}
+  annotations:
+    {{- if .Values.liveEvents.service.annotations }}
+      {{- toYaml .Values.liveEvents.service.annotations | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ .Values.liveEvents.service.type }}
+  ports:
+    - name: ocean-port
+      protocol: TCP
+      port: {{ .Values.liveEvents.service.port }} 
+      targetPort: {{ .Values.liveEvents.service.port }}
+  selector:
+    app: {{ include "port-ocean.liveEvents.deploymentName" . }}
+{{- end }}
+{{- end }}
