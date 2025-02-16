@@ -143,7 +143,7 @@ liveEvents:
         memory: "1024Mi"
         cpu: "500m"
   service:
-    enabled: true
+    enabled: false
     type: ClusterIP
     port: 8000
     annotations: {}
