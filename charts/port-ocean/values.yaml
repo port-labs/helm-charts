@@ -131,7 +131,6 @@ selfSignedCertificate:
     useExistingSecret: false
 
 liveEvents:
-  uuid: ""
   worker:
     enabled: false
     replicaCount: 1
@@ -161,6 +160,8 @@ liveEvents:
     #     hosts:
     #       - "my-host.my-domain.com"
   extraLabels: {}
+  uuid: null
+  ingestHostname: null
 
 livenessProbe:
   enabled: true
