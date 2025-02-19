@@ -11,9 +11,6 @@ data:
   {{- else }}
   OCEAN__INITIALIZE_PORT_RESOURCES: "{{ .Values.liveEvents.initializePortResources | default false }}"
   {{- end }}
-  {{- if .Values.liveEvents.ingestHostname }}
-  OCEAN__BASE_URL: "https://{{ .Values.liveEvents.ingestHostname }}/live-events/{{ .Values.liveEvents.uuid}}"
-  {{- end }}
   OCEAN__ALLOW_ENVIRONMENT_VARIABLES_JQ_ACCESS: "{{ .Values.allowEnvironmentVariablesJqAccess | default true }}"
   {{- if .Values.clientTimeout }}
   OCEAN__CLIENT_TIMEOUT: "{{ .Values.clientTimeout }}"
@@ -25,6 +22,11 @@ data:
   {{- if .Values.integration.config }}
   {{- range $key, $value := .Values.integration.config }}
   OCEAN__INTEGRATION__CONFIG__{{ $key | snakecase | upper }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
+  {{- if .Values.liveEvents.extraConfig }}
+  {{- range $key, $value := .Values.integration.extraConfig }}
+  {{ $key | snakecase | upper }}: {{ $value | quote }}
   {{- end }}
   {{- end }}
 {{- end }}
