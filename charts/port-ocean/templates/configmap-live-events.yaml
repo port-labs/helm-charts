@@ -11,6 +11,7 @@ data:
   {{- else }}
   OCEAN__INITIALIZE_PORT_RESOURCES: "{{ .Values.liveEvents.initializePortResources | default false }}"
   {{- end }}
+  OCEAN__INTEGRATION__CONFIG__APP_HOST: "https://{{ .Values.liveEvents.ingress.host }}/live-events/{{ .Values.liveEvents.uuid}}"
   OCEAN__ALLOW_ENVIRONMENT_VARIABLES_JQ_ACCESS: "{{ .Values.allowEnvironmentVariablesJqAccess | default true }}"
   {{- if .Values.clientTimeout }}
   OCEAN__CLIENT_TIMEOUT: "{{ .Values.clientTimeout }}"

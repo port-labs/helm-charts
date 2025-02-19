@@ -131,6 +131,7 @@ selfSignedCertificate:
     useExistingSecret: false
 
 liveEvents:
+  uuid: ""
   worker:
     enabled: false
     replicaCount: 1
