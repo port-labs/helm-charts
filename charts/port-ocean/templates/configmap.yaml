@@ -26,3 +26,8 @@ data:
   OCEAN__INTEGRATION__CONFIG__{{ $key | snakecase | upper }}: {{ $value | quote }}
   {{- end }}
   {{- end }}
+  {{- if .Values.integration.extraConfig }}
+  {{- range $key, $value := .Values.integration.extraConfig }}
+  {{ $key | snakecase | upper }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}

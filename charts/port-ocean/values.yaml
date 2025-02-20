@@ -118,6 +118,7 @@ integration:
   type: ""
   config: {}
   secrets: {}
+  extraConfig: {}
   eventListener:
     type: "KAFKA"
     brokers: "b-1-public.publicclusterprod.t9rw6w.c1.kafka.eu-west-1.amazonaws.com:9196,b-2-public.publicclusterprod.t9rw6w.c1.kafka.eu-west-1.amazonaws.com:9196,b-3-public.publicclusterprod.t9rw6w.c1.kafka.eu-west-1.amazonaws.com:9196"
@@ -160,6 +161,7 @@ liveEvents:
     #     hosts:
     #       - "my-host.my-domain.com"
   extraLabels: {}
+  extraConfig: {}
 
 livenessProbe:
   enabled: true
