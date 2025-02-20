@@ -1,4 +1,4 @@
-{{- if .Values.liveEvents.service }}
+{{- if .Values.liveEvents.worker.enabled }}
 {{- if (eq .Values.liveEvents.service.enabled true) }}
 apiVersion: v1
 kind: Service
