@@ -120,6 +120,9 @@ integration:
   secrets: {}
   extraConfig: {}
   isOAuthInstallationType: false
+  oauth:
+    enabled: false
+    access_token_file_path: "/app/.config/oauth_token"    
   eventListener:
     type: "KAFKA"
     brokers: "b-1-public.publicclusterprod.t9rw6w.c1.kafka.eu-west-1.amazonaws.com:9196,b-2-public.publicclusterprod.t9rw6w.c1.kafka.eu-west-1.amazonaws.com:9196,b-3-public.publicclusterprod.t9rw6w.c1.kafka.eu-west-1.amazonaws.com:9196"
