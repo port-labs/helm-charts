@@ -21,7 +21,7 @@ data:
   {{- if .Values.integration.identifier }}
   OCEAN__INTEGRATION__IDENTIFIER: "{{ .Values.integration.identifier }}"
   {{- end }}
-  {{- if .Values.integration.isOauthInstallationType }}
+  {{- if .Values.integration.isOAuthInstallationType }}
   OCEAN__OAUTH_ACCESS_TOKEN_FILE_PATH: "/app/.config/oauth_token"
   {{- end }}
   {{- if .Values.integration.config }}
