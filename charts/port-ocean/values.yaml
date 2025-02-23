@@ -119,7 +119,6 @@ integration:
   config: {}
   secrets: {}
   extraConfig: {}
-  isOAuthInstallationType: false
   oauth:
     enabled: false
     access_token_file_path: "/app/.config/oauth_token"    
