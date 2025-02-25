@@ -6,8 +6,10 @@ metadata:
   labels:
     {{- include "port-ocean.liveEvents.labels" . | nindent 4 }}
 spec:
+  {{- with .Values.liveEvents.deployment.rolloutStrategy }}
   strategy:
-    type: {{ .Values.workload.deployment.rolloutStrategy | default "Recreate" }}
+    {{- toYaml . | trim | nindent 4 }}
+  {{- end }}
   replicas: {{ .Values.liveEvents.worker.replicaCount | default 1 }}
   selector:
     matchLabels:

@@ -80,8 +80,8 @@ spec:
 
                   echo "kubectl get jobs -l ${LABEL_SELECTOR} -o=json | jq -r \".items[] | select(.status.active > 0) | select(.metadata.name != \"$CURRENT_JOB_NAME\") | .metadata.name\""
                   JOBS=$(kubectl get jobs -l ${LABEL_SELECTOR} -o=json --token=$TOKEN | jq -r ".items[] | select(.status.active > 0) | select(.metadata.name != \"$CURRENT_JOB_NAME\") | .metadata.name")
-                  echo "Found jobs: $JOBS"
                   if [ -n "$JOBS" ]; then
+                    echo "Found jobs: $JOBS"
                     for JOB in $JOBS; do
                       echo "Setting deadline for job: $JOB"
                       kubectl patch job $JOB -n ${NAMESPACE} -p "{\"spec\":{\"activeDeadlineSeconds\":$DEADLINE}, \"metadata\":{\"labels\":{\"canceled\": \"$CURRENT_JOB_NAME\"}}}" --token=$TOKEN
@@ -100,8 +100,8 @@ spec:
 
                   echo "Running: kubectl get deployment ${DEPLOYMENT_NAME} -o=json | jq -r \".metadata.name\""
                   DEPLOYMENT=$(kubectl get deployment ${DEPLOYMENT_NAME} --token=$TOKEN -o=json | jq -r ".metadata.name")
-                  echo "Found deployment: $DEPLOYMENT"
                   if [ -n $DEPLOYMENT ]; then
+                    echo "Found deployment: $DEPLOYMENT"
                     echo "Rolling out $DEPLOYMENT"
                     kubectl rollout restart deployment $DEPLOYMENT -n ${NAMESPACE} --token=$TOKEN
                   else
