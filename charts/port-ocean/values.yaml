@@ -146,6 +146,11 @@ liveEvents:
       limits:
         memory: "1024Mi"
         cpu: "500m"
+  deployment:
+    rolloutStrategy:
+      type: RollingUpdate
+      maxSurge: 25%
+      maxUnavailable: 25%
   service:
     enabled: true
     type: ClusterIP
