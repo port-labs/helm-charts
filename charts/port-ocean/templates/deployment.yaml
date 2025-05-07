@@ -12,7 +12,7 @@ spec:
   selector:
     matchLabels:
       app: {{ include "port-ocean.deploymentName" . }}
-      {{- include "port-ocean.selectorLabels" . | indent 6 }}
+      {{- include "port-ocean.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
