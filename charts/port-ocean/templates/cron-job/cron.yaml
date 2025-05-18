@@ -55,6 +55,25 @@ spec:
             {{- if .Values.extraInitContainers }}
             {{- tpl (toYaml .Values.extraInitContainers) . | nindent 12 }}
             {{- end }}
+            {{- if .Values.postgresql.enabled }}
+            - name: wait-for-postgresql
+              image: "{{ .Values.postgresql.image }}"
+              command:
+                - sh
+                - -c
+                - |
+                  until pg_isready -h {{ include "port-ocean.fullname" . }}-postgresql -p {{ .Values.postgresql.service.port }} -U {{ .Values.postgresql.auth.username }}; do
+                    echo "Waiting for PostgreSQL to be ready..."
+                    sleep 2
+                  done
+                  echo "PostgreSQL is ready!"
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "port-ocean.fullname" . }}-postgresql
+                      key: password
+            {{- end }}
             - name: terminate-old-resync-jobs
               image: bitnami/kubectl:latest
               env:
