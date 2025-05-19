@@ -26,6 +26,9 @@ jobs:
     - name: Lint Helm Chart
       run: helm lint .
 
+    - name: Build dependencies of Helm Chart
+      run: helm dependency build
+
     - name: Validate Helm Chart
       run: |
         helm template --set port.clientId=test --set port.clientSecret=test --set configMap.config=test . | kubectl apply --dry-run=client -f -
