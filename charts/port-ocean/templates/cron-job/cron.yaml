@@ -57,22 +57,16 @@ spec:
             {{- end }}
             {{- if .Values.postgresql.enabled }}
             - name: wait-for-postgresql
-              image: "{{ .Values.postgresql.image }}"
+              image: postgres:17.5-alpine
               command:
                 - sh
                 - -c
                 - |
-                  until pg_isready -h {{ include "port-ocean.fullname" . }}-postgresql -p {{ .Values.postgresql.service.port }} -U {{ .Values.postgresql.auth.username }}; do
+                  until pg_isready -h {{ .Release.Name }}-postgresql -p 5432 -U {{ .Values.postgresql.global.postgresql.auth.username }}; do
                     echo "Waiting for PostgreSQL to be ready..."
                     sleep 2
                   done
                   echo "PostgreSQL is ready!"
-              env:
-                - name: PGPASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ include "port-ocean.fullname" . }}-postgresql
-                      key: password
             {{- end }}
             - name: terminate-old-resync-jobs
               image: bitnami/kubectl:latest
@@ -154,6 +148,18 @@ spec:
             {{- end }}
             {{- if .Values.extraEnv }}
               {{- tpl (toYaml .Values.extraEnv) . | nindent 14 }}
+            {{- end }}
+            {{- if .Values.postgresql.enabled }}
+          - name: OCEAN__DATABASE__HOST
+            value: {{ include "port-ocean.name" . }}-postgresql
+          - name: OCEAN__DATABASE__PORT
+            value: '5432'
+          - name: OCEAN__DATABASE__NAME
+            value: {{ .Values.postgresql.global.postgresql.auth.database }}
+          - name: OCEAN__DATABASE__USERNAME
+            value: {{ .Values.postgresql.global.postgresql.auth.username }}
+          - name: OCEAN__DATABASE__PASSWORD
+            value: {{ .Values.postgresql.global.postgresql.auth.password }}
             {{- end }}
             envFrom:
               - configMapRef:

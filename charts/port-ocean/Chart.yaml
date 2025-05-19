@@ -10,4 +10,9 @@ sources:
 maintainers:
   - name: Port
     email: support@getport.io
+dependencies:
+  - name: postgresql
+    version: ~16.7.4
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled
 icon: https://port-graphical-assets.s3.eu-west-1.amazonaws.com/Port+Logo.svg

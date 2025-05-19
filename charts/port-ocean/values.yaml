@@ -190,24 +190,10 @@ readinessProbe:
 
 postgresql:
   enabled: false
-  image: "postgres:15"
-  imagePullPolicy: IfNotPresent
-  persistence:
-    enabled: true
-    size: 10Gi
-    storageClass: ""
-  resources:
-    requests:
-      memory: "256Mi"
-      cpu: "100m"
-    limits:
-      memory: "512Mi"
-      cpu: "200m"
-  auth:
-    database: ocean
-    username: ocean
-    password: ""  # Will be auto-generated if not provided
-    existingSecret: ""  # Optional: use existing secret for credentials
-  service:
-    type: ClusterIP
-    port: 5432
+  global:
+    postgresql:
+      auth:
+        database: ocean
+        password: password
+        postgresPassword: password
+        username: port_admin
