@@ -83,15 +83,15 @@ spec:
             value: /etc/ssl/certs/ca-certificates.crt
         {{- end }}
         {{- if .Values.postgresql.enabled }}
-          - name: OCEAN__DATABASE_HOST
+          - name: OCEAN__DATABASE__HOST
             value: {{ include "port-ocean.fullname" . }}-postgresql
-          - name: OCEAN__DATABASE_PORT
+          - name: OCEAN__DATABASE__PORT
             value: {{ .Values.postgresql.service.port | quote }}
-          - name: OCEAN__DATABASE_NAME
+          - name: OCEAN__DATABASE__NAME
             value: {{ .Values.postgresql.auth.database }}
-          - name: OCEAN__DATABASE_USERNAME
+          - name: OCEAN__DATABASE__USERNAME
             value: {{ .Values.postgresql.auth.username }}
-          - name: OCEAN__DATABASE_PASSWORD
+          - name: OCEAN__DATABASE__PASSWORD
             valueFrom:
               secretKeyRef:
                 name: {{ include "port-ocean.fullname" . }}-postgresql
