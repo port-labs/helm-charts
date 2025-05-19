@@ -1,5 +1,6 @@
 nameOverride: ""
 fullnameOverride: ""
+metadataNamePrefixOverride: ""
 
 port:
   clientId: ""

@@ -78,11 +78,19 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Get prefix of ocean resource metadata.name
 */}}
 {{- define "port-ocean.metadataNamePrefix" -}}
+{{- if .Values.metadataNamePrefixOverride }}
+{{- printf "%s" .Values.metadataNamePrefixOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
 {{- printf "ocean-%s-%s" .Values.integration.type .Values.integration.identifier | trunc 63 | trimSuffix "-" }}
+{{- end }}
 {{- end }}
 
 {{- define "port-ocean.metadataNamePrefixShort" -}}
+{{- if .Values.metadataNamePrefixOverride }}
+{{- printf "%s" .Values.metadataNamePrefixOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
 {{- printf "%s-%s" .Values.integration.type .Values.integration.identifier | trunc 63 | trimSuffix "-" }}
+{{- end }}
 {{- end }}
 
 {{/*
