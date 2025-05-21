@@ -33,7 +33,11 @@ jobs:
           registry: ghcr.io
           username: ${ GITHUB_REPOSITORY_OWNER }
           password: ${{ secrets.GITHUB_TOKEN }}
-
+      
+      - name: Configure Helm Repositories
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+    
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
         with:
