@@ -113,7 +113,13 @@ The following table lists the configuration parameters of the `port-ocean` chart
 | `liveEvents.ingress.host`                        | Hostname for the ingress.                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | `null`                      |
 | `liveEvents.ingress.path`                        | Path for the ingress.                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `/`                         |
 | `liveEvents.ingress.pathType`                    | Path type for the ingress.                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | `Prefix`                    |
+| `postgresql.enabled`                              | Enable PostgreSQL database                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | `false`                     |
+| `postgresql.global.postgresql.auth.database`     | PostgreSQL database name                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | `ocean`                     |
+| `postgresql.global.postgresql.auth.username`     | PostgreSQL username                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | `port_admin`                |
+| `postgresql.global.postgresql.auth.password`     | PostgreSQL password                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | `password`                  |
+| `postgresql.global.postgresql.auth.postgresPassword` | PostgreSQL postgres user password                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `password`                  |
 
+When PostgreSQL is enabled, all workloads (Deployment, CronJob, and Live Events) will wait for PostgreSQL to be ready before starting their main containers. This is done using an init container that checks PostgreSQL availability using `pg_isready`. The init container will retry every 2 seconds until PostgreSQL is available.
 
 To override values in `helm install`, use either the `--set` flag.
 
@@ -137,3 +143,27 @@ helm install my-ocean-integration port-labs/port-ocean \
    # Flag for passing the certificate file
    --set-file selfSignedCertificate.certificate=/PATH/TO/CERTIFICATE.crt
 ```
+
+## PostgreSQL Configuration
+
+The chart supports an optional PostgreSQL database deployment. When enabled, PostgreSQL will be deployed as a dependency of the Port Ocean integration. The database is configured with the following default settings:
+
+- Database name: `ocean`
+- Username: `port_admin`
+- Password: `password` (should be changed in production)
+
+To enable PostgreSQL, set the following in your values:
+
+```yaml
+postgresql:
+  enabled: true
+  global:
+    postgresql:
+      auth:
+        database: ocean
+        password: your-secure-password
+        postgresPassword: your-secure-postgres-password
+        username: port_admin
+```
+
+**Note**: It's recommended to use a secure password in production environments and consider using Kubernetes secrets to manage sensitive credentials.

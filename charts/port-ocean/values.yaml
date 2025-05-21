@@ -188,3 +188,13 @@ readinessProbe:
 #  timeoutSeconds: 5
 #  failureThreshold: 3
 #  successThreshold: 2
+
+postgresql:
+  enabled: false
+  global:
+    postgresql:
+      auth:
+        database: ocean
+        password: password
+        postgresPassword: password
+        username: port_admin
