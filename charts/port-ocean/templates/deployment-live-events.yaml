@@ -5,6 +5,10 @@ metadata:
   name: {{ include "port-ocean.liveEvents.deploymentName" . }}
   labels:
     {{- include "port-ocean.liveEvents.labels" . | nindent 4 }}
+  {{- with .Values.liveEvents.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   {{- with .Values.liveEvents.deployment.rolloutStrategy }}
   strategy:
