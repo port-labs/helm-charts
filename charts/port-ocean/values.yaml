@@ -85,6 +85,8 @@ clientTimeout: null
 
 sendRawDataExamples: true
 
+annotations: {}
+
 secret:
   create: true
   name: ""
@@ -170,6 +172,7 @@ liveEvents:
     #       - "my-host.my-domain.com"
   extraLabels: {}
   extraConfig: {}
+  annotations: {}
 
 livenessProbe:
   enabled: true

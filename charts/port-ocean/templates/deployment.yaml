@@ -5,6 +5,10 @@ metadata:
   name: {{ include "port-ocean.deploymentName" . }}
   labels:
     {{- include "port-ocean.labels" . | nindent 4 }}
+  {{- with .Values.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   strategy:
     type: {{ .Values.workload.deployment.rolloutStrategy | default "Recreate" }}
