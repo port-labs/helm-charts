@@ -177,7 +177,7 @@ spec:
             {{- end }}
             {{- if and (eq .Values.integration.processExecution.mode "multi_process") (not .Values.integration.processExecution.prometheusMultiProcessDir) }}
               - name: prometheus-metrics
-                mountPath: /tmp/prom_multiprocess_metrics
+                mountPath: "/tmp/{{ .Values.integration.identifier }}/prometheus/multiprocessing_metrics"
             {{- end }}
             {{- if (.Values.livenessProbe).enabled}}
             livenessProbe:
