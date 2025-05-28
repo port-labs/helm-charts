@@ -118,8 +118,27 @@ The following table lists the configuration parameters of the `port-ocean` chart
 | `postgresql.global.postgresql.auth.username`     | PostgreSQL username                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | `port_admin`                |
 | `postgresql.global.postgresql.auth.password`     | PostgreSQL password                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | `password`                  |
 | `postgresql.global.postgresql.auth.postgresPassword` | PostgreSQL postgres user password                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `password`                  |
+| `processExecution.mode`                           | Process execution mode. Can be either `single_process` or `multi_process`                                                                                                                                                                                                                                                                                                                                                                                                                      | `""`                        |
+| `processExecution.prometheusMultiProcessDir`      | Directory for Prometheus multi-process mode metrics                                                                                                                                                                                                                                                                                                                                                                                                                                            | `/tmp`                      |
 
 When PostgreSQL is enabled, all workloads (Deployment, CronJob, and Live Events) will wait for PostgreSQL to be ready before starting their main containers. This is done using an init container that checks PostgreSQL availability using `pg_isready`. The init container will retry every 2 seconds until PostgreSQL is available.
+
+## Process Execution Modes
+
+The chart supports two process execution modes:
+
+1. `single_process` - Runs the integration in a single process. This is the default mode and is suitable for most use cases.
+2. `multi_process` - Runs the integration in multiple processes, which can be useful for handling high concurrency or when you need to scale horizontally.
+
+To configure the process execution mode, set the following in your values:
+
+```yaml
+processExecution:
+  mode: "multi_process"  # or "single_process"
+  prometheusMultiProcessDir: "/tmp"  # Directory for Prometheus metrics in multi-process mode
+```
+
+**Note**: When using `multi_process` mode, make sure the `prometheusMultiProcessDir` is writable by the container and has sufficient space for metrics storage.
 
 To override values in `helm install`, use either the `--set` flag.
 
