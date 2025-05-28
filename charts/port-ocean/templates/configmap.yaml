@@ -30,7 +30,7 @@ data:
   {{- if .Values.integration.processExecution.prometheusMultiProcessDir }}
   PROMETHEUS_MULTIPROC_DIR: "{{ .Values.integration.processExecution.prometheusMultiProcessDir }}"
   {{- else }}
-  PROMETHEUS_MULTIPROC_DIR: "/tmp/{{ .Values.integration.identifier }}/prometheus/multiprocessing_metrics"
+  PROMETHEUS_MULTIPROC_DIR: "/tmp/ocean/{{ .Values.integration.identifier }}/prometheus/metrics"
   {{- end }}
   {{- end }}
   {{- end }}
