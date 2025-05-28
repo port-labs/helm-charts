@@ -27,7 +27,11 @@ data:
   {{- if .Values.integration.processExecution.mode }}
   OCEAN__PROCESS_EXECUTION_MODE: "{{ .Values.integration.processExecution.mode }}"
   {{- if eq .Values.integration.processExecution.mode "multi_process" }}
+  {{- if .Values.integration.processExecution.prometheusMultiProcessDir }}
   PROMETHEUS_MULTIPROC_DIR: "{{ .Values.integration.processExecution.prometheusMultiProcessDir }}"
+  {{- else }}
+  PROMETHEUS_MULTIPROC_DIR: "/tmp/prom_multiprocess_metrics"
+  {{- end }}
   {{- end }}
   {{- end }}
   {{- if .Values.integration.config }}
