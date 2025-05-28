@@ -105,6 +105,10 @@ spec:
             subPath: cert.crt
             readOnly: true
         {{- end }}
+        {{- if and (eq .Values.integration.processExecution.mode "multi_process") (not .Values.integration.processExecution.prometheusMultiProcessDir) }}
+          - name: prometheus-metrics
+            mountPath: "/tmp/ocean/{{ .Values.integration.identifier }}/prometheus/metrics"
+        {{- end }}
         {{- if (.Values.livenessProbe).enabled}}
         livenessProbe:
           httpGet:
@@ -130,6 +134,10 @@ spec:
       volumes:
         {{- if .Values.extraVolumes }}
         {{- tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
+        {{- end }}
+        {{- if and (eq .Values.integration.processExecution.mode "multi_process") (not .Values.integration.processExecution.prometheusMultiProcessDir) }}
+        - name: prometheus-metrics
+          emptyDir: {}
         {{- end }}
         {{- if and .Values.selfSignedCertificate.enabled .Values.selfSignedCertificate.secret.useExistingSecret }}
         - name: certificates
