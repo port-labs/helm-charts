@@ -105,9 +105,9 @@ spec:
             subPath: cert.crt
             readOnly: true
         {{- end }}
-        {{- if and (eq .Values.integration.processExecution.mode "multi_process") (not .Values.integration.processExecution.prometheusMultiProcessDir) }}
+        {{- if eq .Values.integration.processExecution.mode "multi_process" }}
           - name: prometheus-metrics
-            mountPath: "/tmp/ocean/{{ .Values.integration.identifier }}/prometheus/metrics"
+            mountPath: "{{ .Values.integration.processExecution.prometheusMultiProcessDir }}"
         {{- end }}
         {{- if (.Values.livenessProbe).enabled}}
         livenessProbe:
@@ -135,7 +135,7 @@ spec:
         {{- if .Values.extraVolumes }}
         {{- tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
         {{- end }}
-        {{- if and (eq .Values.integration.processExecution.mode "multi_process") (not .Values.integration.processExecution.prometheusMultiProcessDir) }}
+        {{- if eq .Values.integration.processExecution.mode "multi_process" }}
         - name: prometheus-metrics
           emptyDir: {}
         {{- end }}
