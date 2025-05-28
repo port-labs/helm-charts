@@ -124,7 +124,7 @@ integration:
   extraConfig: {}
   processExecution:
     mode: ""
-    prometheusMultiProcessDir: ""
+    prometheusMultiProcessDir: "/tmp/ocean/prometheus/metrics"
   oauth:
     enabled: false
     access_token_file_path: "/app/.config/oauth_token"    
