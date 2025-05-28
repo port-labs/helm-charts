@@ -122,6 +122,9 @@ integration:
   config: {}
   secrets: {}
   extraConfig: {}
+  processExecution:
+    mode: ""
+    prometheusMultiProcessDir: "/tmp"
   oauth:
     enabled: false
     access_token_file_path: "/app/.config/oauth_token"    
