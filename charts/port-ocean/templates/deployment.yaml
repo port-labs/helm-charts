@@ -97,7 +97,7 @@ spec:
           {{- include "port-ocean.additionalSecrets" . | nindent 10 }}
         volumeMounts:
         {{- if .Values.extraVolumeMounts }}
-        {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 8 }}
+          {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 10 }}
         {{- end }}
         {{- if .Values.selfSignedCertificate.enabled }}
           - name: certificates
