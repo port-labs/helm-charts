@@ -32,7 +32,7 @@ data:
   {{- end }}
   {{- if .Values.integration.config }}
   {{- range $key, $value := .Values.integration.config }}
-  OCEAN__INTEGRATION__CONFIG__{{ $key | snakecase | upper }}: {{ $value | quote }}
+  OCEAN__INTEGRATION__CONFIG__{{ $key | snakecase | upper }}:{{- if kindIs "slice" $value }} {{ $value | toJson }}{{ else }} {{ $value | quote }}{{ end }}
   {{- end }}
   {{- end }}
   {{- if .Values.integration.extraConfig }}
