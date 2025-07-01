@@ -41,6 +41,7 @@ workload:
 
   deployment:
     rolloutStrategy: "Recreate"
+    replicas: 1 # Currently only allows 1 or 0 replicas
 
   cron:
     # number of minutes to wait before cancelling the resync
