@@ -8,7 +8,7 @@ metadata:
 spec:
   strategy:
     type: {{ .Values.workload.deployment.rolloutStrategy | default "Recreate" }}
-  replicas: {{ min (.Values.workload.deployment.replicas | default 1) 1 }}
+  replicas: {{ if and (hasKey .Values.workload.deployment "replicas") (eq (.Values.workload.deployment.replicas | int) 0) }}0{{ else }}1{{ end }}
   selector:
     matchLabels:
       app: {{ include "port-ocean.deploymentName" . }}
