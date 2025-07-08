@@ -1756,6 +1756,28 @@ entries:
   port-ocean:
   - apiVersion: v2
     appVersion: 0.1.0
+    created: "2025-07-08T12:08:02.149953093Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 16.7.4
+    description: A Helm chart for Port Ocean integrations
+    digest: 0b075530f2c3f8f47152c4d67c57b8a6d8593157c801ca1b5ec37a1a8faca565
+    home: https://getport.io/
+    icon: https://port-graphical-assets.s3.eu-west-1.amazonaws.com/Port+Logo.svg
+    maintainers:
+    - email: support@getport.io
+      name: Port
+    name: port-ocean
+    sources:
+    - https://github.com/port-labs/port-ocean
+    type: application
+    urls:
+    - https://github.com/port-labs/helm-charts/releases/download/port-ocean-0.9.0/port-ocean-0.9.0.tgz
+    version: 0.9.0
+  - apiVersion: v2
+    appVersion: 0.1.0
     created: "2025-07-03T10:59:27.505414239Z"
     dependencies:
     - condition: postgresql.enabled
@@ -2758,4 +2780,4 @@ entries:
     urls:
     - https://github.com/port-labs/helm-charts/releases/download/port-ocean-0.1.0/port-ocean-0.1.0.tgz
     version: 0.1.0
-generated: "2025-07-03T10:59:27.505760193Z"
+generated: "2025-07-08T12:08:02.150442145Z"
