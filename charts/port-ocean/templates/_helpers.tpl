@@ -161,6 +161,19 @@ Get deployment name
 {{- printf "%s-live-events-deployment" $prefix }}
 {{- end }}
 
+
+{{/*
+Get ServiceAccount name
+*/}}
+{{- define "port-ocean.serviceAccountName" -}}
+{{- if not (.Values.podServiceAccount).name }}
+{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
+{{- printf "%s-sa" $prefix }}
+{{- else }}
+{{- printf "%s" .Values.podServiceAccount.name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
+
 {{/*
 Get cron job name
 */}}
