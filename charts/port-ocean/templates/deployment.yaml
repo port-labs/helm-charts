@@ -23,8 +23,8 @@ spec:
         app: {{ include "port-ocean.deploymentName" . }}
         {{- include "port-ocean.labels" . | nindent 8 }}
     spec:
-      {{- with .Values.podServiceAccount.name }}
-      serviceAccountName: {{ . }}
+      {{- if or .Values.podServiceAccount.name .Values.podServiceAccount.create }}
+      serviceAccountName: {{ include "port-ocean.serviceAccountName" . }}
       {{- end }}
       terminationGracePeriodSeconds: {{ default 30 .Values.terminationGracePeriodSeconds }}
       {{- with .Values.imagePullSecrets }}
