@@ -170,7 +170,7 @@ Get ServiceAccount name
 {{- $prefix:= include "port-ocean.metadataNamePrefix" . }}
 {{- printf "%s-sa" $prefix }}
 {{- else }}
-{{- printf "%s" .Values.podServiceAccount.name | trunc 63 | trimSuffix "-" }}
+{{- printf "%s" (tpl .Values.podServiceAccount.name $) | trunc 63 | trimSuffix "-" }}
 {{- end }}
 {{- end }}
 
