@@ -88,6 +88,10 @@ spec:
           - name: OCEAN__DATABASE__PASSWORD
             value: {{ .Values.postgresql.global.postgresql.auth.password }}
         {{- end }}
+        {{- if .Values.liveEvents.baseUrl }}
+          - name: OCEAN__BASE_URL
+            value: {{ .Values.liveEvents.baseUrl }}
+        {{- end }}
         {{- if .Values.extraEnv }}
           {{- tpl (toYaml .Values.extraEnv) . | nindent 10 }}
         {{- end }}
