@@ -27,6 +27,9 @@ data:
   OCEAN__INTEGRATION__CONFIG__{{ $key | snakecase | upper }}: {{ $value | quote }}
   {{- end }}
   {{- end }}
+  {{- if .Values.liveEvents.baseUrl }}
+  OCEAN__BASE_URL: "{{ .Values.liveEvents.baseUrl }}"
+  {{- end }}
   {{- if .Values.liveEvents.extraConfig }}
   {{- range $key, $value := .Values.integration.extraConfig }}
   {{ $key | snakecase | upper }}: {{ $value | quote }}
