@@ -38,9 +38,6 @@ spec:
             - -config=/config/config.yaml
             - -delete-dependents={{ .Values.deleteDependents }}
             - -create-missing-related-entities={{ .Values.createMissingRelatedEntities }}
-            {{- if ne (int .Values.verbosity) 0 }}
-            - -v={{ .Values.verbosity }}
-            {{- end }}
             {{- if gt (int .Values.resyncInterval) 0 }}
             - -resync-interval={{ .Values.resyncInterval }}
             {{- end }}
@@ -71,6 +68,8 @@ spec:
               value: {{ .Values.eventListener.securityProtocol | quote }}
             - name: EVENT_LISTENER_AUTHENTICATION_MECHANISM
               value: {{ .Values.eventListener.authenticationMechanism | quote }}
+            - name: HTTP_LOGGING_ENABLED
+              value: {{ .Values.httpLoggingEnabled }}
             {{- end }}
           {{- if .Values.extraEnv }}
             {{- tpl (toYaml .Values.extraEnv) $ | nindent 12 }}
