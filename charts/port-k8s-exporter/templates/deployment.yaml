@@ -60,8 +60,8 @@ spec:
               value: {{ .Values.eventListener.type }}
             - name: HTTP_LOGGING_ENABLED
               value: {{ .Values.httpLoggingEnabled }}
-            - name: MIN_LOG_LEVEL_TO_CAPTURE
-              value: {{ .Values.minLogLevelToCapture | quote }}
+            - name: LOGGING_LEVEL
+              value: {{ .Values.loggingLevel | quote }}
             {{- if eq .Values.eventListener.type "POLLING" }}
             - name: EVENT_LISTENER_POLLING_RATE
               value: {{ .Values.eventListener.pollingRate | quote }}

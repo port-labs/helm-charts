@@ -30,7 +30,7 @@ eventListener:
   authenticationMechanism: "SCRAM-SHA-512"
 
 httpLoggingEnabled: true
-minLogLevelToCapture: "INFO"
+loggingLevel: "info"
 secret:
   annotations: {}
   name: ""
