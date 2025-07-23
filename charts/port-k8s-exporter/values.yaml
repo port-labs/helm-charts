@@ -29,7 +29,7 @@ eventListener:
   securityProtocol: "SASL_SSL"
   authenticationMechanism: "SCRAM-SHA-512"
 
-httpLoggingEnabled: true
+httpLoggingEnabled: "true"
 loggingLevel: "info"
 secret:
   annotations: {}
