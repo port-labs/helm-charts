@@ -205,3 +205,5 @@ postgresql:
         password: password
         postgresPassword: password
         username: port_admin
+
+datalakeEnabled: false
