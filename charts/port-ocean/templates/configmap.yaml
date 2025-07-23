@@ -40,3 +40,4 @@ data:
   {{ $key | snakecase | upper }}: {{ $value | quote }}
   {{- end }}
   {{- end }}
+  OCEAN__DATALAKE_ENABLED: "{{ .Values.datalakeEnabled | default false }}"
