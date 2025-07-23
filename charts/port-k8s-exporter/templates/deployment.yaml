@@ -59,7 +59,7 @@ spec:
             - name: EVENT_LISTENER_TYPE
               value: {{ .Values.eventListener.type }}
             - name: HTTP_LOGGING_ENABLED
-              value: {{ .Values.httpLoggingEnabled }}
+              value: {{ .Values.httpLoggingEnabled | quote }}
             - name: LOGGING_LEVEL
               value: {{ .Values.loggingLevel | quote }}
             {{- if eq .Values.eventListener.type "POLLING" }}
