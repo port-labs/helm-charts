@@ -206,4 +206,4 @@ postgresql:
         postgresPassword: password
         username: port_admin
 
-datalakeEnabled: false
+lakehouseEnabled: false
