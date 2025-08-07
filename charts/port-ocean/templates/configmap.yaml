@@ -8,6 +8,7 @@ metadata:
   name: {{ include "port-ocean.configMapName" . }}
 data:
   OCEAN__PORT__BASE_URL: {{ .Values.port.baseUrl | quote }}
+  OCEAN__PORT__INGEST_URL: {{ .Values.port.ingestUrl | quote }}
   OCEAN__INITIALIZE_PORT_RESOURCES: "{{ .Values.initializePortResources | default false }}"
   OCEAN__ALLOW_ENVIRONMENT_VARIABLES_JQ_ACCESS: "{{ .Values.allowEnvironmentVariablesJqAccess | default true }}"
   {{- if  and .Values.scheduledResyncInterval (not (eq .Values.workload.kind "CronJob")) }}
