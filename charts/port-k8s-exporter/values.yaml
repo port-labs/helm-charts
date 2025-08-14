@@ -31,6 +31,8 @@ eventListener:
 
 httpLoggingEnabled: "true"
 loggingLevel: "info"
+metricsEnabled: "true"
+metricsPort: 9091
 secret:
   annotations: {}
   name: ""

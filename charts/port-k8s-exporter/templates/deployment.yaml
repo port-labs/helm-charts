@@ -62,6 +62,10 @@ spec:
               value: {{ .Values.httpLoggingEnabled | quote }}
             - name: LOGGING_LEVEL
               value: {{ .Values.loggingLevel | quote }}
+            - name: METRICS_ENABLED
+              value: {{ .Values.metricsEnabled | quote }}
+            - name: METRICS_PORT
+              value: {{ .Values.metricsPort | quote }}
             {{- if eq .Values.eventListener.type "POLLING" }}
             - name: EVENT_LISTENER_POLLING_RATE
               value: {{ .Values.eventListener.pollingRate | quote }}
