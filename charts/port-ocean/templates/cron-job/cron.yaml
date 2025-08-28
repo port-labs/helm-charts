@@ -69,7 +69,7 @@ spec:
                   echo "PostgreSQL is ready!"
             {{- end }}
             - name: terminate-old-resync-jobs
-              image: bitnami/kubectl:latest
+              image: bitnamisecure/kubectl:latest
               env:
                 - name: JOB_NAME
                   valueFrom:

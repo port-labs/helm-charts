@@ -18,7 +18,7 @@ spec:
       activeDeadlineSeconds: 180
       containers:
         - name: kubectl
-          image: bitnami/kubectl:latest
+          image: bitnamisecure/kubectl:latest
           command: [ "sh", "-c" ]
           env:
             - name: TOKEN
