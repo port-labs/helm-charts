@@ -199,6 +199,12 @@ readinessProbe:
 
 postgresql:
   enabled: false
+
+  image:
+    registry: docker.io
+    repository: bitnamisecure/postgresql
+    tag: latest
+
   global:
     postgresql:
       auth:
