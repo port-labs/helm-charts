@@ -57,7 +57,7 @@ spec:
             {{- end }}
             {{- if .Values.postgresql.enabled }}
             - name: wait-for-postgresql
-              image: postgres:17.5-alpine
+              image: {{ .Values.postgresql.image }}
               command:
                 - sh
                 - -c
@@ -69,7 +69,7 @@ spec:
                   echo "PostgreSQL is ready!"
             {{- end }}
             - name: terminate-old-resync-jobs
-              image: bitnamisecure/kubectl:latest
+              image: {{ .Values.workload.cron.kubectlImage }}
               env:
                 - name: JOB_NAME
                   valueFrom:
