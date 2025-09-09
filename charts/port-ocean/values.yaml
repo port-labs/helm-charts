@@ -214,4 +214,4 @@ postgresql:
         postgresPassword: password
         username: port_admin
 
-lakehouseEnabled: false
+lakehouseEnabled: true

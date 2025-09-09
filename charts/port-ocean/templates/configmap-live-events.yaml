@@ -36,4 +36,5 @@ data:
   {{ $key | snakecase | upper }}: {{ $value | quote }}
   {{- end }}
   {{- end }}
+  OCEAN__LAKEHOUSE_ENABLED: "{{ .Values.lakehouseEnabled | default false }}"
 {{- end }}
