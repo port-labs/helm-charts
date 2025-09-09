@@ -41,7 +41,7 @@ spec:
         {{- end }}
         {{- if .Values.postgresql.enabled }}
         - name: wait-for-postgresql
-          image: postgres:17.5-alpine
+          image: {{ .Values.postgresql.image }}
           command:
             - sh
             - -c
