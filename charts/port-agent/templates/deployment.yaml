@@ -56,6 +56,9 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           {{- end }}
           volumeMounts:
+          {{- if .Values.extraVolumeMounts }}
+            {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 12 }}
+          {{- end }}
             {{- if .Values.controlThePayloadConfig }}
             - mountPath: /app/control_the_payload_config.json
               name: {{ include "port-agent.fullname" . }}
@@ -68,6 +71,9 @@ spec:
               readOnly: true
           {{- end }}
       volumes:
+        {{- if .Values.extraVolumes }}
+        {{- tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
+        {{- end }}
         {{- if .Values.controlThePayloadConfig }}
         - name: {{ include "port-agent.fullname" . }}
           configMap:

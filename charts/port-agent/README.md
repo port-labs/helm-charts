@@ -21,15 +21,15 @@ port-labs` to see the charts.
 
 Then, install the chart using the following command:
 
-    helm upgrade --install my-port-agent port-labs/port-agent \
-        --create-namespace --namespace port-agent \
-        --set env.normal.PORT_ORG_ID=YOUR_PORT_ORG_ID
-        --set env.normal.PORT_API_BASE_URL=https://api.getport.io \
-        --set env.normal.KAFKA_CONSUMER_GROUP_ID=YOUR_KAFKA_CONSUMER_GROUP_ID \
-        --set env.secret.PORT_CLIENT_ID=YOUR_PORT_CLIENT_ID \
-        --set env.secret.PORT_CLIENT_SECRET=YOUR_PORT_CLIENT_SECRET
-
-*
+```bash showLineNumbers
+helm upgrade --install my-port-agent port-labs/port-agent \
+    --create-namespace --namespace port-agent \
+    --set env.normal.PORT_ORG_ID=YOUR_PORT_ORG_ID \
+    --set env.normal.PORT_API_BASE_URL=https://api.getport.io \
+    --set env.normal.KAFKA_CONSUMER_GROUP_ID=YOUR_KAFKA_CONSUMER_GROUP_ID \
+    --set env.secret.PORT_CLIENT_ID=YOUR_PORT_CLIENT_ID \
+    --set env.secret.PORT_CLIENT_SECRET=YOUR_PORT_CLIENT_SECRET
+```
 
 Replace `YOUR_PORT_ORG_ID`, `YOUR_KAFKA_CONSUMER_GROUP_ID`, `YOUR_PORT_CLIENT_ID`, `YOUR_PORT_CLIENT_SECRET`
 with the values that Port supplied you.
@@ -70,17 +70,19 @@ The following table lists the configuration parameters of the `port-agent` chart
 | `podAnnotations`                                     | Annotations to be added to the pod                                                         | `{}`                                                                                                                                                                                                                              |
 | `podSecurityContext`                                 | Security context applied to the pod                                                        | `{}`                                                                                                                                                                                                                              |
 | `containerSecurityContext`                           | Security context applied to the container                                                  | `{}`                                                                                                                                                                                                                              |
+| `extraVolumes`                                       | Additional volumes to be added to the pod                                                  | `[]`                                                                                                                                                                                                                              |
+| `extraVolumeMounts`                                  | Additional volume mounts to be added to the container                                      | `[]`                                                                                                                                                                                                                              |
 | `resources`                                          | Container resource requests & limits                                                       | `{}`                                                                                                                                                                                                                              |
 | `nodeSelector`                                       | NodeSelector applied to the pod                                                            | `{}`                                                                                                                                                                                                                              |
 | `tolerations`                                        | Tolerations applied to the pod                                                             | `[]`                                                                                                                                                                                                                              |
 | `affinity`                                           | Affinity applied to the pod                                                                | `{}`                                                                                                                                                                                                                              |
-| `selfSignedCertificate` | Self Signed certificate for the agent                                                      | `{}`                     |
-| `selfSignedCertificate.enabled`     | Enable self-signed certificate trust for the agent                                         | `false`                        |
-| `selfSignedCertificate.certificate` | The value of the self-signed certificate (only when `selfSignedCertificate.enabled=true`)  | `""`                        |
-| `selfSignedCertificate.secret` | Secret with self-signed certificate                                                        | `{}`                        |
-| `selfSignedCertificate.secret.useExistingSecret` | Enable this if you wish to use your own secret with the self-signed certificate            | `false`                        |
-| `selfSignedCertificate.secret.key` | The key in the existing self-signed certificate secret                                     | `crt`                        |
-| `selfSignedCertificate.secret.name` | The name of an existing secret containing the self-signed certificate                      | `""`                        |
+| `selfSignedCertificate`                              | Self Signed certificate for the agent                                                      | `{}`                                                                                                                                                                                                                              |
+| `selfSignedCertificate.enabled`                      | Enable self-signed certificate trust for the agent                                         | `false`                                                                                                                                                                                                                           |
+| `selfSignedCertificate.certificate`                  | The value of the self-signed certificate (only when `selfSignedCertificate.enabled=true`)  | `""`                                                                                                                                                                                                                              |
+| `selfSignedCertificate.secret`                       | Secret with self-signed certificate                                                        | `{}`                                                                                                                                                                                                                              |
+| `selfSignedCertificate.secret.useExistingSecret`     | Enable this if you wish to use your own secret with the self-signed certificate            | `false`                                                                                                                                                                                                                           |
+| `selfSignedCertificate.secret.key`                   | The key in the existing self-signed certificate secret                                     | `crt`                                                                                                                                                                                                                             |
+| `selfSignedCertificate.secret.name`                  | The name of an existing secret containing the self-signed certificate                      | `""`                                                                                                                                                                                                                              |
 
 To override values in `helm install`, use either the `--set` flag or the `--set-file` flag to set individual values from
 a file.
@@ -93,15 +95,18 @@ Alternatively, you can use a YAML file that specifies the values while installin
 
 
 ### Self-signed certificate trust
-For self-hosted 3rd-party applications with self-signed certificates, you will need to add your CA to the integration's configuration. 
+For self-hosted 3rd-party applications with self-signed certificates, you will need to add your CA to the agent's configuration. 
 To do so, you will need to run the `helm install` command with the following flags:
 
 ```sh
 helm install my-port-agent port-labs/port-agent \
    --create-namespace --namespace port-agent \
-   -f custom_values.yaml
+   -f custom_values.yaml \
    # Flag for enabling self signed certificates
-   --set selfSignedCertificate.enabled=true \ 
+   --set selfSignedCertificate.enabled=true \
    # Flag for passing the certificate file
    --set-file selfSignedCertificate.certificate=/PATH/TO/CERTIFICATE.crt
 ```
+
+### Multiple certificates
+For environments requiring multiple custom certificates, you can use the `extraVolumes` and `extraVolumeMounts` features alongside the built-in `selfSignedCertificate` feature.
