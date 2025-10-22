@@ -63,6 +63,23 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
+Execution Agent labels
+*/}}
+{{- define "port-ocean.executionAgent.labels" -}}
+helm.sh/chart: {{ include "port-ocean.chart" . }}
+{{- if .Values.executionAgent.worker.enabled -}}
+{{- include "port-ocean.executionAgent.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- range $key, $value := .Values.extraLabels }}
+{{$key}}: {{ $value }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
 Selector labels
 */}}
 {{- define "port-ocean.selectorLabels" }}
@@ -71,6 +88,10 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{- define "port-ocean.liveEvents.selectorLabels" }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{- define "port-ocean.executionAgent.selectorLabels" }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
@@ -104,6 +125,11 @@ Get config map name
 {{- define "port-ocean.liveEvents.configMapName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
 {{- printf "%s-live-events-config" $prefix }}
+{{- end }}
+
+{{- define "port-ocean.executionAgent.configMapName" -}}
+{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
+{{- printf "%s-execution-agent-config" $prefix }}
 {{- end }}
 
 {{/*
@@ -140,6 +166,11 @@ Get service name
 {{- printf "%s-live-events-service" $prefix }}
 {{- end }}
 
+{{- define "port-ocean.executionAgent.serviceName" -}}
+{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
+{{- printf "%s-execution-agent-service" $prefix }}
+{{- end }}
+
 {{/*
 Get container name
 */}}
@@ -161,6 +192,10 @@ Get deployment name
 {{- printf "%s-live-events-deployment" $prefix }}
 {{- end }}
 
+{{- define "port-ocean.executionAgent.deploymentName" -}}
+{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
+{{- printf "%s-execution-agent-deployment" $prefix }}
+{{- end }}
 
 {{/*
 Get ServiceAccount name

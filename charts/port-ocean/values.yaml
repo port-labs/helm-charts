@@ -214,3 +214,23 @@ postgresql:
         username: port_admin
 
 lakehouseEnabled: true
+
+executionAgent:
+  enabled: false
+  worker:
+    enabled: false
+    replicaCount: 1
+    initializePortResources: false
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "200m"
+  deployment:
+    rolloutStrategy:
+      type: RollingUpdate
+      maxSurge: 25%
+      maxUnavailable: 25%
+  extraConfig: { }

@@ -1,0 +1,37 @@
+{{- if and .Values.executionAgent.enabled .Values.executionAgent.worker.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "port-ocean.executionAgent.configMapName" . }}
+data:
+  OCEAN__PORT__CLIENT_ID: {{ .Values.port.clientId | quote }}
+  OCEAN__PORT__INGEST_URL: {{ .Values.port.ingestUrl | quote }}
+  OCEAN__INITIALIZE_PORT_RESOURCES: "false"
+  OCEAN__ALLOW_ENVIRONMENT_VARIABLES_JQ_ACCESS: "{{ .Values.allowEnvironmentVariablesJqAccess | default true }}"
+  OCEAN__EXECUTION_AGENT__ENABLED: "true"
+  {{- if .Values.clientTimeout }}
+  OCEAN__CLIENT_TIMEOUT: "{{ .Values.clientTimeout }}"
+  {{- end }}
+  {{- if .Values.port.baseUrl }}
+  OCEAN__PORT__BASE_URL: {{ .Values.port.baseUrl | quote }}
+  {{- end }}
+  {{- if .Values.integration.identifier }}
+  OCEAN__INTEGRATION__IDENTIFIER: {{ .Values.integration.identifier | quote }}
+  {{- end }}
+  {{- if .Values.integration.version }}
+  OCEAN__INTEGRATION__VERSION: {{ .Values.integration.version | quote }}
+  {{- end }}
+  {{- if .Values.integration.type }}
+  OCEAN__INTEGRATION__TYPE: {{ .Values.integration.type | quote }}
+  {{- end }}
+  {{- if .Values.integration.config }}
+  {{- range $key, $value := .Values.integration.config }}
+  OCEAN__INTEGRATION__CONFIG__{{ $key | snakecase | upper }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
+  {{- if .Values.integration.extraConfig }}
+  {{- range $key, $value := .Values.integration.extraConfig }}
+  OCEAN__INTEGRATION__{{ $key | snakecase | upper }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
+{{- end }}

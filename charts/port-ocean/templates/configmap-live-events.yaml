@@ -37,4 +37,5 @@ data:
   {{- end }}
   {{- end }}
   OCEAN__LAKEHOUSE_ENABLED: "{{ .Values.lakehouseEnabled | default false }}"
+  OCEAN__EXECUTION_AGENT__ENABLED: "{{ .Values.executionAgent.enabled | default false }}"
 {{- end }}

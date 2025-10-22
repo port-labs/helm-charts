@@ -42,3 +42,9 @@ data:
   {{- end }}
   {{- end }}
   OCEAN__LAKEHOUSE_ENABLED: "{{ .Values.lakehouseEnabled | default false }}"
+  OCEAN__EXECUTION_AGENT__ENABLED: "{{ .Values.executionAgent.enabled | default false }}"
+  {{- if .Values.executionAgent.extraConfig }}
+  {{- range $key, $value := .Values.executionAgent.extraConfig }}
+  OCEAN__EXECUTION_AGENT__{{ $key | snakecase | upper }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}

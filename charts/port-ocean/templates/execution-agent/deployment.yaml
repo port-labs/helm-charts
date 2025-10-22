@@ -1,0 +1,155 @@
+{{- if and .Values.executionAgent.enabled .Values.executionAgent.worker.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "port-ocean.executionAgent.deploymentName" . }}
+  labels:
+    {{- include "port-ocean.executionAgent.labels" . | nindent 4 }}
+    {{- if .Values.extraLabels }}
+    {{- toYaml .Values.extraLabels | nindent 4 }}
+    {{- end }}
+spec:
+  {{- if eq .Values.executionAgent.deployment.rolloutStrategy.type "Recreate" }}
+  strategy:
+    type: Recreate
+  {{- else }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: {{ .Values.executionAgent.deployment.rolloutStrategy.maxSurge | default "25%" }}
+      maxUnavailable: {{ .Values.executionAgent.deployment.rolloutStrategy.maxUnavailable | default "25%" }}
+  {{- end }}
+  replicas: {{ .Values.executionAgent.worker.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "port-ocean.executionAgent.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "port-ocean.executionAgent.labels" . | nindent 8 }}
+        {{- if .Values.extraLabels }}
+        {{- toYaml .Values.extraLabels | nindent 8 }}
+        {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.podServiceAccount.create }}
+      serviceAccountName: {{ include "port-ocean.serviceAccountName" . }}
+      {{- end }}
+      {{- if .Values.extraInitContainers }}
+      initContainers:
+      {{- toYaml .Values.extraInitContainers | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.imageRegistry }}/{{ .Chart.Name }}:{{ .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "port-ocean.executionAgent.configMapName" . }}
+            - secretRef:
+                name: {{ include "port-ocean.secretName" . }}
+          {{- if .Values.extraEnv }}
+          env:
+            {{- toYaml .Values.extraEnv | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          {{- with .Values.executionAgent.worker.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            {{- if .Values.extraVolumeMounts }}
+            {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
+            {{- end }}
+            {{- if .Values.selfSignedCertificate.enabled }}
+            - name: certificate
+              mountPath: /app/.config/cert.crt
+              subPath: cert.crt
+              readOnly: true
+            {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /docs
+              port: http
+            {{- with .Values.livenessProbe }}
+            {{- if .initialDelaySeconds }}
+            initialDelaySeconds: {{ .initialDelaySeconds }}
+            {{- end }}
+            {{- if .periodSeconds }}
+            periodSeconds: {{ .periodSeconds }}
+            {{- end }}
+            {{- if .timeoutSeconds }}
+            timeoutSeconds: {{ .timeoutSeconds }}
+            {{- end }}
+            {{- if .failureThreshold }}
+            failureThreshold: {{ .failureThreshold }}
+            {{- end }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /docs
+              port: http
+            {{- with .Values.readinessProbe }}
+            {{- if .initialDelaySeconds }}
+            initialDelaySeconds: {{ .initialDelaySeconds }}
+            {{- end }}
+            {{- if .periodSeconds }}
+            periodSeconds: {{ .periodSeconds }}
+            {{- end }}
+            {{- if .timeoutSeconds }}
+            timeoutSeconds: {{ .timeoutSeconds }}
+            {{- end }}
+            {{- if .failureThreshold }}
+            failureThreshold: {{ .failureThreshold }}
+            {{- end }}
+            {{- if .successThreshold }}
+            successThreshold: {{ .successThreshold }}
+            {{- end }}
+            {{- end }}
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        {{- if .Values.extraVolumes }}
+        {{- toYaml .Values.extraVolumes | nindent 8 }}
+        {{- end }}
+        {{- if .Values.selfSignedCertificate.enabled }}
+        - name: certificate
+          secret:
+            secretName: {{ .Values.selfSignedCertificate.secret.name }}
+            items:
+              - key: {{ .Values.selfSignedCertificate.secret.key }}
+                path: cert.crt
+        {{- end }}
+{{- end }}
