@@ -5,9 +5,6 @@ metadata:
   name: {{ include "port-ocean.executionAgent.deploymentName" . }}
   labels:
     {{- include "port-ocean.executionAgent.labels" . | nindent 4 }}
-    {{- if .Values.extraLabels }}
-    {{- toYaml .Values.extraLabels | nindent 4 }}
-    {{- end }}
 spec:
   {{- if eq .Values.executionAgent.deployment.rolloutStrategy.type "Recreate" }}
   strategy:
@@ -27,9 +24,6 @@ spec:
     metadata:
       labels:
         {{- include "port-ocean.executionAgent.labels" . | nindent 8 }}
-        {{- if .Values.extraLabels }}
-        {{- toYaml .Values.extraLabels | nindent 8 }}
-        {{- end }}
       {{- with .Values.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
@@ -48,7 +42,7 @@ spec:
       {{- end }}
       {{- if .Values.extraInitContainers }}
       initContainers:
-      {{- toYaml .Values.extraInitContainers | nindent 8 }}
+        {{- toYaml .Values.extraInitContainers | nindent 8 }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}

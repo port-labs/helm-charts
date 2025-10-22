@@ -4,10 +4,7 @@ kind: Service
 metadata:
   name: {{ include "port-ocean.executionAgent.serviceName" . }}
   labels:
-    {{- include "port-ocean.labels" . | nindent 4 }}
-    {{- if .Values.extraLabels }}
-    {{- toYaml .Values.extraLabels | nindent 4 }}
-    {{- end }}
+    {{- include "port-ocean.executionAgent.labels" . | nindent 4 }}
   {{- with .Values.service.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -20,5 +17,5 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app: {{ include "port-ocean.executionAgent.deploymentName" . }}
+    {{- include "port-ocean.executionAgent.selectorLabels" . | nindent 4 }}
 {{- end }}

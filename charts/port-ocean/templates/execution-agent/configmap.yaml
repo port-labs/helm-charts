@@ -3,6 +3,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "port-ocean.executionAgent.configMapName" . }}
+  labels:
+    {{- include "port-ocean.executionAgent.labels" . | nindent 4 }}
 data:
   OCEAN__PORT__CLIENT_ID: {{ .Values.port.clientId | quote }}
   OCEAN__PORT__INGEST_URL: {{ .Values.port.ingestUrl | quote }}
