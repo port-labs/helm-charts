@@ -18,7 +18,7 @@ spec:
       activeDeadlineSeconds: 180
       containers:
         - name: kubectl
-          image: bitnamisecure/kubectl:latest
+          image: {{ .Values.workload.cron.kubectlImage }}
           command: [ "sh", "-c" ]
           env:
             - name: TOKEN
