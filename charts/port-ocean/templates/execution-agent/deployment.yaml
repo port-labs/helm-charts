@@ -6,122 +6,152 @@ metadata:
   labels:
     {{- include "port-ocean.executionAgent.labels" . | nindent 4 }}
 spec:
-  {{- if eq .Values.executionAgent.deployment.rolloutStrategy.type "Recreate" }}
+  {{- with .Values.executionAgent.deployment.rolloutStrategy }}
   strategy:
-    type: Recreate
-  {{- else }}
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: {{ .Values.executionAgent.deployment.rolloutStrategy.maxSurge | default "25%" }}
-      maxUnavailable: {{ .Values.executionAgent.deployment.rolloutStrategy.maxUnavailable | default "25%" }}
+    {{- toYaml . | trim | nindent 4 }}
   {{- end }}
-  replicas: {{ .Values.executionAgent.worker.replicaCount }}
+  replicas: {{ .Values.executionAgent.worker.replicaCount | default 1 }}
   selector:
     matchLabels:
-      {{- include "port-ocean.executionAgent.selectorLabels" . | nindent 6 }}
+      app: {{ include "port-ocean.executionAgent.deploymentName" . }}
+      {{- include "port-ocean.executionAgent.selectorLabels" . | indent 6 }}
   template:
     metadata:
-      labels:
-        {{- include "port-ocean.executionAgent.labels" . | nindent 8 }}
       {{- with .Values.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      labels:
+        app: {{ include "port-ocean.executionAgent.deploymentName" . }}
+        {{- include "port-ocean.executionAgent.labels" . | nindent 8 }}
     spec:
+      {{- if or .Values.podServiceAccount.name .Values.podServiceAccount.create }}
+      serviceAccountName: {{ include "port-ocean.serviceAccountName" . }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ default 30 .Values.terminationGracePeriodSeconds }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.podSecurityContext }}
       securityContext:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if .Values.podServiceAccount.create }}
-      serviceAccountName: {{ include "port-ocean.serviceAccountName" . }}
-      {{- end }}
-      {{- if .Values.extraInitContainers }}
+        {{- if .Values.podSecurityContext }}
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        {{- end }}
       initContainers:
-        {{- toYaml .Values.extraInitContainers | nindent 8 }}
-      {{- end }}
+        {{- if .Values.extraInitContainers }}
+        {{- tpl (toYaml .Values.extraInitContainers) . | nindent 8 }}
+        {{- end }}
+        {{- if .Values.postgresql.enabled }}
+        - name: wait-for-postgresql
+          image: {{ .Values.postgresql.image }}
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h {{ .Release.Name }}-postgresql -p 5432 -U {{ .Values.postgresql.global.postgresql.auth.username }}; do
+                echo "Waiting for PostgreSQL {{ include "port-ocean.name" . }}-postgresql to be ready..."
+                sleep 2
+              done
+              echo "PostgreSQL is ready!"
+        {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
-          {{- with .Values.containerSecurityContext }}
-          securityContext:
-            {{- toYaml . | nindent 12 }}
+      - name: {{ include "port-ocean.containerName" . }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        image: '{{ .Values.imageRegistry }}/port-ocean-{{ .Values.integration.type }}:{{ .Values.integration.version | default "latest" }}'
+        {{- if .Values.service.enabled }}
+        securityContext:
+          {{- if .Values.containerSecurityContext }}
+          {{- toYaml .Values.containerSecurityContext | nindent 10 }}
           {{- end }}
-          image: "{{ .Values.imageRegistry }}/{{ .Chart.Name }}:{{ .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.imagePullPolicy }}
-          envFrom:
-            - configMapRef:
-                name: {{ include "port-ocean.executionAgent.configMapName" . }}
-            - secretRef:
-                name: {{ include "port-ocean.secretName" . }}
-          {{- if .Values.extraEnv }}
-          env:
-            {{- toYaml .Values.extraEnv | nindent 12 }}
+        resources:
+          {{- if .Values.executionAgent.worker.resources }}
+          {{- toYaml .Values.executionAgent.worker.resources | nindent 10 }}
           {{- end }}
-          ports:
-            - name: http
-              containerPort: 8000
-              protocol: TCP
-          {{- with .Values.executionAgent.worker.resources }}
-          resources:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          volumeMounts:
-            {{- if .Values.extraVolumeMounts }}
-            {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
-            {{- end }}
-            {{- if .Values.selfSignedCertificate.enabled }}
-            - name: certificate
-              mountPath: /app/.config/cert.crt
-              subPath: cert.crt
-              readOnly: true
-            {{- end }}
-          {{- if .Values.livenessProbe.enabled }}
-          livenessProbe:
-            httpGet:
-              path: /docs
-              port: http
-            {{- with .Values.livenessProbe }}
-            {{- if .initialDelaySeconds }}
-            initialDelaySeconds: {{ .initialDelaySeconds }}
-            {{- end }}
-            {{- if .periodSeconds }}
-            periodSeconds: {{ .periodSeconds }}
-            {{- end }}
-            {{- if .timeoutSeconds }}
-            timeoutSeconds: {{ .timeoutSeconds }}
-            {{- end }}
-            {{- if .failureThreshold }}
-            failureThreshold: {{ .failureThreshold }}
-            {{- end }}
-            {{- end }}
-          {{- end }}
-          {{- if .Values.readinessProbe.enabled }}
-          readinessProbe:
-            httpGet:
-              path: /docs
-              port: http
-            {{- with .Values.readinessProbe }}
-            {{- if .initialDelaySeconds }}
-            initialDelaySeconds: {{ .initialDelaySeconds }}
-            {{- end }}
-            {{- if .periodSeconds }}
-            periodSeconds: {{ .periodSeconds }}
-            {{- end }}
-            {{- if .timeoutSeconds }}
-            timeoutSeconds: {{ .timeoutSeconds }}
-            {{- end }}
-            {{- if .failureThreshold }}
-            failureThreshold: {{ .failureThreshold }}
-            {{- end }}
-            {{- if .successThreshold }}
-            successThreshold: {{ .successThreshold }}
-            {{- end }}
-            {{- end }}
-          {{- end }}
+        ports:
+        - containerPort: {{.Values.executionAgent.service.port}}
+          protocol: TCP
+        {{- end }}
+        env:
+        {{- if .Values.selfSignedCertificate.enabled }}
+          - name: SSL_CERT_FILE
+            value: /etc/ssl/certs/ca-certificates.crt
+          - name: REQUESTS_CA_BUNDLE
+            value: /etc/ssl/certs/ca-certificates.crt
+        {{- end }}
+        {{- if .Values.postgresql.enabled }}
+          - name: OCEAN__DATABASE__HOST
+            value: {{ include "port-ocean.name" . }}-postgresql
+          - name: OCEAN__DATABASE__PORT
+            value: '5432'
+          - name: OCEAN__DATABASE__NAME
+            value: {{ .Values.postgresql.global.postgresql.auth.database }}
+          - name: OCEAN__DATABASE__USERNAME
+            value: {{ .Values.postgresql.global.postgresql.auth.username }}
+          - name: OCEAN__DATABASE__PASSWORD
+            value: {{ .Values.postgresql.global.postgresql.auth.password }}
+        {{- end }}
+        {{- if .Values.extraEnv }}
+          {{- tpl (toYaml .Values.extraEnv) . | nindent 10 }}
+        {{- end }}
+        envFrom:
+          - configMapRef:
+              name: {{ include "port-ocean.executionAgent.configMapName" . }}
+          {{- include "port-ocean.additionalSecrets" . | nindent 10 }}
+        volumeMounts:
+        {{- if .Values.extraVolumeMounts }}
+          {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 10 }}
+        {{- end }}
+        {{- if .Values.selfSignedCertificate.enabled }}
+          - name: certificates
+            mountPath: /usr/local/share/ca-certificates/cert.crt
+            subPath: cert.crt
+            readOnly: true
+        {{- end }}
+        {{- if .Values.livenessProbe.enabled}}
+        livenessProbe:
+          httpGet:
+            path: /docs
+            port: {{.Values.executionAgent.service.port}}
+          initialDelaySeconds: {{ default 30 .Values.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ default 10 .Values.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ default 5 .Values.livenessProbe.timeoutSeconds }}
+          successThreshold: 1
+          failureThreshold: {{ default 3 .Values.livenessProbe.failureThreshold }}
+        {{- end }}
+        {{- if (.Values.readinessProbe).enabled}}
+        readinessProbe:
+          httpGet:
+            path: /docs
+            port: {{.Values.executionAgent.service.port}}
+          initialDelaySeconds: {{ default 30 .Values.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ default 10 .Values.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ default 5 .Values.readinessProbe.timeoutSeconds }}
+          successThreshold: {{ default 2 .Values.readinessProbe.successThreshold }}
+          failureThreshold: {{ default 3 .Values.readinessProbe.failureThreshold }}
+        {{- end }}
+      volumes:
+        {{- if .Values.extraVolumes }}
+        {{- tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
+        {{- end }}
+        {{- if and .Values.selfSignedCertificate.enabled .Values.selfSignedCertificate.secret.useExistingSecret }}
+        - name: certificates
+          projected:
+            sources:
+              - secret:
+                  name: {{ .Values.selfSignedCertificate.secret.name }}
+                  items:
+                    - key: {{ .Values.selfSignedCertificate.secret.key }}
+                      path: cert.crt
+        {{- else if .Values.selfSignedCertificate.enabled }}
+        - name: certificates
+          projected:
+            sources:
+              - secret:
+                  name: {{ include "port-ocean.selfSignedCertName" . }}
+                  items:
+                    - key: crt
+                      path: cert.crt
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -134,16 +164,4 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      volumes:
-        {{- if .Values.extraVolumes }}
-        {{- toYaml .Values.extraVolumes | nindent 8 }}
-        {{- end }}
-        {{- if .Values.selfSignedCertificate.enabled }}
-        - name: certificate
-          secret:
-            secretName: {{ .Values.selfSignedCertificate.secret.name }}
-            items:
-              - key: {{ .Values.selfSignedCertificate.secret.key }}
-                path: cert.crt
-        {{- end }}
 {{- end }}

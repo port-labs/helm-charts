@@ -234,4 +234,9 @@ executionAgent:
       type: RollingUpdate
       maxSurge: 25%
       maxUnavailable: 25%
+  service:
+    enabled: true
+    type: ClusterIP
+    port: 8000
+    annotations: { }
   extraConfig: { }
