@@ -161,8 +161,9 @@ liveEvents:
   deployment:
     rolloutStrategy:
       type: RollingUpdate
-      maxSurge: 25%
-      maxUnavailable: 25%
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
   service:
     enabled: true
     type: ClusterIP
@@ -232,8 +233,9 @@ executionAgent:
   deployment:
     rolloutStrategy:
       type: RollingUpdate
-      maxSurge: 25%
-      maxUnavailable: 25%
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
   service:
     enabled: true
     type: ClusterIP

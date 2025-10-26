@@ -32,7 +32,7 @@ data:
   OCEAN__BASE_URL: "{{ .Values.liveEvents.baseUrl }}"
   {{- end }}
   {{- if .Values.liveEvents.extraConfig }}
-  {{- range $key, $value := .Values.integration.extraConfig }}
+  {{- range $key, $value := .Values.liveEvents.extraConfig }}
   {{ $key | snakecase | upper }}: {{ $value | quote }}
   {{- end }}
   {{- end }}
