@@ -4,18 +4,18 @@ kind: Service
 metadata:
   name: {{ include "port-ocean.executionAgent.serviceName" . }}
   labels:
-    {{- include "port-ocean.executionAgent.labels" . | nindent 4 }}
-  {{- with .Values.service.annotations }}
+    {{- include "port-ocean.executionAgent.labels" $ | nindent 4 }}
   annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+    {{- if .Values.executionAgent.service.annotations }}
+      {{- toYaml .Values.executionAgent.service.annotations | nindent 4 }}
+    {{- end }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ .Values.executionAgent.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
+    - name: ocean-port
       protocol: TCP
-      name: http
+      port: {{ .Values.executionAgent.service.port }} 
+      targetPort: {{ .Values.executionAgent.service.port }}
   selector:
-    {{- include "port-ocean.executionAgent.selectorLabels" . | nindent 4 }}
+    app: {{ include "port-ocean.executionAgent.deploymentName" . }}
 {{- end }}
