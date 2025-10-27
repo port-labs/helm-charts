@@ -234,8 +234,9 @@ executionAgent:
     rolloutStrategy:
       type: RollingUpdate
       rollingUpdate:
-        maxSurge: 25%
-        maxUnavailable: 25%
+        # Ensure no more than 1 pod is running at a time
+        maxSurge: 0
+        maxUnavailable: 1
   service:
     enabled: true
     type: ClusterIP
