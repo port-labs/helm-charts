@@ -221,6 +221,8 @@ executionAgent:
   enabled: false
   worker:
     enabled: false
+    rolloutStrategy:
+      type: Recreate
     replicaCount: 1
     initializePortResources: false
     resources:
@@ -230,13 +232,6 @@ executionAgent:
       limits:
         memory: "512Mi"
         cpu: "200m"
-  deployment:
-    rolloutStrategy:
-      type: RollingUpdate
-      rollingUpdate:
-        # Ensure no more than 1 pod is running at a time
-        maxSurge: 0
-        maxUnavailable: 1
   service:
     enabled: true
     type: ClusterIP
