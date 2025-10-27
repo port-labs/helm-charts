@@ -217,7 +217,7 @@ postgresql:
 
 lakehouseEnabled: true
 
-executionAgent:
+actionsProcessor:
   enabled: false
   worker:
     enabled: false

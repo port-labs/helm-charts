@@ -65,10 +65,10 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Execution Agent labels
 */}}
-{{- define "port-ocean.executionAgent.labels" -}}
+{{- define "port-ocean.actionsProcessor.labels" -}}
 helm.sh/chart: {{ include "port-ocean.chart" . }}
-{{- if .Values.executionAgent.worker.enabled -}}
-{{- include "port-ocean.executionAgent.selectorLabels" . }}
+{{- if .Values.actionsProcessor.worker.enabled -}}
+{{- include "port-ocean.actionsProcessor.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -91,7 +91,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
-{{- define "port-ocean.executionAgent.selectorLabels" }}
+{{- define "port-ocean.actionsProcessor.selectorLabels" }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
@@ -127,9 +127,9 @@ Get config map name
 {{- printf "%s-live-events-config" $prefix }}
 {{- end }}
 
-{{- define "port-ocean.executionAgent.configMapName" -}}
+{{- define "port-ocean.actionsProcessor.configMapName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-execution-agent-config" $prefix }}
+{{- printf "%s-actions-processor-config" $prefix }}
 {{- end }}
 
 {{/*
@@ -166,9 +166,9 @@ Get service name
 {{- printf "%s-live-events-service" $prefix }}
 {{- end }}
 
-{{- define "port-ocean.executionAgent.serviceName" -}}
+{{- define "port-ocean.actionsProcessor.serviceName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-execution-agent-service" $prefix }}
+{{- printf "%s-actions-processor-service" $prefix }}
 {{- end }}
 
 {{/*
@@ -192,9 +192,9 @@ Get deployment name
 {{- printf "%s-live-events-deployment" $prefix }}
 {{- end }}
 
-{{- define "port-ocean.executionAgent.deploymentName" -}}
+{{- define "port-ocean.actionsProcessor.deploymentName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-execution-agent-deployment" $prefix }}
+{{- printf "%s-actions-processor-deployment" $prefix }}
 {{- end }}
 
 {{/*

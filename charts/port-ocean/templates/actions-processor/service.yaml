@@ -1,0 +1,21 @@
+{{- if and .Values.actionsProcessor.enabled .Values.actionsProcessor.worker.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "port-ocean.actionsProcessor.serviceName" . }}
+  labels:
+    {{- include "port-ocean.actionsProcessor.labels" $ | nindent 4 }}
+  annotations:
+    {{- if .Values.actionsProcessor.service.annotations }}
+      {{- toYaml .Values.actionsProcessor.service.annotations | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ .Values.actionsProcessor.service.type }}
+  ports:
+    - name: ocean-port
+      protocol: TCP
+      port: {{ .Values.actionsProcessor.service.port }} 
+      targetPort: {{ .Values.actionsProcessor.service.port }}
+  selector:
+    app: {{ include "port-ocean.actionsProcessor.deploymentName" . }}
+{{- end }}

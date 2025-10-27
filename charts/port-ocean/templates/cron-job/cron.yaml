@@ -125,7 +125,7 @@ spec:
                   }
 
                   rollout_if_exists {{ include "port-ocean.liveEvents.deploymentName" . }}
-                  rollout_if_exists {{ include "port-ocean.executionAgent.deploymentName" . }}
+                  rollout_if_exists {{ include "port-ocean.actionsProcessor.deploymentName" . }}
 
                   echo "Exiting init container"
           containers:

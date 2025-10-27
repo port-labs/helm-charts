@@ -1,20 +1,20 @@
-{{- if and .Values.executionAgent.enabled .Values.executionAgent.worker.enabled }}
+{{- if and .Values.actionsProcessor.enabled .Values.actionsProcessor.worker.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "port-ocean.executionAgent.deploymentName" . }}
+  name: {{ include "port-ocean.actionsProcessor.deploymentName" . }}
   labels:
-    {{- include "port-ocean.executionAgent.labels" . | nindent 4 }}
+    {{- include "port-ocean.actionsProcessor.labels" . | nindent 4 }}
 spec:
-  {{- with .Values.executionAgent.deployment.rolloutStrategy }}
+  {{- with .Values.actionsProcessor.worker.rolloutStrategy }}
   strategy:
     {{- toYaml . | trim | nindent 4 }}
   {{- end }}
-  replicas: {{ .Values.executionAgent.worker.replicaCount | default 1 }}
+  replicas: {{ .Values.actionsProcessor.worker.replicaCount | default 1 }}
   selector:
     matchLabels:
-      app: {{ include "port-ocean.executionAgent.deploymentName" . }}
-      {{- include "port-ocean.executionAgent.selectorLabels" . | indent 6 }}
+      app: {{ include "port-ocean.actionsProcessor.deploymentName" . }}
+      {{- include "port-ocean.actionsProcessor.selectorLabels" . | indent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -22,8 +22,8 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        app: {{ include "port-ocean.executionAgent.deploymentName" . }}
-        {{- include "port-ocean.executionAgent.labels" . | nindent 8 }}
+        app: {{ include "port-ocean.actionsProcessor.deploymentName" . }}
+        {{- include "port-ocean.actionsProcessor.labels" . | nindent 8 }}
     spec:
       {{- if or .Values.podServiceAccount.name .Values.podServiceAccount.create }}
       serviceAccountName: {{ include "port-ocean.serviceAccountName" . }}
@@ -64,11 +64,11 @@ spec:
           {{- toYaml .Values.containerSecurityContext | nindent 10 }}
           {{- end }}
         resources:
-          {{- if .Values.executionAgent.worker.resources }}
-          {{- toYaml .Values.executionAgent.worker.resources | nindent 10 }}
+          {{- if .Values.actionsProcessor.worker.resources }}
+          {{- toYaml .Values.actionsProcessor.worker.resources | nindent 10 }}
           {{- end }}
         ports:
-        - containerPort: {{.Values.executionAgent.service.port}}
+        - containerPort: {{.Values.actionsProcessor.service.port}}
           protocol: TCP
         {{- end }}
         env:
@@ -95,7 +95,7 @@ spec:
         {{- end }}
         envFrom:
           - configMapRef:
-              name: {{ include "port-ocean.executionAgent.configMapName" . }}
+              name: {{ include "port-ocean.actionsProcessor.configMapName" . }}
           {{- include "port-ocean.additionalSecrets" . | nindent 10 }}
         volumeMounts:
         {{- if .Values.extraVolumeMounts }}
@@ -111,7 +111,7 @@ spec:
         livenessProbe:
           httpGet:
             path: /docs
-            port: {{.Values.executionAgent.service.port}}
+            port: {{.Values.actionsProcessor.service.port}}
           initialDelaySeconds: {{ default 30 .Values.livenessProbe.initialDelaySeconds }}
           periodSeconds: {{ default 10 .Values.livenessProbe.periodSeconds }}
           timeoutSeconds: {{ default 5 .Values.livenessProbe.timeoutSeconds }}
@@ -122,7 +122,7 @@ spec:
         readinessProbe:
           httpGet:
             path: /docs
-            port: {{.Values.executionAgent.service.port}}
+            port: {{.Values.actionsProcessor.service.port}}
           initialDelaySeconds: {{ default 30 .Values.readinessProbe.initialDelaySeconds }}
           periodSeconds: {{ default 10 .Values.readinessProbe.periodSeconds }}
           timeoutSeconds: {{ default 5 .Values.readinessProbe.timeoutSeconds }}

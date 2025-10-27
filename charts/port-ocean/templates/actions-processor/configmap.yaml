@@ -1,10 +1,10 @@
-{{- if and .Values.executionAgent.enabled .Values.executionAgent.worker.enabled }}
+{{- if and .Values.actionsProcessor.enabled .Values.actionsProcessor.worker.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "port-ocean.executionAgent.configMapName" . }}
+  name: {{ include "port-ocean.actionsProcessor.configMapName" . }}
   labels:
-    {{- include "port-ocean.executionAgent.labels" . | nindent 4 }}
+    {{- include "port-ocean.actionsProcessor.labels" . | nindent 4 }}
 data:
   OCEAN__PORT__BASE_URL: {{ .Values.port.baseUrl | quote }}
   OCEAN__PORT__INGEST_URL: {{ .Values.port.ingestUrl | quote }}
@@ -12,7 +12,7 @@ data:
   {{- if eq .Values.initializePortResources true}}
   OCEAN__INITIALIZE_PORT_RESOURCES: "false"
   {{- else }}
-  OCEAN__INITIALIZE_PORT_RESOURCES: "{{ .Values.executionAgent.worker.initializePortResources | default false }}"
+  OCEAN__INITIALIZE_PORT_RESOURCES: "{{ .Values.actionsProcessor.worker.initializePortResources | default false }}"
   {{- end }}
   OCEAN__ALLOW_ENVIRONMENT_VARIABLES_JQ_ACCESS: "{{ .Values.allowEnvironmentVariablesJqAccess | default true }}"
   {{- if .Values.clientTimeout }}
@@ -40,8 +40,8 @@ data:
   {{- end }}
   OCEAN__LAKEHOUSE_ENABLED: "{{ .Values.lakehouseEnabled | default false }}"
   OCEAN__EXECUTION_AGENT__ENABLED: "true"
-  {{- if .Values.executionAgent.extraConfig }}
-  {{- range $key, $value := .Values.executionAgent.extraConfig }}
+  {{- if .Values.actionsProcessor.extraConfig }}
+  {{- range $key, $value := .Values.actionsProcessor.extraConfig }}
   OCEAN__EXECUTION_AGENT__{{ $key | snakecase | upper }}: {{ $value | quote }}
   {{- end }}
   {{- end }}
