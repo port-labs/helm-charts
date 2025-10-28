@@ -49,6 +49,10 @@ containerSecurityContext: {}
   # runAsUser: 1001
   # allowPrivilegeEscalation: false
 
+extraVolumes: []
+
+extraVolumeMounts: []
+
 rolloutStrategy: "Recreate"
 
 resources:
