@@ -2,7 +2,11 @@ name: Release RC
 
 on:
   pull_request:
-    types: [opened, labeled, synchronize]
+    types: [opened, synchronize]
+
+permissions:
+  contents: write
+  packages: write
 
 jobs:
   check-rc:
