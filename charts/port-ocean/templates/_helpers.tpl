@@ -63,7 +63,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
-Execution Agent labels
+Actions Processor labels
 */}}
 {{- define "port-ocean.actionsProcessor.labels" -}}
 helm.sh/chart: {{ include "port-ocean.chart" . }}

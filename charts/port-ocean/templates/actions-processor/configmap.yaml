@@ -39,10 +39,10 @@ data:
   {{- end }}
   {{- end }}
   OCEAN__LAKEHOUSE_ENABLED: "{{ .Values.lakehouseEnabled | default false }}"
-  OCEAN__EXECUTION_AGENT__ENABLED: "true"
+  OCEAN__ACTIONS_PROCESSOR__ENABLED: "true"
   {{- if .Values.actionsProcessor.extraConfig }}
   {{- range $key, $value := .Values.actionsProcessor.extraConfig }}
-  OCEAN__EXECUTION_AGENT__{{ $key | snakecase | upper }}: {{ $value | quote }}
+  OCEAN__ACTIONS_PROCESSOR__{{ $key | snakecase | upper }}: {{ $value | quote }}
   {{- end }}
   {{- end }}
 {{- end }}
