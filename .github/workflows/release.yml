@@ -1,7 +1,18 @@
 name: Release Charts
 
 on:
+  workflow_call:
+    inputs:
+      mark_as_latest:
+        type: boolean
+        required: false
+        default: true
   workflow_dispatch:
+    inputs:
+      mark_as_latest:
+        type: boolean
+        required: false
+        default: true
   push:
     branches:
       - main
@@ -37,22 +48,12 @@ jobs:
       - name: Configure Helm Repositories
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
-
-      - name: Set mark_as_latest
-        id: set-mark-as-latest
-        run: |
-          VERSION=$(yq e '.version' charts/port-ocean/Chart.yaml)
-          if [[ "$VERSION" == *"dev"* ]]; then
-            echo "mark_as_latest=false" >> $GITHUB_OUTPUT
-          else
-            echo "mark_as_latest=true" >> $GITHUB_OUTPUT
-          fi
     
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
         with:
           skip_existing: true
-          mark_as_latest: ${{ steps.set-mark-as-latest.outputs.mark_as_latest }}
+          mark_as_latest: ${{ inputs.mark_as_latest }}
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
