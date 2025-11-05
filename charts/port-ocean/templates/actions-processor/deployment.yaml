@@ -41,19 +41,6 @@ spec:
         {{- if .Values.extraInitContainers }}
         {{- tpl (toYaml .Values.extraInitContainers) . | nindent 8 }}
         {{- end }}
-        {{- if .Values.postgresql.enabled }}
-        - name: wait-for-postgresql
-          image: {{ .Values.postgresql.image }}
-          command:
-            - sh
-            - -c
-            - |
-              until pg_isready -h {{ .Release.Name }}-postgresql -p 5432 -U {{ .Values.postgresql.global.postgresql.auth.username }}; do
-                echo "Waiting for PostgreSQL {{ include "port-ocean.name" . }}-postgresql to be ready..."
-                sleep 2
-              done
-              echo "PostgreSQL is ready!"
-        {{- end }}
       containers:
       - name: {{ include "port-ocean.containerName" . }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
@@ -77,18 +64,6 @@ spec:
             value: /etc/ssl/certs/ca-certificates.crt
           - name: REQUESTS_CA_BUNDLE
             value: /etc/ssl/certs/ca-certificates.crt
-        {{- end }}
-        {{- if .Values.postgresql.enabled }}
-          - name: OCEAN__DATABASE__HOST
-            value: {{ include "port-ocean.name" . }}-postgresql
-          - name: OCEAN__DATABASE__PORT
-            value: '5432'
-          - name: OCEAN__DATABASE__NAME
-            value: {{ .Values.postgresql.global.postgresql.auth.database }}
-          - name: OCEAN__DATABASE__USERNAME
-            value: {{ .Values.postgresql.global.postgresql.auth.username }}
-          - name: OCEAN__DATABASE__PASSWORD
-            value: {{ .Values.postgresql.global.postgresql.auth.password }}
         {{- end }}
         {{- if .Values.extraEnv }}
           {{- tpl (toYaml .Values.extraEnv) . | nindent 10 }}
