@@ -161,8 +161,9 @@ liveEvents:
   deployment:
     rolloutStrategy:
       type: RollingUpdate
-      maxSurge: 25%
-      maxUnavailable: 25%
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
   service:
     enabled: true
     type: ClusterIP
@@ -215,3 +216,25 @@ postgresql:
         username: port_admin
 
 lakehouseEnabled: true
+
+actionsProcessor:
+  enabled: false
+  worker:
+    enabled: false
+    rolloutStrategy:
+      type: Recreate
+    replicaCount: 1
+    initializePortResources: false
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "200m"
+  service:
+    enabled: true
+    type: ClusterIP
+    port: 8000
+    annotations: { }
+  extraConfig: { }
