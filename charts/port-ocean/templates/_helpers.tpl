@@ -119,17 +119,17 @@ Get config map name
 */}}
 {{- define "port-ocean.configMapName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-config" $prefix }}
+{{- printf "%s-config" $prefix | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{- define "port-ocean.liveEvents.configMapName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-live-events-config" $prefix }}
+{{- printf "%s-le-config" $prefix | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{- define "port-ocean.actionsProcessor.configMapName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-actions-processor-config" $prefix }}
+{{- printf "%s-ap-config" $prefix | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -145,12 +145,12 @@ Get ingress name
 */}}
 {{- define "port-ocean.ingressName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-ingress" $prefix }}
+{{- printf "%s-ingress" $prefix | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{- define "port-ocean.liveEvents.ingressName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-live-events-ingress" $prefix }}
+{{- printf "%s-le-ingress" $prefix | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -158,17 +158,17 @@ Get service name
 */}}
 {{- define "port-ocean.serviceName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-service" $prefix }}
+{{- printf "%s-service" $prefix | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{- define "port-ocean.liveEvents.serviceName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-live-events-service" $prefix }}
+{{- printf "%s-le-service" $prefix | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{- define "port-ocean.actionsProcessor.serviceName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-actions-processor-service" $prefix }}
+{{- printf "%s-ap-service" $prefix | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -184,17 +184,17 @@ Get deployment name
 */}}
 {{- define "port-ocean.deploymentName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-deployment" $prefix }}
+{{- printf "%s-deployment" $prefix | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{- define "port-ocean.liveEvents.deploymentName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-live-events-deployment" $prefix }}
+{{- printf "%s-le-deployment" $prefix | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{- define "port-ocean.actionsProcessor.deploymentName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-actions-processor-deployment" $prefix }}
+{{- printf "%s-ap-deployment" $prefix | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -214,7 +214,7 @@ Get cron job name
 */}}
 {{- define "port-ocean.cronJobName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-cron-job" $prefix }}
+{{- printf "%s-cron-job" $prefix | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
