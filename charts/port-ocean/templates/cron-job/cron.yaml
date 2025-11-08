@@ -13,7 +13,7 @@ metadata:
 spec:
   failedJobsHistoryLimit: 5
   successfulJobsHistoryLimit: 1
-  schedule: {{ .Values.scheduledResyncInterval | default "0 */1 * * *" }}
+  schedule: {{ .Values.scheduledResyncInterval | default "0 */1 * * *" | squote }}
   suspend: {{ or .Values.workload.cron.suspend (eq .Values.scheduledResyncInterval "")}}
   concurrencyPolicy: {{ .Values.scheduleConcurrencyPolicy | default "Replace" }}
   jobTemplate:
