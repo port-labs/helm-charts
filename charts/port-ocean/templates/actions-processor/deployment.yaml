@@ -1,20 +1,20 @@
-{{- if .Values.liveEvents.worker.enabled }}
+{{- if and .Values.actionsProcessor.enabled .Values.actionsProcessor.worker.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "port-ocean.liveEvents.deploymentName" . }}
+  name: {{ include "port-ocean.actionsProcessor.deploymentName" . }}
   labels:
-    {{- include "port-ocean.liveEvents.labels" . | nindent 4 }}
+    {{- include "port-ocean.actionsProcessor.labels" . | nindent 4 }}
 spec:
-  {{- with .Values.liveEvents.deployment.rolloutStrategy }}
+  {{- with .Values.actionsProcessor.worker.rolloutStrategy }}
   strategy:
     {{- toYaml . | trim | nindent 4 }}
   {{- end }}
-  replicas: {{ .Values.liveEvents.worker.replicaCount | default 1 }}
+  replicas: {{ .Values.actionsProcessor.worker.replicaCount | default 1 }}
   selector:
     matchLabels:
-      app: {{ include "port-ocean.liveEvents.deploymentName" . }}
-      {{- include "port-ocean.liveEvents.selectorLabels" . | indent 6 }}
+      app: {{ include "port-ocean.actionsProcessor.deploymentName" . }}
+      {{- include "port-ocean.actionsProcessor.selectorLabels" . | indent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -22,8 +22,8 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        app: {{ include "port-ocean.liveEvents.deploymentName" . }}
-        {{- include "port-ocean.liveEvents.labels" . | nindent 8 }}
+        app: {{ include "port-ocean.actionsProcessor.deploymentName" . }}
+        {{- include "port-ocean.actionsProcessor.labels" . | nindent 8 }}
     spec:
       {{- if or .Values.podServiceAccount.name .Values.podServiceAccount.create }}
       serviceAccountName: {{ include "port-ocean.serviceAccountName" . }}
@@ -41,19 +41,6 @@ spec:
         {{- if .Values.extraInitContainers }}
         {{- tpl (toYaml .Values.extraInitContainers) . | nindent 8 }}
         {{- end }}
-        {{- if .Values.postgresql.enabled }}
-        - name: wait-for-postgresql
-          image: {{ .Values.postgresql.image }}
-          command:
-            - sh
-            - -c
-            - |
-              until pg_isready -h {{ .Release.Name }}-postgresql -p 5432 -U {{ .Values.postgresql.global.postgresql.auth.username }}; do
-                echo "Waiting for PostgreSQL {{ include "port-ocean.name" . }}-postgresql to be ready..."
-                sleep 2
-              done
-              echo "PostgreSQL is ready!"
-        {{- end }}
       containers:
       - name: {{ include "port-ocean.containerName" . }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
@@ -64,11 +51,11 @@ spec:
           {{- toYaml .Values.containerSecurityContext | nindent 10 }}
           {{- end }}
         resources:
-          {{- if .Values.liveEvents.worker.resources }}
-          {{- toYaml .Values.liveEvents.worker.resources | nindent 10 }}
+          {{- if .Values.actionsProcessor.worker.resources }}
+          {{- toYaml .Values.actionsProcessor.worker.resources | nindent 10 }}
           {{- end }}
         ports:
-        - containerPort: {{.Values.liveEvents.service.port}}
+        - containerPort: {{.Values.actionsProcessor.service.port}}
           protocol: TCP
         {{- end }}
         env:
@@ -78,24 +65,12 @@ spec:
           - name: REQUESTS_CA_BUNDLE
             value: /etc/ssl/certs/ca-certificates.crt
         {{- end }}
-        {{- if .Values.postgresql.enabled }}
-          - name: OCEAN__DATABASE__HOST
-            value: {{ include "port-ocean.name" . }}-postgresql
-          - name: OCEAN__DATABASE__PORT
-            value: '5432'
-          - name: OCEAN__DATABASE__NAME
-            value: {{ .Values.postgresql.global.postgresql.auth.database }}
-          - name: OCEAN__DATABASE__USERNAME
-            value: {{ .Values.postgresql.global.postgresql.auth.username }}
-          - name: OCEAN__DATABASE__PASSWORD
-            value: {{ .Values.postgresql.global.postgresql.auth.password }}
-        {{- end }}
         {{- if .Values.extraEnv }}
           {{- tpl (toYaml .Values.extraEnv) . | nindent 10 }}
         {{- end }}
         envFrom:
           - configMapRef:
-              name: {{ include "port-ocean.liveEvents.configMapName" . }}
+              name: {{ include "port-ocean.actionsProcessor.configMapName" . }}
           {{- include "port-ocean.additionalSecrets" . | nindent 10 }}
         volumeMounts:
         {{- if .Values.extraVolumeMounts }}
@@ -107,11 +82,11 @@ spec:
             subPath: cert.crt
             readOnly: true
         {{- end }}
-        {{- if (.Values.livenessProbe).enabled}}
+        {{- if .Values.livenessProbe.enabled}}
         livenessProbe:
           httpGet:
             path: /docs
-            port: {{.Values.liveEvents.service.port}}
+            port: {{.Values.actionsProcessor.service.port}}
           initialDelaySeconds: {{ default 30 .Values.livenessProbe.initialDelaySeconds }}
           periodSeconds: {{ default 10 .Values.livenessProbe.periodSeconds }}
           timeoutSeconds: {{ default 5 .Values.livenessProbe.timeoutSeconds }}
@@ -122,7 +97,7 @@ spec:
         readinessProbe:
           httpGet:
             path: /docs
-            port: {{.Values.liveEvents.service.port}}
+            port: {{.Values.actionsProcessor.service.port}}
           initialDelaySeconds: {{ default 30 .Values.readinessProbe.initialDelaySeconds }}
           periodSeconds: {{ default 10 .Values.readinessProbe.periodSeconds }}
           timeoutSeconds: {{ default 5 .Values.readinessProbe.timeoutSeconds }}

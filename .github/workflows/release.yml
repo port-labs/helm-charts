@@ -1,7 +1,18 @@
 name: Release Charts
 
 on:
+  workflow_call:
+    inputs:
+      mark_as_latest:
+        type: boolean
+        required: false
+        default: true
   workflow_dispatch:
+    inputs:
+      mark_as_latest:
+        type: boolean
+        required: false
+        default: true
   push:
     branches:
       - main
@@ -15,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -33,14 +44,18 @@ jobs:
           registry: ghcr.io
           username: ${ GITHUB_REPOSITORY_OWNER }
           password: ${{ secrets.GITHUB_TOKEN }}
-
+      
+      - name: Configure Helm Repositories
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+    
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
         with:
           skip_existing: true
+          mark_as_latest: ${{ inputs.mark_as_latest }}
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-
 
       - name: Push chart to GHCR
         run: |

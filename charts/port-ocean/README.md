@@ -101,6 +101,7 @@ The following table lists the configuration parameters of the `port-ocean` chart
 | `selfSignedCertificate.secret.name`              | The name of an existing secret containing the self-signed certificate                                                                                                                                                                                                                                                                                                                                                                                                                              | `""`                        |
 | `eventListener.type`                             | Type of the event listener for the integration, one of the following "WEBHOOK" / "KAFKA" / "SAMPLE"                                                                                                                                                                                                                                                                                                                                                                                                | `"KAFKA"`                   |
 | `liveEvents.worker.enabled`                      | Enable stand-alone live events worker                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `false`                     |
+| `liveEvents.baseUrl`                      | The base url of the live events worker required to setup and recieve webhook http requests                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `""`                     |
 | `liveEvents.worker.replicaCount`                 | Number of stand-alone live events worker replicas                                                                                                                                                                                                                                                                                                                                                                                                                                                  | `1`                         |
 | `liveEvents.worker.resources`                    | Container resource requests and limits for stand-alone live events worker                                                                                                                                                                                                                                                                                                                                                                                                                          | `{}`                        |
 | `liveEvents.deployment.rolloutStrategy`          | Standalone live events worker deployment rollout strategy.                                                                                                                                                                                                                                                                                                                                                                                                                                                   | `RollingUpdate`                      |
@@ -113,7 +114,35 @@ The following table lists the configuration parameters of the `port-ocean` chart
 | `liveEvents.ingress.host`                        | Hostname for the ingress.                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | `null`                      |
 | `liveEvents.ingress.path`                        | Path for the ingress.                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `/`                         |
 | `liveEvents.ingress.pathType`                    | Path type for the ingress.                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | `Prefix`                    |
+| `postgresql.enabled`                              | Enable PostgreSQL database                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | `false`                     |
+| `postgresql.global.postgresql.auth.database`     | PostgreSQL database name                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | `ocean`                     |
+| `postgresql.global.postgresql.auth.username`     | PostgreSQL username                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | `port_admin`                |
+| `postgresql.global.postgresql.auth.password`     | PostgreSQL password                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | `password`                  |
+| `postgresql.global.postgresql.auth.postgresPassword` | PostgreSQL postgres user password                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `password`                  |
+| `integration.processExecution.mode`                           | Process execution mode. Can be either `single_process` or `multi_process`                                                                                                                                                                                                                                                                                                                                                                                                                      | `multi_process`                        |
+| `integration.processExecution.prometheusMultiProcessDir`      | Directory for Prometheus multi-process mode metrics.                                                                                                                                                                                                                                                                                                                                                                            | `/tmp/ocean/prometheus/metrics`                        |
 
+When PostgreSQL is enabled, all workloads (Deployment, CronJob, and Live Events) will wait for PostgreSQL to be ready before starting their main containers. This is done using an init container that checks PostgreSQL availability using `pg_isready`. The init container will retry every 2 seconds until PostgreSQL is available.
+
+## Process Execution Modes
+
+The chart supports two process execution modes:
+
+1. `single_process` - Runs the integration in a single process. This is the default mode and is suitable for most use cases.
+2. `multi_process` - Runs the integration in multiple processes, which can be useful for handling high concurrency or when you need to scale horizontally.
+
+To configure the process execution mode, set the following in your values:
+
+```yaml
+processExecution:
+  mode: "multi_process"  # or "single_process"
+  prometheusMultiProcessDir: "/custom/path"  # Optional: Directory for Prometheus metrics in multi-process mode
+```
+
+**Note**: When using `multi_process` mode:
+
+- If `prometheusMultiProcessDir` is not provided, it will default to `/tmp/ocean/prometheus/metrics`
+- The directory must be writable by the container and have sufficient space for metrics storage
 
 To override values in `helm install`, use either the `--set` flag.
 
@@ -137,3 +166,27 @@ helm install my-ocean-integration port-labs/port-ocean \
    # Flag for passing the certificate file
    --set-file selfSignedCertificate.certificate=/PATH/TO/CERTIFICATE.crt
 ```
+
+## PostgreSQL Configuration
+
+The chart supports an optional PostgreSQL database deployment. When enabled, PostgreSQL will be deployed as a dependency of the Port Ocean integration. The database is configured with the following default settings:
+
+- Database name: `ocean`
+- Username: `port_admin`
+- Password: `password` (should be changed in production)
+
+To enable PostgreSQL, set the following in your values:
+
+```yaml
+postgresql:
+  enabled: true
+  global:
+    postgresql:
+      auth:
+        database: ocean
+        password: your-secure-password
+        postgresPassword: your-secure-postgres-password
+        username: port_admin
+```
+
+**Note**: It's recommended to use a secure password in production environments and consider using Kubernetes secrets to manage sensitive credentials.

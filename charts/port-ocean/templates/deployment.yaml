@@ -8,7 +8,7 @@ metadata:
 spec:
   strategy:
     type: {{ .Values.workload.deployment.rolloutStrategy | default "Recreate" }}
-  replicas: 1
+  replicas: {{ if and (hasKey .Values.workload.deployment "replicas") (eq (.Values.workload.deployment.replicas | int) 0) }}0{{ else }}1{{ end }}
   selector:
     matchLabels:
       app: {{ include "port-ocean.deploymentName" . }}
@@ -23,8 +23,8 @@ spec:
         app: {{ include "port-ocean.deploymentName" . }}
         {{- include "port-ocean.labels" . | nindent 8 }}
     spec:
-      {{- with .Values.podServiceAccount.name }}
-      serviceAccountName: {{ . }}
+      {{- if or .Values.podServiceAccount.name .Values.podServiceAccount.create }}
+      serviceAccountName: {{ include "port-ocean.serviceAccountName" . }}
       {{- end }}
       terminationGracePeriodSeconds: {{ default 30 .Values.terminationGracePeriodSeconds }}
       {{- with .Values.imagePullSecrets }}
@@ -38,6 +38,19 @@ spec:
       initContainers:
         {{- if .Values.extraInitContainers }}
         {{- tpl (toYaml .Values.extraInitContainers) . | nindent 8 }}
+        {{- end }}
+        {{- if .Values.postgresql.enabled }}
+        - name: wait-for-postgresql
+          image: {{ .Values.postgresql.image }}
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h {{ .Release.Name }}-postgresql -p 5432 -U {{ .Values.postgresql.global.postgresql.auth.username }}; do
+                echo "Waiting for PostgreSQL to be ready..."
+                sleep 2
+              done
+              echo "PostgreSQL is ready!"
         {{- end }}
       containers:
       - name: {{ include "port-ocean.containerName" . }}
@@ -63,6 +76,22 @@ spec:
           - name: REQUESTS_CA_BUNDLE
             value: /etc/ssl/certs/ca-certificates.crt
         {{- end }}
+        {{- if .Values.postgresql.enabled }}
+          - name: OCEAN__DATABASE__HOST
+            value: {{ include "port-ocean.name" . }}-postgresql
+          - name: OCEAN__DATABASE__PORT
+            value: '5432'
+          - name: OCEAN__DATABASE__NAME
+            value: {{ .Values.postgresql.global.postgresql.auth.database }}
+          - name: OCEAN__DATABASE__USERNAME
+            value: {{ .Values.postgresql.global.postgresql.auth.username }}
+          - name: OCEAN__DATABASE__PASSWORD
+            value: {{ .Values.postgresql.global.postgresql.auth.password }}
+        {{- end }}
+        {{- if .Values.liveEvents.baseUrl }}
+          - name: OCEAN__BASE_URL
+            value: {{ .Values.liveEvents.baseUrl }}
+        {{- end }}
         {{- if .Values.extraEnv }}
           {{- tpl (toYaml .Values.extraEnv) . | nindent 10 }}
         {{- end }}
@@ -72,13 +101,17 @@ spec:
           {{- include "port-ocean.additionalSecrets" . | nindent 10 }}
         volumeMounts:
         {{- if .Values.extraVolumeMounts }}
-        {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 8 }}
+          {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 10 }}
         {{- end }}
         {{- if .Values.selfSignedCertificate.enabled }}
           - name: certificates
             mountPath: /usr/local/share/ca-certificates/cert.crt
             subPath: cert.crt
             readOnly: true
+        {{- end }}
+        {{- if eq .Values.integration.processExecution.mode "multi_process" }}
+          - name: prometheus-metrics
+            mountPath: "{{ .Values.integration.processExecution.prometheusMultiProcessDir }}"
         {{- end }}
         {{- if (.Values.livenessProbe).enabled}}
         livenessProbe:
@@ -105,6 +138,10 @@ spec:
       volumes:
         {{- if .Values.extraVolumes }}
         {{- tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
+        {{- end }}
+        {{- if eq .Values.integration.processExecution.mode "multi_process" }}
+        - name: prometheus-metrics
+          emptyDir: {}
         {{- end }}
         {{- if and .Values.selfSignedCertificate.enabled .Values.selfSignedCertificate.secret.useExistingSecret }}
         - name: certificates

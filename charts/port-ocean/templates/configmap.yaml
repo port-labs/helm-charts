@@ -8,6 +8,7 @@ metadata:
   name: {{ include "port-ocean.configMapName" . }}
 data:
   OCEAN__PORT__BASE_URL: {{ .Values.port.baseUrl | quote }}
+  OCEAN__PORT__INGEST_URL: {{ .Values.port.ingestUrl | quote }}
   OCEAN__INITIALIZE_PORT_RESOURCES: "{{ .Values.initializePortResources | default false }}"
   OCEAN__ALLOW_ENVIRONMENT_VARIABLES_JQ_ACCESS: "{{ .Values.allowEnvironmentVariablesJqAccess | default true }}"
   {{- if  and .Values.scheduledResyncInterval (not (eq .Values.workload.kind "CronJob")) }}
@@ -24,6 +25,12 @@ data:
   {{- if .Values.integration.oauth.enabled }}
   OCEAN__OAUTH_ACCESS_TOKEN_FILE_PATH: "{{ .Values.integration.oauth.access_token_file_path }}"
   {{- end }}
+  {{- if .Values.integration.processExecution.mode }}
+  OCEAN__PROCESS_EXECUTION_MODE: "{{ .Values.integration.processExecution.mode }}"
+  {{- if eq .Values.integration.processExecution.mode "multi_process" }}
+  PROMETHEUS_MULTIPROC_DIR: "{{ .Values.integration.processExecution.prometheusMultiProcessDir }}"
+  {{- end }}
+  {{- end }}
   {{- if .Values.integration.config }}
   {{- range $key, $value := .Values.integration.config }}
   OCEAN__INTEGRATION__CONFIG__{{ $key | snakecase | upper }}: {{ $value | quote }}
@@ -32,5 +39,12 @@ data:
   {{- if .Values.integration.extraConfig }}
   {{- range $key, $value := .Values.integration.extraConfig }}
   {{ $key | snakecase | upper }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
+  OCEAN__LAKEHOUSE_ENABLED: "{{ .Values.lakehouseEnabled | default false }}"
+  OCEAN__ACTIONS_PROCESSOR__ENABLED: "{{ .Values.actionsProcessor.enabled | default false }}"
+  {{- if .Values.actionsProcessor.extraConfig }}
+  {{- range $key, $value := .Values.actionsProcessor.extraConfig }}
+  OCEAN__ACTIONS_PROCESSOR__{{ $key | snakecase | upper }}: {{ $value | quote }}
   {{- end }}
   {{- end }}

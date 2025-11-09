@@ -63,6 +63,23 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
+Actions Processor labels
+*/}}
+{{- define "port-ocean.actionsProcessor.labels" -}}
+helm.sh/chart: {{ include "port-ocean.chart" . }}
+{{- if .Values.actionsProcessor.worker.enabled -}}
+{{- include "port-ocean.actionsProcessor.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- range $key, $value := .Values.extraLabels }}
+{{$key}}: {{ $value }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
 Selector labels
 */}}
 {{- define "port-ocean.selectorLabels" }}
@@ -74,15 +91,27 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
+{{- define "port-ocean.actionsProcessor.selectorLabels" }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
 {{/*
 Get prefix of ocean resource metadata.name
 */}}
 {{- define "port-ocean.metadataNamePrefix" -}}
+{{- if .Values.metadataNamePrefixOverride }}
+{{- printf "%s" .Values.metadataNamePrefixOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
 {{- printf "ocean-%s-%s" .Values.integration.type .Values.integration.identifier | trunc 63 | trimSuffix "-" }}
+{{- end }}
 {{- end }}
 
 {{- define "port-ocean.metadataNamePrefixShort" -}}
+{{- if .Values.metadataNamePrefixOverride }}
+{{- printf "%s" .Values.metadataNamePrefixOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
 {{- printf "%s-%s" .Values.integration.type .Values.integration.identifier | trunc 63 | trimSuffix "-" }}
+{{- end }}
 {{- end }}
 
 {{/*
@@ -96,6 +125,11 @@ Get config map name
 {{- define "port-ocean.liveEvents.configMapName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
 {{- printf "%s-live-events-config" $prefix }}
+{{- end }}
+
+{{- define "port-ocean.actionsProcessor.configMapName" -}}
+{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
+{{- printf "%s-actions-processor-config" $prefix }}
 {{- end }}
 
 {{/*
@@ -132,6 +166,11 @@ Get service name
 {{- printf "%s-live-events-service" $prefix }}
 {{- end }}
 
+{{- define "port-ocean.actionsProcessor.serviceName" -}}
+{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
+{{- printf "%s-actions-processor-service" $prefix }}
+{{- end }}
+
 {{/*
 Get container name
 */}}
@@ -151,6 +190,23 @@ Get deployment name
 {{- define "port-ocean.liveEvents.deploymentName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
 {{- printf "%s-live-events-deployment" $prefix }}
+{{- end }}
+
+{{- define "port-ocean.actionsProcessor.deploymentName" -}}
+{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
+{{- printf "%s-actions-processor-deployment" $prefix }}
+{{- end }}
+
+{{/*
+Get ServiceAccount name
+*/}}
+{{- define "port-ocean.serviceAccountName" -}}
+{{- if not (.Values.podServiceAccount).name }}
+{{- $prefix:= include "port-ocean.metadataNamePrefix" . }}
+{{- printf "%s-sa" $prefix }}
+{{- else }}
+{{- printf "%s" (tpl .Values.podServiceAccount.name $) | trunc 63 | trimSuffix "-" }}
+{{- end }}
 {{- end }}
 
 {{/*

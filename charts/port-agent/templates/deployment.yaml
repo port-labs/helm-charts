@@ -41,7 +41,9 @@ spec:
           {{- end }}
           env:
             {{- if .Values.selfSignedCertificate.enabled }}
-            {{/* Used for requests library in python - For httpx please use SSL_CERT_FILE */}}
+            {{/* SSL_CERT_FILE is used for httpx library, REQUESTS_CA_BUNDLE is used for requests library */}}
+            - name: SSL_CERT_FILE
+              value: /etc/ssl/certs/ca-certificates.crt
             - name: REQUESTS_CA_BUNDLE
               value: /etc/ssl/certs/ca-certificates.crt
             {{- end }}
@@ -56,6 +58,9 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           {{- end }}
           volumeMounts:
+          {{- if .Values.extraVolumeMounts }}
+            {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 12 }}
+          {{- end }}
             {{- if .Values.controlThePayloadConfig }}
             - mountPath: /app/control_the_payload_config.json
               name: {{ include "port-agent.fullname" . }}
@@ -68,6 +73,9 @@ spec:
               readOnly: true
           {{- end }}
       volumes:
+        {{- if .Values.extraVolumes }}
+        {{- tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
+        {{- end }}
         {{- if .Values.controlThePayloadConfig }}
         - name: {{ include "port-agent.fullname" . }}
           configMap:

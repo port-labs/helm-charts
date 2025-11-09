@@ -1,0 +1,38 @@
+name: Release RC
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  check-rc:
+    runs-on: ubuntu-latest
+    outputs:
+      rc: ${{ steps.check-rc.outputs.rc }}
+    steps: 
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Check RC
+        id: check-rc
+        run: |
+          VERSION=$(yq e '.version' charts/port-ocean/Chart.yaml)
+          if [[ "$VERSION" == *"rc"* ]]; then
+            echo "rc=true" >> $GITHUB_OUTPUT
+          else
+            echo "rc=false" >> $GITHUB_OUTPUT
+          fi
+
+  release:
+    needs: check-rc
+    if: ${{ needs.check-rc.outputs.rc == 'true' }}
+    uses: .github/workflows/release.yml
+    with:
+      secrets: inherit
+      mark_as_latest: false

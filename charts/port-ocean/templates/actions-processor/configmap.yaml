@@ -1,8 +1,10 @@
-{{- if .Values.liveEvents.worker.enabled }}
+{{- if and .Values.actionsProcessor.enabled .Values.actionsProcessor.worker.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: "{{ include "port-ocean.liveEvents.configMapName" . }}"
+  name: {{ include "port-ocean.actionsProcessor.configMapName" . }}
+  labels:
+    {{- include "port-ocean.actionsProcessor.labels" . | nindent 4 }}
 data:
   OCEAN__PORT__BASE_URL: {{ .Values.port.baseUrl | quote }}
   OCEAN__PORT__INGEST_URL: {{ .Values.port.ingestUrl | quote }}
@@ -10,13 +12,13 @@ data:
   {{- if eq .Values.initializePortResources true}}
   OCEAN__INITIALIZE_PORT_RESOURCES: "false"
   {{- else }}
-  OCEAN__INITIALIZE_PORT_RESOURCES: "{{ .Values.liveEvents.initializePortResources | default false }}"
+  OCEAN__INITIALIZE_PORT_RESOURCES: "{{ .Values.actionsProcessor.worker.initializePortResources | default false }}"
   {{- end }}
   OCEAN__ALLOW_ENVIRONMENT_VARIABLES_JQ_ACCESS: "{{ .Values.allowEnvironmentVariablesJqAccess | default true }}"
   {{- if .Values.clientTimeout }}
   OCEAN__CLIENT_TIMEOUT: "{{ .Values.clientTimeout }}"
   {{- end }}
-  OCEAN__EVENT_LISTENER: '{"type":"WEBHOOKS_ONLY"}'
+  OCEAN__EVENT_LISTENER: '{"type":"ACTIONS_ONLY"}'
   {{- if .Values.integration.identifier }}
   OCEAN__INTEGRATION__IDENTIFIER: "{{ .Values.integration.identifier }}"
   {{- end }}
@@ -37,5 +39,10 @@ data:
   {{- end }}
   {{- end }}
   OCEAN__LAKEHOUSE_ENABLED: "{{ .Values.lakehouseEnabled | default false }}"
-  OCEAN__ACTIONS_PROCESSOR__ENABLED: "{{ .Values.actionsProcessor.enabled | default false }}"
+  OCEAN__ACTIONS_PROCESSOR__ENABLED: "true"
+  {{- if .Values.actionsProcessor.extraConfig }}
+  {{- range $key, $value := .Values.actionsProcessor.extraConfig }}
+  OCEAN__ACTIONS_PROCESSOR__{{ $key | snakecase | upper }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
 {{- end }}

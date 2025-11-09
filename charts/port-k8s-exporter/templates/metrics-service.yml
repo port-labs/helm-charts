@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "port-k8s-exporter.fullname" . }}-metrics
+  labels:
+    {{- include "port-k8s-exporter.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "port-k8s-exporter.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: metrics
+      port: {{ .Values.metricsPort }}
+      targetPort: {{ .Values.metricsPort }}
+      protocol: TCP

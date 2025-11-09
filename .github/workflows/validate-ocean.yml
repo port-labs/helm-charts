@@ -15,7 +15,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Set up Helm
       uses: azure/setup-helm@v3
@@ -25,6 +25,12 @@ jobs:
 
     - name: Lint Helm Chart
       run: helm lint .
+
+    - name: Build dependencies of Helm Chart
+      run: |
+        helm repo add bitnami https://charts.bitnami.com/bitnami
+        helm repo update
+        helm dependency update
 
     - name: Validate Helm Chart
       run: |
