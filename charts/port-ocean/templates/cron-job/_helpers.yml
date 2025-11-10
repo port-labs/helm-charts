@@ -1,1 +1,13 @@
-{{ define "port-ocean.cron.job-query-rbac-prefix" }}{{.Release.Name}}-job-query{{ end }}
+{{/*
+Generate the service account name prefix for CronJob init container.
+Auto-generates unique names from integration.type and integration.identifier.
+Supports optional custom naming via workload.cron.initContainer.serviceAccount.name
+*/}}
+{{- define "port-ocean.cron.job-query-rbac-prefix" -}}
+{{- if and (.Values.workload.cron.initContainer) (.Values.workload.cron.initContainer.serviceAccount) (.Values.workload.cron.initContainer.serviceAccount.name) -}}
+{{- .Values.workload.cron.initContainer.serviceAccount.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $prefix := include "port-ocean.metadataNamePrefix" . -}}
+{{- printf "%s-job-query" $prefix | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end }}
