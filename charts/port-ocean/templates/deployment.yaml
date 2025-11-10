@@ -88,7 +88,7 @@ spec:
           - name: OCEAN__DATABASE__PASSWORD
             value: {{ .Values.postgresql.global.postgresql.auth.password }}
         {{- end }}
-        {{- if .Values.liveEvents.baseUrl }}
+        {{- if and .Values.liveEvents.baseUrl (not .Values.liveEvents.worker.enabled) }}
           - name: OCEAN__BASE_URL
             value: {{ .Values.liveEvents.baseUrl }}
         {{- end }}
