@@ -211,10 +211,18 @@ Get ServiceAccount name
 
 {{/*
 Get cron job name
+Enforces Kubernetes CronJob name limit of 52 characters
 */}}
 {{- define "port-ocean.cronJobName" -}}
-{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-cron-job" $prefix | trunc 63 | trimSuffix "-" }}
+{{- $prefix := include "port-ocean.metadataNamePrefix" . -}}
+{{- $cronJobName := printf "%s-cron-job" $prefix -}}
+{{- if gt (len $cronJobName) 52 -}}
+{{- $maxPrefixLen := sub 52 9 -}}
+{{- $truncatedPrefix := trunc $maxPrefixLen $prefix | trimSuffix "-" -}}
+{{- printf "%s-cron-job" $truncatedPrefix -}}
+{{- else -}}
+{{- $cronJobName -}}
+{{- end -}}
 {{- end }}
 
 {{/*

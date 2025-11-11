@@ -13,8 +13,9 @@ metadata:
 spec:
   failedJobsHistoryLimit: 5
   successfulJobsHistoryLimit: 1
-  schedule: {{ .Values.scheduledResyncInterval | default "0 */1 * * *" }}
-  suspend: {{ or .Values.workload.cron.suspend (eq .Values.scheduledResyncInterval "")}}
+  {{- $scheduleValue := (.Values.scheduledResyncInterval | default "0 */1 * * *") | toString }}
+  schedule: {{ if regexMatch "^[\"'].*[\"']$" $scheduleValue }}{{ $scheduleValue }}{{ else }}{{ $scheduleValue | squote }}{{ end }}
+  suspend: {{ .Values.workload.cron.suspend }}
   concurrencyPolicy: {{ .Values.scheduleConcurrencyPolicy | default "Replace" }}
   jobTemplate:
     metadata:

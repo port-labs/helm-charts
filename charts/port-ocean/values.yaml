@@ -52,6 +52,12 @@ workload:
     resyncOnInstall: true
     resyncOnUpgrade: true
     suspend: false
+    # Init container service account configuration
+    # Optional: provide custom service account name
+    # If empty, auto-generates unique name from integration.type and integration.identifier
+    initContainer:
+      serviceAccount:
+        name: ""
     kubectlImage: bitnamisecure/kubectl:latest
 
 resources:
