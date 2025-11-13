@@ -6,7 +6,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
-    helm.sh/hook: post-install, post-upgrade
+    helm.sh/hook: post-install
     helm.sh/hook-delete-policy: hook-succeeded, hook-failed
   name: init-sync-{{ .Release.Name }}-{{ $jobName }}
 spec:
