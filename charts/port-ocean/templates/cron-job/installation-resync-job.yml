@@ -6,8 +6,8 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
-    helm.sh/hook: post-install
-    helm.sh/hook-delete-policy: hook-succeeded, hook-failed
+    helm.sh/hook: {{ .Values.workload.cron.hook | default "post-install, post-upgrade" }}
+    helm.sh/hook-delete-policy: {{ .Values.workload.cron.hookDeletePolicy | default "hook-succeeded, hook-failed" }}
   name: init-sync-{{ .Release.Name }}-{{ $jobName }}
 spec:
   ttlSecondsAfterFinished: 600
