@@ -244,5 +244,6 @@ actionsProcessor:
     enabled: true
     type: ClusterIP
     port: 8000
+    portName: ocean-port
     annotations: { }
   extraConfig: { }
