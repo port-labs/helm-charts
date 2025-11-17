@@ -11,3 +11,18 @@ Supports optional custom naming via workload.cron.initContainer.serviceAccount.n
 {{- printf "%s-job-query" $prefix | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end }}
+
+{{/*
+Get installation resync job name
+*/}}
+{{- define "port-ocean.installationResyncJobName" -}}
+{{- printf "init-sync-%s" .Release.Name }}
+{{- end }}
+
+{{/*
+Get installation triggered job name
+*/}}
+{{- define "port-ocean.installationTriggeredJobName" -}}
+{{- $jobName := (print (randAlphaNum 4) "-" .Release.Revision) | lower }}
+{{- printf "init-sync-%s" $jobName }}
+{{- end }}
