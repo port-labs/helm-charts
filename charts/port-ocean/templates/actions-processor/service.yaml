@@ -12,7 +12,7 @@ metadata:
 spec:
   type: {{ .Values.actionsProcessor.service.type }}
   ports:
-    - name: {{ .Values.actionsProcessor.service.portName | default "ocean-port" }}
+    - name: ocean-port
       protocol: TCP
       port: {{ .Values.actionsProcessor.service.port }} 
       targetPort: {{ .Values.actionsProcessor.service.port }}

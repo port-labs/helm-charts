@@ -226,6 +226,21 @@ Enforces Kubernetes CronJob name limit of 52 characters
 {{- end }}
 
 {{/*
+Get installation resync job name
+*/}}
+{{- define "port-ocean.installationResyncJobName" -}}
+{{- printf "init-sync-%s" .Release.Name }}
+{{- end }}
+ 
+{{/*
+Get installation triggered job name
+*/}}
+{{- define "port-ocean.installationTriggeredJobName" -}}
+{{- $jobName := (print (randAlphaNum 4) "-" .Release.Revision) | lower }}
+{{- printf "init-sync-%s" $jobName }}
+{{- end }}
+
+{{/*
 Get self signed cert secret name
 */}}
 {{- define "port-ocean.selfSignedCertName" -}}

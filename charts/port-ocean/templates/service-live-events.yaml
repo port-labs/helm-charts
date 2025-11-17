@@ -13,7 +13,7 @@ metadata:
 spec:
   type: {{ .Values.liveEvents.service.type }}
   ports:
-    - name: {{ .Values.liveEvents.service.portName | default "ocean-port" }}
+    - name: ocean-port
       protocol: TCP
       port: {{ .Values.liveEvents.service.port }} 
       targetPort: {{ .Values.liveEvents.service.port }}
