@@ -1,8 +1,10 @@
-{{- if eq .Values.workload.kind "CronJob" }}
+{{- if and (eq .Values.workload.kind "CronJob") (or (.Values.workload.cron.resyncOnUpgrade) (eq .Release.Revision 1)) }}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  annotations: {{ toYaml .Values.workload.cron.installationJob.annotations | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-install, post-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded, hook-failed
   name: {{ include "port-ocean.installationResyncJobName" . }}
 spec:
   ttlSecondsAfterFinished: 600
