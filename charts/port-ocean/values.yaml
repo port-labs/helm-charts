@@ -49,8 +49,10 @@ workload:
   cron:
     # number of minutes to wait before cancelling the resync
     resyncTimeoutMinutes: null
-    resyncOnInstall: true
-    resyncOnUpgrade: true
+    installationJob:
+      annotations:
+        helm.sh/hook: post-install, post-upgrade
+        helm.sh/hook-delete-policy: hook-succeeded, hook-failed
     suspend: false
     # Init container service account configuration
     # Optional: provide custom service account name
@@ -111,7 +113,6 @@ service:
   enabled: true
   type: ClusterIP
   port: 8000
-  portName: ocean-port
   annotations: { }
 
 ingress:
@@ -175,7 +176,6 @@ liveEvents:
     enabled: true
     type: ClusterIP
     port: 8000
-    portName: ocean-port
     annotations: { }
   ingress:
     enabled: false
@@ -244,6 +244,5 @@ actionsProcessor:
     enabled: true
     type: ClusterIP
     port: 8000
-    portName: ocean-port
     annotations: { }
   extraConfig: { }
