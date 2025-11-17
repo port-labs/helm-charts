@@ -111,6 +111,7 @@ service:
   enabled: true
   type: ClusterIP
   port: 8000
+  portName: ocean-port
   annotations: { }
 
 ingress:
@@ -174,6 +175,7 @@ liveEvents:
     enabled: true
     type: ClusterIP
     port: 8000
+    portName: ocean-port
     annotations: { }
   ingress:
     enabled: false
@@ -242,5 +244,6 @@ actionsProcessor:
     enabled: true
     type: ClusterIP
     port: 8000
+    portName: ocean-port
     annotations: { }
   extraConfig: { }
