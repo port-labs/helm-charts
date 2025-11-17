@@ -1,4 +1,6 @@
-{{- if and (eq .Values.workload.kind "CronJob") (or (.Values.workload.cron.resyncOnUpgrade) (eq .Release.Revision 1)) }}
+{{- $shouldResyncOnInstall := and (.Values.workload.cron.resyncOnInstall) (eq .Release.Revision 1) }}
+{{- $shouldResyncOnUpgrade := and (.Values.workload.cron.resyncOnUpgrade) (gt .Release.Revision 1) }}
+{{- if and (eq .Values.workload.kind "CronJob") (or $shouldResyncOnInstall $shouldResyncOnUpgrade) }}
 apiVersion: batch/v1
 kind: Job
 metadata:

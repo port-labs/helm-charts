@@ -49,6 +49,7 @@ workload:
   cron:
     # number of minutes to wait before cancelling the resync
     resyncTimeoutMinutes: null
+    resyncOnInstall: true
     resyncOnUpgrade: true
     suspend: false
     # Init container service account configuration
