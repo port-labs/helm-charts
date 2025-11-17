@@ -33,6 +33,6 @@ jobs:
     needs: check-rc
     if: ${{ needs.check-rc.outputs.rc == 'true' }}
     uses: ./.github/workflows/release.yml
+    secrets: inherit
     with:
-      secrets: inherit
       mark_as_latest: false
