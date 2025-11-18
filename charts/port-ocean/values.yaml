@@ -78,6 +78,11 @@ extraLabels: { }
 
 imageRegistry: "ghcr.io/port-labs"
 
+# image: Custom container image name (without registry, but including tag)
+# If not specified, defaults to "port-ocean-{integration.type}:{integration.version}"
+# Example: "my-custom-ocean-image:v1.0.0" or "port-ocean-custom:latest"
+image: ""
+
 imagePullPolicy: Always
 
 imagePullSecrets: [ ]
