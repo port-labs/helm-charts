@@ -187,6 +187,13 @@ port-ocean-{{ .Values.integration.type }}:{{ .Values.integration.version | defau
 {{- end }}
 
 {{/*
+Get container image (registry + image name)
+*/}}
+{{- define "port-ocean.image" -}}
+{{ .Values.imageRegistry }}/{{ .Values.image | default (include "port-ocean.defaultImage" .) }}
+{{- end }}
+
+{{/*
 Get deployment name
 */}}
 {{- define "port-ocean.deploymentName" -}}

@@ -132,7 +132,7 @@ spec:
           containers:
           - name: {{ include "port-ocean.containerName" . }}
             imagePullPolicy: {{ .Values.imagePullPolicy }}
-            image: '{{ .Values.imageRegistry }}/{{ .Values.image | default (include "port-ocean.defaultImage" .) }}'
+            image: {{ include "port-ocean.image" . }}
             {{- if .Values.service.enabled }}
             securityContext:
               {{- if .Values.containerSecurityContext }}
