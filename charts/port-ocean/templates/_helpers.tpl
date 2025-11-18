@@ -180,9 +180,9 @@ Get container name
 {{- end }}
 
 {{/*
-Get default image name
+Get default image
 */}}
-{{- define "port-ocean.defaultImageName" -}}
+{{- define "port-ocean.defaultImage" -}}
 port-ocean-{{ .Values.integration.type }}:{{ .Values.integration.version | default "latest" }}
 {{- end }}
 
