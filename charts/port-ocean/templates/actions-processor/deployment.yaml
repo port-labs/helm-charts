@@ -44,7 +44,7 @@ spec:
       containers:
       - name: {{ include "port-ocean.containerName" . }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
-        image: '{{ .Values.imageRegistry }}/port-ocean-{{ .Values.integration.type }}:{{ .Values.integration.version | default "latest" }}'
+        image: '{{ .Values.imageRegistry }}/{{ .Values.imageName | default (include "port-ocean.defaultImageName" .) }}'
         {{- if .Values.service.enabled }}
         securityContext:
           {{- if .Values.containerSecurityContext }}
