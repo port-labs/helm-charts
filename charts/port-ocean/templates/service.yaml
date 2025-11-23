@@ -19,5 +19,6 @@ spec:
       targetPort: {{ .Values.service.port }}
   selector:
     app: {{ include "port-ocean.deploymentName" . }}
+    {{- include "port-ocean.selectorLabels" . | nindent 4 }}
 {{- end }}
 {{- end }}
