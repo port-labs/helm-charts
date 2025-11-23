@@ -109,58 +109,28 @@ spec:
                     echo "No running resync jobs found. Starting new job: $CURRENT_JOB_NAME"
                   fi
 
-                  # Rollout live events deployment if exists to match integration image versions
-                  rollout_if_exists() {
+                  # Rollout existing deployments if they are not running with the latest image
+                  rollout_if_image_mismatch() {
                     local DEPLOYMENT_NAME=$1
-                    local CONTAINER_NAME="{{ include "port-ocean.containerName" . }}"
 
-                    echo "Checking deployment: ${DEPLOYMENT_NAME}"
-                    DEPLOYMENT=$(kubectl get deployment ${DEPLOYMENT_NAME} -n ${NAMESPACE} --token=$TOKEN -o=json 2>/dev/null | jq -r ".metadata.name" 2>/dev/null)
+                    echo "Checking if ${DEPLOYMENT_NAME} exists"
+                    if ! kubectl get deployment ${DEPLOYMENT_NAME} -n ${NAMESPACE} --token=$TOKEN > /dev/null 2>&1; then
+                      echo "Deployment ${DEPLOYMENT_NAME} does not exist. Skipping rollout restart."
+                      return
+                    fi
 
-                    if [ -n "$DEPLOYMENT" ]; then
-                      echo "Found deployment: $DEPLOYMENT"
-                      
-                      # Get the CronJob container's resolved image SHA
-                      CRONJOB_IMAGE_SHA=$(kubectl get pod $HOSTNAME -n ${NAMESPACE} --token=$TOKEN -o=jsonpath="{.status.containerStatuses[?(@.name==\"${CONTAINER_NAME}\")].imageID}" 2>/dev/null)
-                      
-                      # Get selector labels from the deployment to find its pods
-                      SELECTOR=$(kubectl get deployment ${DEPLOYMENT_NAME} -n ${NAMESPACE} --token=$TOKEN -o=json 2>/dev/null | jq -r '.spec.selector.matchLabels | to_entries | map("\(.key)=\(.value)") | join(",")' 2>/dev/null)
-                      
-                      if [ -n "$SELECTOR" ]; then
-                        # Get first pod managed by this deployment
-                        DEPLOYMENT_POD=$(kubectl get pods -n ${NAMESPACE} -l ${SELECTOR} --token=$TOKEN -o=jsonpath='{.items[0].metadata.name}' 2>/dev/null)
-                        
-                        if [ -n "$DEPLOYMENT_POD" ]; then
-                          # Get the deployment container's resolved image SHA
-                          DEPLOYMENT_IMAGE_SHA=$(kubectl get pod ${DEPLOYMENT_POD} -n ${NAMESPACE} --token=$TOKEN -o=jsonpath="{.status.containerStatuses[?(@.name==\"${CONTAINER_NAME}\")].imageID}" 2>/dev/null)
-                          
-                          echo "CronJob container image SHA: $CRONJOB_IMAGE_SHA"
-                          echo "Deployment container image SHA: $DEPLOYMENT_IMAGE_SHA"
-                          
-                          if [ -n "$CRONJOB_IMAGE_SHA" ] && [ -n "$DEPLOYMENT_IMAGE_SHA" ]; then
-                            if [ "$CRONJOB_IMAGE_SHA" = "$DEPLOYMENT_IMAGE_SHA" ]; then
-                              echo "Image SHAs are the same. Skipping rollout for $DEPLOYMENT"
-                            else
-                              echo "Image SHAs are different. Rolling out $DEPLOYMENT"
-                              kubectl rollout restart deployment $DEPLOYMENT -n ${NAMESPACE} --token=$TOKEN
-                            fi
-                          else
-                            echo "Could not retrieve image SHAs. Proceeding with rollout as safety measure."
-                            kubectl rollout restart deployment $DEPLOYMENT -n ${NAMESPACE} --token=$TOKEN
-                          fi
-                        else
-                          echo "No running pods found for deployment $DEPLOYMENT_NAME. Skipping rollout (no pods to compare)."
-                        fi
-                      else
-                        echo "Could not determine selector for deployment $DEPLOYMENT_NAME. Skipping rollout."
-                      fi
-                    else
-                      echo "Deployment $DEPLOYMENT_NAME does not exist. Skipping rollout restart."
+                    echo "Checking if ${DEPLOYMENT_NAME} pods are running with the latest image"
+                    DEPLOYMENT_IMAGE_SHA=$(kubectl get pods -l app=${DEPLOYMENT_NAME} -o go-template='{{range .items}}{{range .status.containerStatuses}}{{if eq .name {{ include "port-ocean.containerName" . }} }}{{.imageID}}{{"\n"}}{{end}}{{end}}{{end}}' | sed 's|.*@||')
+                    LATEST_IMAGE_SHA=$(docker inspect {{ include "port-ocean.image" . }} --format '{{index .RepoDigests 0}}' | sed 's|.*@||')
+
+                    if [ "$DEPLOYMENT_IMAGE_SHA" != "$LATEST_IMAGE_SHA" ]; then
+                      echo "Deployment $DEPLOYMENT_NAME is not running with the latest image. Rolling out restart."
+                      kubectl rollout restart deployment $DEPLOYMENT_NAME -n ${NAMESPACE} --token=$TOKEN
                     fi
                   }
 
-                  rollout_if_exists {{ include "port-ocean.liveEvents.deploymentName" . }}
-                  rollout_if_exists {{ include "port-ocean.actionsProcessor.deploymentName" . }}
+                  rollout_if_image_mismatch {{ include "port-ocean.liveEvents.deploymentName" . }}
+                  rollout_if_image_mismatch {{ include "port-ocean.actionsProcessor.deploymentName" . }}
 
                   echo "Exiting init container"
           containers:
@@ -191,16 +161,16 @@ spec:
               {{- tpl (toYaml .Values.extraEnv) . | nindent 14 }}
             {{- end }}
             {{- if .Values.postgresql.enabled }}
-              - name: OCEAN__DATABASE__HOST
-                value: {{ include "port-ocean.name" . }}-postgresql
-              - name: OCEAN__DATABASE__PORT
-                value: '5432'
-              - name: OCEAN__DATABASE__NAME
-                value: {{ .Values.postgresql.global.postgresql.auth.database }}
-              - name: OCEAN__DATABASE__USERNAME
-                value: {{ .Values.postgresql.global.postgresql.auth.username }}
-              - name: OCEAN__DATABASE__PASSWORD
-                value: {{ .Values.postgresql.global.postgresql.auth.password }}
+          - name: OCEAN__DATABASE__HOST
+            value: {{ include "port-ocean.name" . }}-postgresql
+          - name: OCEAN__DATABASE__PORT
+            value: '5432'
+          - name: OCEAN__DATABASE__NAME
+            value: {{ .Values.postgresql.global.postgresql.auth.database }}
+          - name: OCEAN__DATABASE__USERNAME
+            value: {{ .Values.postgresql.global.postgresql.auth.username }}
+          - name: OCEAN__DATABASE__PASSWORD
+            value: {{ .Values.postgresql.global.postgresql.auth.password }}
             {{- end }}
             envFrom:
               - configMapRef:
