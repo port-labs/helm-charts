@@ -52,6 +52,9 @@ workload:
     resyncOnInstall: true
     resyncOnUpgrade: true
     suspend: false
+    # history limits for CronJob - how many completed jobs to keep
+    failedJobsHistoryLimit: 1
+    successfulJobsHistoryLimit: 1
     # Init container service account configuration
     # Optional: provide custom service account name
     # If empty, auto-generates unique name from integration.type and integration.identifier
