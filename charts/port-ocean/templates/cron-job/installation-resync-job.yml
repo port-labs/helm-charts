@@ -7,7 +7,7 @@ kind: Job
 metadata:
   annotations:
     helm.sh/hook: post-install, post-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded, hook-failed
+    helm.sh/hook-delete-policy: hook-succeeded
   name: init-sync-{{ .Release.Name }}-{{ $jobName }}
 spec:
   ttlSecondsAfterFinished: 600
