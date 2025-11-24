@@ -10,6 +10,7 @@ spec:
   strategy:
     {{- toYaml . | trim | nindent 4 }}
   {{- end }}
+  revisionHistoryLimit: {{ .Values.actionsProcessor.worker.revisionHistoryLimit }}
   replicas: {{ .Values.actionsProcessor.worker.replicaCount | default 1 }}
   selector:
     matchLabels:
