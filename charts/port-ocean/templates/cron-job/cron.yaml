@@ -11,8 +11,8 @@ metadata:
   labels:
     {{- include "port-ocean.labels" . | nindent 4 }}
 spec:
-  failedJobsHistoryLimit: {{ .Values.workload.cron.failedJobsHistoryLimit | default 1 }}
-  successfulJobsHistoryLimit: {{ .Values.workload.cron.successfulJobsHistoryLimit | default 1 }}
+  failedJobsHistoryLimit: {{ .Values.workload.cron.failedJobsHistoryLimit }}
+  successfulJobsHistoryLimit: {{ .Values.workload.cron.successfulJobsHistoryLimit }}
   {{- $scheduleValue := (.Values.scheduledResyncInterval | default "0 */1 * * *") | toString }}
   schedule: {{ if regexMatch "^[\"'].*[\"']$" $scheduleValue }}{{ $scheduleValue }}{{ else }}{{ $scheduleValue | squote }}{{ end }}
   suspend: {{ .Values.workload.cron.suspend }}
