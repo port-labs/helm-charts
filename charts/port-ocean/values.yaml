@@ -179,6 +179,7 @@ liveEvents:
       rollingUpdate:
         maxSurge: 25%
         maxUnavailable: 25%
+    revisionHistoryLimit: 1
   service:
     enabled: true
     type: ClusterIP
@@ -239,6 +240,7 @@ actionsProcessor:
     enabled: false
     rolloutStrategy:
       type: Recreate
+    revisionHistoryLimit: 1
     replicaCount: 1
     initializePortResources: false
     resources:
