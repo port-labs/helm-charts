@@ -14,6 +14,11 @@ spec:
   activeDeadlineSeconds: 180
   backoffLimit: 0
   template:
+    metadata:
+      {{- with .Values.podLabels }}
+      labels:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       activeDeadlineSeconds: 180
       containers:
