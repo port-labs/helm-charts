@@ -11,6 +11,8 @@ port:
 
 podAnnotations: { }
 
+podLabels: { }
+
 podServiceAccount:
   create: false
   name: null

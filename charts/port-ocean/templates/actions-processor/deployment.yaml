@@ -25,6 +25,9 @@ spec:
       labels:
         app: {{ include "port-ocean.actionsProcessor.deploymentName" . }}
         {{- include "port-ocean.actionsProcessor.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       {{- if or .Values.podServiceAccount.name .Values.podServiceAccount.create }}
       serviceAccountName: {{ include "port-ocean.serviceAccountName" . }}
