@@ -14,7 +14,7 @@ data:
   {{- else }}
   OCEAN__INITIALIZE_PORT_RESOURCES: "{{ .Values.actionsProcessor.worker.initializePortResources | default false }}"
   {{- end }}
-  OCEAN__ALLOW_ENVIRONMENT_VARIABLES_JQ_ACCESS: "{{ .Values.allowEnvironmentVariablesJqAccess | default true }}"
+  OCEAN__ALLOW_ENVIRONMENT_VARIABLES_JQ_ACCESS: "{{ if hasKey .Values "allowEnvironmentVariablesJqAccess" }}{{ .Values.allowEnvironmentVariablesJqAccess }}{{ else }}true{{ end }}"
   {{- if .Values.clientTimeout }}
   OCEAN__CLIENT_TIMEOUT: "{{ .Values.clientTimeout }}"
   {{- end }}
