@@ -259,3 +259,5 @@ actionsProcessor:
     portName: ocean-port
     annotations: { }
   extraConfig: { }
+
+additionalSecrets: [ ]
