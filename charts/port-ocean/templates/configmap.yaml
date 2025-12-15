@@ -42,7 +42,7 @@ data:
   {{- end }}
   {{- end }}
   OCEAN__LAKEHOUSE_ENABLED: "{{ .Values.lakehouseEnabled | default false }}"
-  OCEAN__STREAMING__ENABLED: "{{ .Values.lakehouseEnabled | default false }}"
+  OCEAN__STREAMING__ENABLED: "{{ .Values.streamingEnabled | default false }}"
   OCEAN__ACTIONS_PROCESSOR__ENABLED: "{{ .Values.actionsProcessor.enabled | default false }}"
   {{- if .Values.actionsProcessor.extraConfig }}
   {{- range $key, $value := .Values.actionsProcessor.extraConfig }}
