@@ -235,6 +235,7 @@ postgresql:
         username: port_admin
 
 lakehouseEnabled: true
+streamingEnabled: false
 
 actionsProcessor:
   enabled: false
