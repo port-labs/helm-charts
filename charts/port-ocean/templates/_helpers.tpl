@@ -260,4 +260,11 @@ Get self signed cert secret name
 - secretRef:
     name: {{ . }}
 {{- end }}
+{{- /* Include additional secrets from additionalSecrets array */}}
+{{- if .Values.additionalSecrets }}
+{{- range .Values.additionalSecrets }}
+- secretRef:
+    name: {{ . }}
+{{- end }}
+{{- end }}
 {{- end }}
