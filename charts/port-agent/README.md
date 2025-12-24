@@ -57,10 +57,10 @@ The following table lists the configuration parameters of the `port-agent` chart
 | `secret.name`                                        | Secret object name                                                                         | `""`                                                                                                                                                                                                                              |
 | `secret.useExistingSecret`                           | Enable this if you wish to create your own secret with credentials                         | `false`                                                                                                                                                                                                                           |
 | `podServiceAccount.name`                             | Service account to attach to the pod.                                                      | `null`                                                                                                                                                                                                                            |
-| `env.normal.STREAMER_NAME`                           | Streamer name, available: [`KAFKA`]                                                        | `"KafkaToWebhookStreamer"`                                                                                                                                                                                                        |
 | `env.normal.PORT_ORG_ID`                             | Your Port org id - **Required**                                                            | `""`                                                                                                                                                                                                                              |
 | `env.normal.PORT_API_BASE_URL`                       | Port API base url                                                                          | `"https://api.getport.io"`                                                                                                                                                                                                        |
-| `env.normal.KAFKA_CONSUMER_GROUP_ID`                 | Kafka consumer group id - **Required if using any Kafka streamer**                         | `""`                                                                                                                                                                                                                              |
+| `env.normal.PORT_AGENT_TRANSPORT_TYPE`               | Transport mechanism: `KAFKA` (default, faster) or `HTTPS` (polling-based, slower)          | `"KAFKA"`                                                                                                                                                                                                                         |
+| `env.normal.KAFKA_CONSUMER_GROUP_ID`                 | Kafka consumer group id - **Required if using Kafka transport**                            | `""`                                                                                                                                                                                                                              |
 | `env.normal.KAFKA_CONSUMER_SECURITY_PROTOCOL`        | Kafka consumer security protocol                                                           | `"SASL_SSL"`                                                                                                                                                                                                                      |
 | `env.normal.KAFKA_CONSUMER_AUTHENTICATION_MECHANISM` | Kafka consumer authentication mechanism                                                    | `"SCRAM-SHA-512"`                                                                                                                                                                                                                 |
 | `env.normal.KAFKA_CONSUMER_AUTO_OFFSET_RESET`        | Kafka consumer auto offset reset                                                           | `"largest"`                                                                                                                                                                                                                       |
@@ -110,3 +110,53 @@ helm install my-port-agent port-labs/port-agent \
 
 ### Multiple certificates
 For environments requiring multiple custom certificates, you can use the `extraVolumes` and `extraVolumeMounts` features alongside the built-in `selfSignedCertificate` feature.
+
+## Transport Types
+
+The Port Agent supports two transport mechanisms for receiving action runs:
+
+### Kafka Transport (Default)
+
+The default and recommended transport mechanism. Uses Kafka for real-time event streaming.
+
+**Advantages:**
+- Real-time, low-latency event delivery
+- Efficient for high-volume workloads
+- Supports both action runs and changelog destinations
+
+**Configuration:**
+```bash
+helm upgrade --install my-port-agent port-labs/port-agent \
+    --create-namespace --namespace port-agent \
+    --set env.normal.PORT_ORG_ID=YOUR_PORT_ORG_ID \
+    --set env.normal.PORT_AGENT_TRANSPORT_TYPE=KAFKA \
+    --set env.normal.KAFKA_CONSUMER_GROUP_ID=YOUR_CONSUMER_GROUP_ID \
+    --set env.secret.PORT_CLIENT_ID=YOUR_CLIENT_ID \
+    --set env.secret.PORT_CLIENT_SECRET=YOUR_CLIENT_SECRET
+```
+
+### HTTPS Transport (Polling)
+
+An alternative transport mechanism that uses HTTPS polling to retrieve action runs from the Port API.
+
+**Advantages:**
+- Works in environments with Kafka connectivity restrictions
+- Simpler network requirements (HTTPS only)
+- No Kafka consumer group management needed
+
+**Considerations:**
+- Polling-based, which introduces a delay (default: 10 seconds between polls)
+- Higher latency compared to Kafka
+- Only supports action runs (not changelog destinations)
+
+**Configuration:**
+```bash
+helm upgrade --install my-port-agent port-labs/port-agent \
+    --create-namespace --namespace port-agent \
+    --set env.normal.PORT_ORG_ID=YOUR_PORT_ORG_ID \
+    --set env.normal.PORT_AGENT_TRANSPORT_TYPE=HTTPS \
+    --set env.secret.PORT_CLIENT_ID=YOUR_CLIENT_ID \
+    --set env.secret.PORT_CLIENT_SECRET=YOUR_CLIENT_SECRET
+```
+
+**Note:** When using HTTPS transport, you don't need to set `KAFKA_CONSUMER_GROUP_ID`.
