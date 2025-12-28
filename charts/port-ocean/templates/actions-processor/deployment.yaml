@@ -11,7 +11,7 @@ spec:
     {{- toYaml . | trim | nindent 4 }}
   {{- end }}
   revisionHistoryLimit: {{ .Values.actionsProcessor.worker.revisionHistoryLimit }}
-  replicas: {{ .Values.actionsProcessor.worker.replicaCount | default 1 }}
+  replicas: 1
   selector:
     matchLabels:
       app: {{ include "port-ocean.actionsProcessor.deploymentName" . }}
