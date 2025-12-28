@@ -8,7 +8,7 @@ This chart installs any Port ocean integration and it's dependencies.
 
 ## Usage
 
-[Helm](https://helm.sh) must be installed to use the charts.  Please refer to
+[Helm](https://helm.sh) must be installed to use the charts. Please refer to
 Helm's [documentation](https://helm.sh/docs) to get started.
 
 Once Helm has been set up correctly, add the repo as follows:
@@ -18,7 +18,7 @@ helm repo add port-labs https://port-labs.github.io/helm-charts
 ```
 
 If you had already added this repo earlier, run `helm repo update` to retrieve
-the latest versions of the packages.  You can then run `helm search repo
+the latest versions of the packages. You can then run `helm search repo
 port-labs` to see the charts.
 
 Use your `PORT_CLIENT_ID` & `PORT_CLIENT_SECRET` to install the chart, with the following command:
@@ -40,6 +40,75 @@ To uninstall the chart use:
     helm uninstall my-ocean-integration --namespace port-ocean
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
+
+## Architecture Overview
+
+The Port Ocean chart supports multiple architectures to fit different operational needs:
+
+### 1. **Single Deployment Architecture** (Default)
+
+- **Description**: Runs as a single always-on Deployment (default). Suitable for most use-cases, this keeps an integration pod running continuously, listening for live events and/or processing Port Actions. Can also trigger periodic syncing as needed.
+- **Configuration**:
+  ```yaml
+  workload:
+    kind: "Deployment"
+  liveEvents:
+    worker:
+      enabled: false # Live events handled in main deployment
+  actionsProcessor:
+    enabled: true
+    worker:
+      enabled: false # Actions handled in main deployment
+  ```
+
+### 2. **CronJob-Only Architecture** (Scheduled Resync)
+
+- **Description**: Runs as a scheduled CronJob, suitable for lightweight scenarios focused on periodic data syncing without continuous operation. The integration pod runs on schedule, performs resync, and then terminates (`ONCE` event listener).
+- **Configuration**:
+  ```yaml
+  workload:
+    kind: "CronJob"
+    cron:
+      resyncTimeoutMinutes: 60
+  scheduledResyncInterval: "0 */2 * * *"
+  ```
+
+### 3. **Separated Deployments Architecture** (Recommended for Production)
+
+- **Description**: Runs the integration, live events worker, and actions processor each as their own always-on Deployment (no CronJob). Use this configuration when you want maximum scalability, dedicated resources for each function, and real-time responsiveness across all integration capabilities.
+- **Configuration**:
+  ```yaml
+  workload:
+    kind: "Deployment"
+  liveEvents:
+    worker:
+      enabled: true
+  actionsProcessor:
+    enabled: true
+    worker:
+      enabled: true
+  ```
+
+### 4. **Hybrid Architecture**
+
+- **CronJob**: Scheduled data polling on a cron schedule
+- **Live Events Worker**: Dedicated deployment for real-time webhook events
+- **Actions Processor**: Optional dedicated deployment for actions
+- **Use Case**: Periodic polling supplemented with real-time event ingestion
+- **Configuration**:
+  ```yaml
+  workload:
+    kind: "CronJob"
+  scheduledResyncInterval: "0 */6 * * *" # Every 6 hours
+  liveEvents:
+    worker:
+      enabled: true
+      replicaCount: 2
+  actionsProcessor:
+    enabled: true
+    worker:
+      enabled: true
+  ```
 
 ## Configuration
 
@@ -138,9 +207,10 @@ The chart supports two process execution modes:
 To configure the process execution mode, set the following in your values:
 
 ```yaml
-processExecution:
-  mode: "multi_process"  # or "single_process"
-  prometheusMultiProcessDir: "/custom/path"  # Optional: Directory for Prometheus metrics in multi-process mode
+integration:
+  processExecution:
+    mode: "multi_process" # or "single_process"
+    prometheusMultiProcessDir: "/custom/path" # Optional: Directory for Prometheus metrics in multi-process mode
 ```
 
 **Note**: When using `multi_process` mode:
@@ -156,17 +226,17 @@ Alternatively, you can use a YAML file that specifies the values while installin
        --create-namespace --namespace port-ocean \
        -f custom_values.yaml
 
-
 ### Self-signed certificate trust
-For self-hosted 3rd-party applications with self-signed certificates, you will need to add your CA to the integration's configuration. 
+
+For self-hosted 3rd-party applications with self-signed certificates, you will need to add your CA to the integration's configuration.
 To do so, you will need to run the `helm install` command with the following flags:
 
 ```sh
 helm install my-ocean-integration port-labs/port-ocean \
    --create-namespace --namespace port-ocean \
-   -f custom_values.yaml \ 
+   -f custom_values.yaml \
    # Flag for enabling self signed certificates
-   --set selfSignedCertificate.enabled=true \ 
+   --set selfSignedCertificate.enabled=true \
    # Flag for passing the certificate file
    --set-file selfSignedCertificate.certificate=/PATH/TO/CERTIFICATE.crt
 ```
