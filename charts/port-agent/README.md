@@ -19,7 +19,7 @@ If you had already added this repo earlier, run `helm repo update` to retrieve
 the latest versions of the packages. You can then run `helm search repo
 port-labs` to see the charts.
 
-Then, install the chart using the following command (Kafka streamer - default):
+Then, install the chart using the following command:
 
 ```bash showLineNumbers
 helm upgrade --install my-port-agent port-labs/port-agent \
@@ -120,11 +120,8 @@ The Port Agent supports two streamer mechanisms for receiving action runs:
 
 ### Kafka Streamer (Default)
 
-The default and recommended streamer mechanism. Uses Kafka for real-time event streaming.
-
 **Advantages:**
 - Real-time, low-latency event delivery
-- Efficient for high-volume workloads
 - Supports both action runs and changelog destinations
 
 **Configuration:**
@@ -148,7 +145,7 @@ An alternative streamer mechanism that uses HTTP polling to retrieve action runs
 - No Kafka consumer group management needed
 
 **Considerations:**
-- Polling-based, which introduces a delay (default: 10 seconds between polls)
+- Polling-based, not real-time
 - Higher latency compared to Kafka
 - Only supports action runs (not changelog destinations)
 
