@@ -632,6 +632,23 @@ entries:
     version: 0.1.0
   port-k8s-exporter:
   - apiVersion: v2
+    appVersion: 0.6.7
+    created: "2026-01-01T09:29:43.23510413Z"
+    description: A Helm chart for Port Kubernetes Exporter
+    digest: 26ba0d729a064ecf759223c0aa4a2651f3f1ce004802a8e9146cea9bc53819e1
+    home: https://getport.io/
+    icon: https://port-graphical-assets.s3.eu-west-1.amazonaws.com/Port+Logo.svg
+    maintainers:
+    - email: support@getport.io
+      name: Port
+    name: port-k8s-exporter
+    sources:
+    - https://github.com/port-labs/port-k8s-exporter
+    type: application
+    urls:
+    - https://github.com/port-labs/helm-charts/releases/download/port-k8s-exporter-0.3.20/port-k8s-exporter-0.3.20.tgz
+    version: 0.3.20
+  - apiVersion: v2
     appVersion: 0.6.4
     created: "2025-10-26T08:24:19.49381613Z"
     description: A Helm chart for Port Kubernetes Exporter
@@ -3851,4 +3868,4 @@ entries:
     urls:
     - https://github.com/port-labs/helm-charts/releases/download/port-ocean-0.1.0/port-ocean-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-15T12:51:37.041605944Z"
+generated: "2026-01-01T09:29:43.474233645Z"
