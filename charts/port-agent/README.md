@@ -35,7 +35,7 @@ helm upgrade --install my-port-agent port-labs/port-agent \
 Replace `YOUR_PORT_ORG_ID`, `YOUR_KAFKA_CONSUMER_GROUP_ID`, `YOUR_PORT_CLIENT_ID`, `YOUR_PORT_CLIENT_SECRET`
 with the values that Port supplied you.
 
-**Note:** For HTTP streamer (polling-based), set `STREAMER_NAME=HTTP` and omit `KAFKA_CONSUMER_GROUP_ID`. See the [Streamer Types](#streamer-types) section below for details.
+**Note:** For POLLING streamer (polling-based), set `STREAMER_NAME=POLLING` and omit `KAFKA_CONSUMER_GROUP_ID`. See the [Streamer Types](#streamer-types) section below for details.
 
 To uninstall the chart use:
 
@@ -60,7 +60,7 @@ The following table lists the configuration parameters of the `port-agent` chart
 | `secret.name`                                        | Secret object name                                                                         | `""`                                                                                                                                                                                                                              |
 | `secret.useExistingSecret`                           | Enable this if you wish to create your own secret with credentials                         | `false`                                                                                                                                                                                                                           |
 | `podServiceAccount.name`                             | Service account to attach to the pod.                                                      | `null`                                                                                                                                                                                                                            |
-| `env.normal.STREAMER_NAME`                           | Streamer name, available: [`KAFKA`, `HTTP`]                                                 | `"KAFKA"`                                                                                                                                                                                                                         |
+| `env.normal.STREAMER_NAME`                           | Streamer name, available: [`KAFKA`, `POLLING`]                                                 | `"KAFKA"`                                                                                                                                                                                                                         |
 | `env.normal.PORT_ORG_ID`                             | Your Port org id - **Required**                                                            | `""`                                                                                                                                                                                                                              |
 | `env.normal.PORT_API_BASE_URL`                       | Port API base url                                                                          | `"https://api.getport.io"`                                                                                                                                                                                                        |
 | `env.normal.KAFKA_CONSUMER_GROUP_ID`                 | Kafka consumer group id - **Required if using Kafka streamer**                            | `""`                                                                                                                                                                                                                              |
@@ -135,7 +135,7 @@ helm upgrade --install my-port-agent port-labs/port-agent \
     --set env.secret.PORT_CLIENT_SECRET=YOUR_CLIENT_SECRET
 ```
 
-### HTTP Streamer (Polling)
+### POLLING Streamer
 
 An alternative streamer mechanism that uses HTTP polling to retrieve action runs from the Port API.
 
@@ -154,9 +154,9 @@ An alternative streamer mechanism that uses HTTP polling to retrieve action runs
 helm upgrade --install my-port-agent port-labs/port-agent \
     --create-namespace --namespace port-agent \
     --set env.normal.PORT_ORG_ID=YOUR_PORT_ORG_ID \
-    --set env.normal.STREAMER_NAME=HTTP \
+    --set env.normal.STREAMER_NAME=POLLING \
     --set env.secret.PORT_CLIENT_ID=YOUR_CLIENT_ID \
     --set env.secret.PORT_CLIENT_SECRET=YOUR_CLIENT_SECRET
 ```
 
-**Note:** When using HTTP streamer, you don't need to set `KAFKA_CONSUMER_GROUP_ID`.
+**Note:** When using POLLING streamer, you don't need to set `KAFKA_CONSUMER_GROUP_ID`.
