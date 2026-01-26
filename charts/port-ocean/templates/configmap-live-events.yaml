@@ -12,6 +12,9 @@ data:
   {{- else }}
   OCEAN__INITIALIZE_PORT_RESOURCES: "{{ .Values.liveEvents.initializePortResources | default false }}"
   {{- end }}
+  {{- if .Values.createPortResourcesOrigin }}
+  OCEAN__CREATE_PORT_RESOURCES_ORIGIN: "{{ .Values.createPortResourcesOrigin }}"
+  {{- end }}
   OCEAN__ALLOW_ENVIRONMENT_VARIABLES_JQ_ACCESS: "{{ if hasKey .Values "allowEnvironmentVariablesJqAccess" }}{{ .Values.allowEnvironmentVariablesJqAccess }}{{ else }}true{{ end }}"
   {{- if .Values.clientTimeout }}
   OCEAN__CLIENT_TIMEOUT: "{{ .Values.clientTimeout }}"
