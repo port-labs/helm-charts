@@ -94,6 +94,9 @@ imagePullSecrets: [ ]
 
 initializePortResources: true
 
+# Origin of the port resources creation. Possible values: Port, Default, Empty
+# createPortResourcesOrigin: Port
+
 allowEnvironmentVariablesJqAccess: true
 
 scheduledResyncInterval: null
