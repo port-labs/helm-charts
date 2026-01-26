@@ -41,6 +41,9 @@ data:
   {{ $key | snakecase | upper }}: {{ $value | quote }}
   {{- end }}
   {{- end }}
+  {{- if .Values.pathPrefix }}
+  OCEAN__PATH_PREFIX: "{{ .Values.pathPrefix }}"
+  {{- end }}
   OCEAN__LAKEHOUSE_ENABLED: "{{ .Values.lakehouseEnabled | default false }}"
   OCEAN__ACTIONS_PROCESSOR__ENABLED: "true"
   {{- if .Values.actionsProcessor.extraConfig }}
