@@ -165,6 +165,8 @@ selfSignedCertificate:
     key: crt
     useExistingSecret: false
 
+pathPrefix: ""
+
 liveEvents:
   baseUrl: ""
   worker:

@@ -34,6 +34,9 @@ data:
   {{- if .Values.liveEvents.baseUrl }}
   OCEAN__BASE_URL: "{{ .Values.liveEvents.baseUrl }}"
   {{- end }}
+  {{- if .Values.pathPrefix }}
+  OCEAN__PATH_PREFIX: "{{ .Values.pathPrefix }}"
+  {{- end }}
   {{- if .Values.liveEvents.extraConfig }}
   {{- range $key, $value := .Values.liveEvents.extraConfig }}
   {{ $key | snakecase | upper }}: {{ $value | quote }}
