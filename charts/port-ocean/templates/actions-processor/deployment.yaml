@@ -39,9 +39,8 @@ spec:
       {{- end }}
       {{- if or (gt (len .Values.dnsConfig) 0) (ne .Values.dnsPolicy "ClusterFirst") }}
       dnsPolicy: {{ .Values.dnsPolicy }}
-      {{- if gt (len .Values.dnsConfig) 0 }}
-      dnsConfig:
-        {{- toYaml .Values.dnsConfig | nindent 8 }}
+      {{- with .Values.dnsConfig }}
+      dnsConfig: {{ toYaml . | nindent 8 }}
       {{- end }}
       {{- end }}
       securityContext:
