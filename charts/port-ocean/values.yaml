@@ -120,6 +120,12 @@ secret:
   #    - "y"
   #    - "c"
 
+# DNS configuration for pod spec. Only applied when overridden from defaults below.
+# Leave as-is to use cluster defaults; override for environments like AWS Fargate where
+# dnsPolicy: Default may be more appropriate than ClusterFirst.
+dnsPolicy: ClusterFirst  # valid values: ClusterFirst, ClusterFirstWithHostNet, Default, None
+dnsConfig: { }  # e.g. { nameservers: ["8.8.8.8"], searches: ["ns1.svc.cluster.local"] }
+
 service:
   enabled: true
   type: ClusterIP

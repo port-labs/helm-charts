@@ -37,6 +37,10 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      dnsPolicy: {{ .Values.dnsPolicy }}
+      {{- with .Values.dnsConfig }}
+      dnsConfig: {{ toYaml . | nindent 8 }}
+      {{- end }}
       securityContext:
         {{- if .Values.podSecurityContext }}
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
