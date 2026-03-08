@@ -40,13 +40,6 @@ spec:
             {{- toYaml .Values.containerSecurityContext | nindent 14 }}
           {{- end }}
           env:
-            {{- if .Values.selfSignedCertificate.enabled }}
-            {{/* SSL_CERT_FILE is used for httpx library, REQUESTS_CA_BUNDLE is used for requests library */}}
-            - name: SSL_CERT_FILE
-              value: /etc/ssl/certs/ca-certificates.crt
-            - name: REQUESTS_CA_BUNDLE
-              value: /etc/ssl/certs/ca-certificates.crt
-            {{- end }}
             {{- include "port-agent.envVariables" . | indent 12 }}
           {{- if eq .Values.secret.useExistingSecret true }}
           envFrom:
