@@ -119,9 +119,9 @@ secret:
   #    - "c"
 
 # Health-checker sidecar. When enabled, adds a sidecar that runs a bash script with the same
-# env and secrets as the main container.
 healthChecker:
   enabled: false
+  image: docker.io/library/alpine:3.21
 
 # DNS configuration for pod spec. Only applied when overridden from defaults below.
 # Leave as-is to use cluster defaults; override for environments like AWS Fargate where
