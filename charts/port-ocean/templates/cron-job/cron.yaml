@@ -209,7 +209,7 @@ spec:
                 #!/usr/bin/env bash
                 set -euo pipefail
 
-                IS_HEALTHY_URL="http://{{.Values.service.host}}:{{.Values.service.port}}/isHealthy"
+                IS_HEALTHY_URL="http://localhost:{{.Values.service.port}}/isHealthy"
                 INTERVAL_SECONDS="${OCEAN_HEALTH_CHECKER__INTERVAL_SECONDS:-10}"
                 FAILURE_THRESHOLD="${OCEAN_HEALTH_CHECKER__FAILURE_THRESHOLD:-3}"
                 TIMEOUT_SECONDS="${OCEAN_HEALTH_CHECKER__TIMEOUT_SECONDS:-5}"
