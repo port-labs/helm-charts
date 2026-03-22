@@ -41,4 +41,5 @@ data:
   {{- end }}
   OCEAN__LAKEHOUSE_ENABLED: "{{ .Values.lakehouseEnabled | default false }}"
   OCEAN__ACTIONS_PROCESSOR__ENABLED: "{{ .Values.actionsProcessor.enabled | default false }}"
+  OCEAN__EVENTS_DEBUG_LOGGING: "{{ .Values.eventsDebugLogging | default false }}"
 {{- end }}
