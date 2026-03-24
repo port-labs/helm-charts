@@ -129,7 +129,7 @@ healthChecker:
 resyncStaleCleanup:
   enabled: false
   image: docker.io/library/alpine:3.21
-  cronSchedule: "*/1 * * * *"
+  cronSchedule: "*/5 * * * *"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 3
