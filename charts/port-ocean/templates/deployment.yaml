@@ -9,7 +9,7 @@ metadata:
   annotations:
     port.io/stale-resync-cleanup-cronjob: {{ include "port-ocean.resyncStaleCleanupCronJobName" . | quote }}
   {{- end }}
-spec: 
+spec:
   strategy:
     type: {{ .Values.workload.deployment.rolloutStrategy | default "Recreate" }}
   replicas: {{ if and (hasKey .Values.workload.deployment "replicas") (eq (.Values.workload.deployment.replicas | int) 0) }}0{{ else }}1{{ end }}

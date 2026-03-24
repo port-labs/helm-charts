@@ -19,7 +19,7 @@ spec:
   concurrencyPolicy: {{ .Values.scheduleConcurrencyPolicy | default "Replace" }}
   jobTemplate:
     metadata:
-      generateName: {{ include "port-ocean.metadataNamePrefixShort" . }}-
+      generateName: {{ printf "%s-" (include "port-ocean.metadataNamePrefixShort" .) | quote }}
       namespace: {{ .Release.Namespace }}
       labels:
         app: {{ include "port-ocean.cronJobName" . }}
@@ -146,6 +146,7 @@ spec:
             - containerPort: {{.Values.service.port}}
               protocol: TCP
             {{- end }}
+            {{- if or .Values.selfSignedCertificate.enabled .Values.postgresql.enabled .Values.extraEnv }}
             env:
             {{- if .Values.selfSignedCertificate.enabled }}
               - name: SSL_CERT_FILE
@@ -153,20 +154,21 @@ spec:
               - name: REQUESTS_CA_BUNDLE
                 value: /etc/ssl/certs/ca-certificates.crt
             {{- end }}
+            {{- if .Values.postgresql.enabled }}
+              - name: OCEAN__DATABASE__HOST
+                value: {{ include "port-ocean.name" . }}-postgresql
+              - name: OCEAN__DATABASE__PORT
+                value: '5432'
+              - name: OCEAN__DATABASE__NAME
+                value: {{ .Values.postgresql.global.postgresql.auth.database }}
+              - name: OCEAN__DATABASE__USERNAME
+                value: {{ .Values.postgresql.global.postgresql.auth.username }}
+              - name: OCEAN__DATABASE__PASSWORD
+                value: {{ .Values.postgresql.global.postgresql.auth.password }}
+            {{- end }}
             {{- if .Values.extraEnv }}
               {{- tpl (toYaml .Values.extraEnv) . | nindent 14 }}
             {{- end }}
-            {{- if .Values.postgresql.enabled }}
-          - name: OCEAN__DATABASE__HOST
-            value: {{ include "port-ocean.name" . }}-postgresql
-          - name: OCEAN__DATABASE__PORT
-            value: '5432'
-          - name: OCEAN__DATABASE__NAME
-            value: {{ .Values.postgresql.global.postgresql.auth.database }}
-          - name: OCEAN__DATABASE__USERNAME
-            value: {{ .Values.postgresql.global.postgresql.auth.username }}
-          - name: OCEAN__DATABASE__PASSWORD
-            value: {{ .Values.postgresql.global.postgresql.auth.password }}
             {{- end }}
             envFrom:
               - configMapRef:
@@ -200,105 +202,100 @@ spec:
                   name: {{ include "port-ocean.configMapName" . }}
               {{- include "port-ocean.additionalSecrets" . | nindent 14 }}
             command:
-              - /bin/sh
-              - -c
-              - |
-                set -eu
-                apk add --no-cache bash curl jq >/dev/null
-                exec /bin/bash <<'OCEAN_HEALTHCHECK_SCRIPT'
-                #!/usr/bin/env bash
-                set -euo pipefail
+                - /bin/bash
+                - -c
+                - |
+                  set -euo pipefail
 
-                IS_HEALTHY_URL="http://localhost:{{.Values.service.port}}/isHealthy"
-                INTERVAL_SECONDS="${OCEAN_HEALTH_CHECKER__INTERVAL_SECONDS:-10}"
-                FAILURE_THRESHOLD="${OCEAN_HEALTH_CHECKER__FAILURE_THRESHOLD:-3}"
-                TIMEOUT_SECONDS="${OCEAN_HEALTH_CHECKER__TIMEOUT_SECONDS:-5}"
+                  IS_HEALTHY_URL="http://localhost:{{.Values.service.port}}/isHealthy"
+                  INTERVAL_SECONDS="${OCEAN_HEALTH_CHECKER__INTERVAL_SECONDS:-10}"
+                  FAILURE_THRESHOLD="${OCEAN_HEALTH_CHECKER__FAILURE_THRESHOLD:-3}"
+                  TIMEOUT_SECONDS="${OCEAN_HEALTH_CHECKER__TIMEOUT_SECONDS:-5}"
 
-                PORT_BASE_URL="${OCEAN__PORT__BASE_URL:-}"
-                PORT_CLIENT_ID="${OCEAN__PORT__CLIENT_ID:-}"
-                PORT_CLIENT_SECRET="${OCEAN__PORT__CLIENT_SECRET:-}"
-                INTEGRATION_IDENTIFIER="${OCEAN__INTEGRATION__IDENTIFIER:-}"
+                  PORT_BASE_URL="${OCEAN__PORT__BASE_URL:-}"
+                  PORT_CLIENT_ID="${OCEAN__PORT__CLIENT_ID:-}"
+                  PORT_CLIENT_SECRET="${OCEAN__PORT__CLIENT_SECRET:-}"
+                  INTEGRATION_IDENTIFIER="${OCEAN__INTEGRATION__IDENTIFIER:-}"
 
-                log_warning() { echo "[WARN] $*" >&2; }
-                log_error()   { echo "[ERROR] $*" >&2; }
-                log_info()    { echo "[INFO] $*" >&2; }
+                  log_warning() { echo "[WARN] $*" >&2; }
+                  log_error()   { echo "[ERROR] $*" >&2; }
+                  log_info()    { echo "[INFO] $*" >&2; }
 
-                check_health() {
-                  curl -sf --max-time "$TIMEOUT_SECONDS" "$IS_HEALTHY_URL" > /dev/null
-                }
+                  check_health() {
+                    curl -sf --max-time "$TIMEOUT_SECONDS" "$IS_HEALTHY_URL" > /dev/null
+                  }
 
-                # Report resync aborted to Port
-                report_resync_aborted_to_port() {
-                  if [[ -z "$PORT_BASE_URL" || -z "$PORT_CLIENT_ID" || -z "$PORT_CLIENT_SECRET" || -z "$INTEGRATION_IDENTIFIER" ]]; then
-                    return 0
-                  fi
-
-                  local api_url="${PORT_BASE_URL%/}/v1"
-
-                  # Get access token
-                  local token_resp
-                  token_resp=$(curl -sf --max-time 10 -X POST "${api_url}/auth/access_token" \
-                    -H "Content-Type: application/json" \
-                    -d "$(jq -n --arg clientId "$PORT_CLIENT_ID" --arg clientSecret "$PORT_CLIENT_SECRET" '{clientId:$clientId,clientSecret:$clientSecret}')" 2>/dev/null) || return 0
-                  local token_type token_value
-                  token_type=$(echo "$token_resp" | jq -r '.tokenType // "Bearer"')
-                  token_value=$(echo "$token_resp" | jq -r '.accessToken')
-                  [[ "$token_value" == "null" || -z "$token_value" ]] && return 0
-                  local auth_header="${token_type} ${token_value}"
-
-                  # Get integration (for _id)
-                  local integ_id_encoded
-                  integ_id_encoded=$(printf %s "$INTEGRATION_IDENTIFIER" | jq -sRr @uri)
-                  local integ_resp
-                  integ_resp=$(curl -sf --max-time 10 -X GET "${api_url}/integration/${integ_id_encoded}" \
-                    -H "Authorization: $auth_header" 2>/dev/null) || return 0
-                  local integration_internal_id
-                  integration_internal_id=$(echo "$integ_resp" | jq -r '.integration._id')
-                  [[ "$integration_internal_id" == "null" || -z "$integration_internal_id" ]] && return 0
-
-                  # Get latest resync id
-                  local internal_id_encoded
-                  internal_id_encoded=$(printf %s "$integration_internal_id" | jq -sRr @uri)
-                  local syncs_resp
-                  syncs_resp=$(curl -sf --max-time 10 -X GET "${api_url}/integration/${internal_id_encoded}/syncsMetadata" \
-                    -H "Authorization: $auth_header" 2>/dev/null) || return 0
-                  local sync_state
-                  sync_state=$(echo "$syncs_resp" | jq -r '.data[0].syncState // empty')
-                  [[ "$sync_state" != "syncing" ]] && return 0
-                  local resync_id
-                  resync_id=$(echo "$syncs_resp" | jq -r '.data[0].eventId // empty')
-                  [[ -z "$resync_id" ]] && return 0
-
-                  local abort_url="${api_url}/integration/${integ_id_encoded}/resync/${resync_id}/abort"
-                  local abort_code
-                  abort_code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 -X POST "$abort_url" \
-                    -H "Authorization: $auth_header" 2>/dev/null) || abort_code=000
-                  if [[ "$abort_code" =~ ^2[0-9][0-9]$ ]]; then
-                    log_info "Reported resync aborted to integ-service (integrationIdentifier=$INTEGRATION_IDENTIFIER)"
-                  else
-                    log_error "integ-service resync abort returned $abort_code"
-                  fi
-                }
-
-                # After the integration exits (ONCE), /isHealthy fails repeatedly until FAILURE_THRESHOLD;
-                # exit 0 so the Job can succeed if the main container already completed (exit 1 would fail the Pod).
-
-                consecutive_failures=0
-                while true; do
-                  if check_health; then
-                    consecutive_failures=0
-                  else
-                    ((consecutive_failures++)) || true
-                    if [[ "$consecutive_failures" -ge "$FAILURE_THRESHOLD" ]]; then
-                      report_resync_aborted_to_port
-                      log_warning "Health check failed $FAILURE_THRESHOLD times in a row (url=$IS_HEALTHY_URL); exiting so CronJob can complete."
-                      exit 0
+                  # Report resync aborted to Port
+                  report_resync_aborted_to_port() {
+                    if [[ -z "$PORT_BASE_URL" || -z "$PORT_CLIENT_ID" || -z "$PORT_CLIENT_SECRET" || -z "$INTEGRATION_IDENTIFIER" ]]; then
+                      return 0
                     fi
-                    log_warning "Health check failed (attempt $consecutive_failures/$FAILURE_THRESHOLD)"
-                  fi
-                  sleep "$INTERVAL_SECONDS"
-                done
-                OCEAN_HEALTHCHECK_SCRIPT
+
+                    local api_url="${PORT_BASE_URL%/}/v1"
+
+                    # Get access token
+                    local token_resp
+                    token_resp=$(curl -sf --max-time 10 -X POST "${api_url}/auth/access_token" \
+                      -H "Content-Type: application/json" \
+                      -d "$(jq -n --arg clientId "$PORT_CLIENT_ID" --arg clientSecret "$PORT_CLIENT_SECRET" '{clientId:$clientId,clientSecret:$clientSecret}')" 2>/dev/null) || return 0
+                    local token_type token_value
+                    token_type=$(echo "$token_resp" | jq -r '.tokenType // "Bearer"')
+                    token_value=$(echo "$token_resp" | jq -r '.accessToken')
+                    [[ "$token_value" == "null" || -z "$token_value" ]] && return 0
+                    local auth_header="${token_type} ${token_value}"
+
+                    # Get integration (for _id)
+                    local integ_id_encoded
+                    integ_id_encoded=$(printf %s "$INTEGRATION_IDENTIFIER" | jq -sRr @uri)
+                    local integ_resp
+                    integ_resp=$(curl -sf --max-time 10 -X GET "${api_url}/integration/${integ_id_encoded}" \
+                      -H "Authorization: $auth_header" 2>/dev/null) || return 0
+                    local integration_internal_id
+                    integration_internal_id=$(echo "$integ_resp" | jq -r '.integration._id')
+                    [[ "$integration_internal_id" == "null" || -z "$integration_internal_id" ]] && return 0
+
+                    # Get latest resync id
+                    local internal_id_encoded
+                    internal_id_encoded=$(printf %s "$integration_internal_id" | jq -sRr @uri)
+                    local syncs_resp
+                    syncs_resp=$(curl -sf --max-time 10 -X GET "${api_url}/integration/${internal_id_encoded}/syncsMetadata" \
+                      -H "Authorization: $auth_header" 2>/dev/null) || return 0
+                    local sync_state
+                    sync_state=$(echo "$syncs_resp" | jq -r '.data[0].syncState // empty')
+                    [[ "$sync_state" != "syncing" ]] && return 0
+                    local resync_id
+                    resync_id=$(echo "$syncs_resp" | jq -r '.data[0].eventId // empty')
+                    [[ -z "$resync_id" ]] && return 0
+
+                    local abort_url="${api_url}/integration/${integ_id_encoded}/resync/${resync_id}/abort"
+                    local abort_code
+                    abort_code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 -X POST "$abort_url" \
+                      -H "Authorization: $auth_header" 2>/dev/null) || abort_code=000
+                    if [[ "$abort_code" =~ ^2[0-9][0-9]$ ]]; then
+                      log_info "Reported resync aborted to integ-service (integrationIdentifier=$INTEGRATION_IDENTIFIER)"
+                    else
+                      log_error "integ-service resync abort returned $abort_code"
+                    fi
+                  }
+
+                  # After the integration exits (ONCE), /isHealthy fails repeatedly until FAILURE_THRESHOLD;
+                  # exit 0 so the Job can succeed if the main container already completed (exit 1 would fail the Pod).
+
+                  consecutive_failures=0
+                  while true; do
+                    if check_health; then
+                      consecutive_failures=0
+                    else
+                      ((consecutive_failures++)) || true
+                      if [[ "$consecutive_failures" -ge "$FAILURE_THRESHOLD" ]]; then
+                        report_resync_aborted_to_port
+                        log_warning "Health check failed $FAILURE_THRESHOLD times in a row (url=$IS_HEALTHY_URL); exiting so CronJob can complete."
+                        exit 0
+                      fi
+                      log_warning "Health check failed (attempt $consecutive_failures/$FAILURE_THRESHOLD)"
+                    fi
+                    sleep "$INTERVAL_SECONDS"
+                  done
             resources:
               requests:
                 memory: "32Mi"

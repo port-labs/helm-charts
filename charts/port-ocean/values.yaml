@@ -121,14 +121,14 @@ secret:
 # CronJob workload only: sidecar that polls /isHealthy; after repeated failures, reports resync aborted to Port.
 healthChecker:
   enabled: false
-  image: docker.io/library/alpine:3.21
+  image: bitnami/kubectl:latest
   intervalSeconds: 10
   failureThreshold: 3
 
 # Deployment workload only: separate CronJob Pod that aborts stale pending/syncing resyncs in Port (keeps the newest).
 resyncStaleCleanup:
   enabled: false
-  image: docker.io/library/alpine:3.21
+  image: bitnami/kubectl:latest
   cronSchedule: "*/5 * * * *"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 1

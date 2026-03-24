@@ -26,7 +26,7 @@ spec:
           {{- if or .Values.podServiceAccount.name .Values.podServiceAccount.create }}
           serviceAccountName: {{ include "port-ocean.serviceAccountName" . }}
           {{- end }}
-          restartPolicy: OnFailure
+          restartPolicy: Never
           {{- with .Values.imagePullSecrets }}
           imagePullSecrets:
             {{- toYaml . | nindent 12 }}
@@ -52,13 +52,9 @@ spec:
                     name: {{ include "port-ocean.configMapName" . }}
                 {{- include "port-ocean.additionalSecrets" . | nindent 16 }}
               command:
-                - /bin/sh
+                - /bin/bash
                 - -c
                 - |
-                  set -eu
-                  apk add --no-cache bash curl jq >/dev/null
-                  exec /bin/bash <<'OCEAN_RESYNC_GC_SCRIPT'
-                  #!/usr/bin/env bash
                   set -euo pipefail
 
                   PORT_BASE_URL="${OCEAN__PORT__BASE_URL:-}"
@@ -104,16 +100,14 @@ spec:
                   # syncsMetadata.data is newest-first; keep the newest pending/syncing, abort older pending/syncing.
                   while IFS= read -r eventId; do
                     [[ -z "$eventId" || "$eventId" == "null" ]] && continue
-                    echo "eventId: $eventId"
                     abort_url="${api_url}/integration/${integ_id_encoded}/resync/${eventId}/abort"
                     abort_code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 -X POST "$abort_url" \
                       -H "Authorization: $auth_header" 2>/dev/null) || abort_code=000
                   done < <(echo "$syncs_resp" | jq -r '
                     (.data // [])
-                    | map(select(((.syncState) | ascii_downcase | test("^(pending|syncing)$"))))
+                    | map(select(((.syncState) | test("^(pending|syncing)$"))))
                     | if length <= 1 then empty else .[1:] | .[].eventId end
                   ')
-                  OCEAN_RESYNC_GC_SCRIPT
               resources:
                 requests:
                   memory: "32Mi"
