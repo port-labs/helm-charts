@@ -262,7 +262,10 @@ spec:
                   local syncs_resp
                   syncs_resp=$(curl -sf --max-time 10 -X GET "${api_url}/integration/${internal_id_encoded}/syncsMetadata" \
                     -H "Authorization: $auth_header" 2>/dev/null) || return 0
-                  local resync_id 
+                  local sync_state
+                  sync_state=$(echo "$syncs_resp" | jq -r '.data[0].syncState // empty')
+                  [[ "$sync_state" != "syncing" ]] && return 0
+                  local resync_id
                   resync_id=$(echo "$syncs_resp" | jq -r '.data[0].eventId // empty')
                   [[ -z "$resync_id" ]] && return 0
 

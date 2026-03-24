@@ -202,7 +202,7 @@ Get deployment name
 {{- end }}
 
 {{/*
-Stale-resync cleanup CronJob (Deployment workloads only).
+resyncStaleCleanup CronJob name (Deployment workload only).
 CronJob.metadata.name must be <= 52 characters (Kubernetes validation).
 */}}
 {{- define "port-ocean.resyncStaleCleanupCronJobName" -}}

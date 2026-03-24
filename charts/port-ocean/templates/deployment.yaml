@@ -5,7 +5,7 @@ metadata:
   name: {{ include "port-ocean.deploymentName" . }}
   labels:
     {{- include "port-ocean.labels" . | nindent 4 }}
-  {{- if .Values.healthChecker.enabled }}
+  {{- if .Values.resyncStaleCleanup.enabled }}
   annotations:
     port.io/stale-resync-cleanup-cronjob: {{ include "port-ocean.resyncStaleCleanupCronJobName" . | quote }}
   {{- end }}

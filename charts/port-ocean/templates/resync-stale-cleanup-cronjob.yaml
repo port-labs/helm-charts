@@ -1,4 +1,4 @@
-{{- if and (eq .Values.workload.kind "Deployment") .Values.healthChecker.enabled }}
+{{- if and (eq .Values.workload.kind "Deployment") .Values.resyncStaleCleanup.enabled }}
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -7,15 +7,15 @@ metadata:
     {{- include "port-ocean.labels" . | nindent 4 }}
     app.kubernetes.io/component: resync-stale-cleanup
 spec:
-  {{- $scheduleValue := (.Values.healthChecker.cronSchedule | default "*/5 * * * *") | toString }}
+  {{- $scheduleValue := (.Values.resyncStaleCleanup.cronSchedule | default "*/5 * * * *") | toString }}
   schedule: {{ if regexMatch "^[\"'].*[\"']$" $scheduleValue }}{{ $scheduleValue }}{{ else }}{{ $scheduleValue | squote }}{{ end }}
-  concurrencyPolicy: {{ .Values.healthChecker.concurrencyPolicy | default "Forbid" }}
-  successfulJobsHistoryLimit: {{ .Values.healthChecker.successfulJobsHistoryLimit | default 1 }}
-  failedJobsHistoryLimit: {{ .Values.healthChecker.failedJobsHistoryLimit | default 3 }}
-  suspend: {{ .Values.healthChecker.suspend | default false }}
+  concurrencyPolicy: {{ .Values.resyncStaleCleanup.concurrencyPolicy | default "Forbid" }}
+  successfulJobsHistoryLimit: {{ .Values.resyncStaleCleanup.successfulJobsHistoryLimit | default 1 }}
+  failedJobsHistoryLimit: {{ .Values.resyncStaleCleanup.failedJobsHistoryLimit | default 3 }}
+  suspend: {{ .Values.resyncStaleCleanup.suspend | default false }}
   jobTemplate:
     spec:
-      ttlSecondsAfterFinished: {{ .Values.healthChecker.jobTtlSecondsAfterFinished | default 300 }}
+      ttlSecondsAfterFinished: {{ .Values.resyncStaleCleanup.jobTtlSecondsAfterFinished | default 300 }}
       backoffLimit: 0
       template:
         metadata:
@@ -45,7 +45,7 @@ spec:
           {{- end }}
           containers:
             - name: resync-cleanup
-              image: {{ .Values.healthChecker.image }}
+              image: {{ .Values.resyncStaleCleanup.image }}
               imagePullPolicy: {{ .Values.imagePullPolicy }}
               envFrom:
                 - configMapRef:
@@ -76,19 +76,11 @@ spec:
 
                   api_url="${PORT_BASE_URL%/}/v1"
 
-                  echo "api_url: $api_url"
-                  echo "PORT_CLIENT_ID: $PORT_CLIENT_ID"
-                  echo "PORT_CLIENT_SECRET: $PORT_CLIENT_SECRET"
-                  echo "INTEGRATION_IDENTIFIER: $INTEGRATION_IDENTIFIER"
-
                   token_resp=$(curl -sf --max-time 10 -X POST "${api_url}/auth/access_token" \
                     -H "Content-Type: application/json" \
                     -d "$(jq -n --arg clientId "$PORT_CLIENT_ID" --arg clientSecret "$PORT_CLIENT_SECRET" '{clientId:$clientId,clientSecret:$clientSecret}')" 2>/dev/null) || { log_error "Failed to obtain access token"; exit 0; }
-                  echo "token_resp: $token_resp"
                   token_type=$(echo "$token_resp" | jq -r '.tokenType // "Bearer"')
                   token_value=$(echo "$token_resp" | jq -r '.accessToken')
-                  echo "token_type: $token_type"
-                  echo "token_value: $token_value"
                   if [[ "$token_value" == "null" || -z "$token_value" ]]; then
                     log_error "Invalid access token response"
                     exit 0
@@ -104,8 +96,6 @@ spec:
                     exit 0
                   fi
                   
-                  echo "integration_internal_id: $integration_internal_id"
-
                   internal_id_encoded=$(printf %s "$integration_internal_id" | jq -sRr @uri)
                   syncs_resp=$(curl -sf --max-time 10 -X GET "${api_url}/integration/${internal_id_encoded}/syncsMetadata" \
                     -H "Authorization: $auth_header" 2>/dev/null) || { log_error "Failed to GET syncsMetadata"; exit 0; }
@@ -113,7 +103,6 @@ spec:
 
                   # syncsMetadata.data is newest-first; keep the newest pending/syncing, abort older pending/syncing.
                   while IFS= read -r eventId; do
-                    echo "eventId: $eventId"
                     [[ -z "$eventId" || "$eventId" == "null" ]] && continue
                     abort_url="${api_url}/integration/${integ_id_encoded}/resync/${eventId}/abort"
                     abort_code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 -X POST "$abort_url" \

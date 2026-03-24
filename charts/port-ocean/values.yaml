@@ -118,19 +118,23 @@ secret:
   #    - "y"
   #    - "c"
 
-# Health checker:
-# - Deployment workload: CronJob that periodically aborts stale pending/syncing resyncs in Port (keeps the newest).
-# - CronJob workload: sidecar in the integration pod.
+# CronJob workload only: sidecar that polls /isHealthy; after repeated failures, reports resync aborted to Port.
 healthChecker:
   enabled: false
   image: docker.io/library/alpine:3.21
-  # Deployment only: CronJob schedule (cron syntax).
+  intervalSeconds: 10
+  failureThreshold: 3
+
+# Deployment workload only: separate CronJob Pod that aborts stale pending/syncing resyncs in Port (keeps the newest).
+resyncStaleCleanup:
+  enabled: false
+  image: docker.io/library/alpine:3.21
   cronSchedule: "*/5 * * * *"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 3
   jobTtlSecondsAfterFinished: 300
-  # Set true to disable the CronJob without uninstalling the release.
+  # Set true to disable without uninstalling the release.
   suspend: false
 
 # DNS configuration for pod spec. Only applied when overridden from defaults below.
