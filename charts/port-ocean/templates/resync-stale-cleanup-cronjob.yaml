@@ -104,10 +104,10 @@ spec:
                   # syncsMetadata.data is newest-first; keep the newest pending/syncing, abort older pending/syncing.
                   while IFS= read -r eventId; do
                     [[ -z "$eventId" || "$eventId" == "null" ]] && continue
+                    echo "eventId: $eventId"
                     abort_url="${api_url}/integration/${integ_id_encoded}/resync/${eventId}/abort"
                     abort_code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 -X POST "$abort_url" \
                       -H "Authorization: $auth_header" 2>/dev/null) || abort_code=000
-                    echo "abort_code: $abort_code"
                   done < <(echo "$syncs_resp" | jq -r '
                     (.data // [])
                     | map(select(((.syncState) | ascii_downcase | test("^(pending|syncing)$"))))
