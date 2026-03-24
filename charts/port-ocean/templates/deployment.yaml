@@ -5,7 +5,11 @@ metadata:
   name: {{ include "port-ocean.deploymentName" . }}
   labels:
     {{- include "port-ocean.labels" . | nindent 4 }}
-spec:
+  {{- if .Values.healthChecker.enabled }}
+  annotations:
+    port.io/stale-resync-cleanup-cronjob: {{ include "port-ocean.resyncStaleCleanupCronJobName" . | quote }}
+  {{- end }}
+spec: 
   strategy:
     type: {{ .Values.workload.deployment.rolloutStrategy | default "Recreate" }}
   replicas: {{ if and (hasKey .Values.workload.deployment "replicas") (eq (.Values.workload.deployment.replicas | int) 0) }}0{{ else }}1{{ end }}
@@ -141,105 +145,6 @@ spec:
           successThreshold: {{ default 2 .Values.readinessProbe.successThreshold }}
           failureThreshold: {{ default 3 .Values.readinessProbe.failureThreshold }}
         {{- end }}
-      {{- if .Values.healthChecker.enabled }}
-      - name: health-checker
-        image: {{ .Values.healthChecker.image }}
-        imagePullPolicy: {{ .Values.imagePullPolicy }}
-        env:
-          - name: OCEAN_HEALTH_CHECKER__INTERVAL_SECONDS
-            value: {{ .Values.healthChecker.intervalSeconds | default 10 | quote }}
-        envFrom:
-          - configMapRef:
-              name: {{ include "port-ocean.configMapName" . }}
-          {{- include "port-ocean.additionalSecrets" . | nindent 10 }}
-        command:
-          - /bin/sh
-          - -c
-          - |
-              set -eu
-              apk add --no-cache bash curl jq >/dev/null
-              exec /bin/bash <<'OCEAN_HEALTHCHECK_SCRIPT'
-              #!/usr/bin/env bash
-              set -euo pipefail
-
-              IS_HEALTHY_URL="http://localhost:{{.Values.service.port}}/isHealthy"
-              INTERVAL_SECONDS="${OCEAN_HEALTH_CHECKER__INTERVAL_SECONDS:-10}"
-              TIMEOUT_SECONDS="${OCEAN_HEALTH_CHECKER__TIMEOUT_SECONDS:-5}"
-
-              PORT_BASE_URL="${OCEAN__PORT__BASE_URL:-}"
-              PORT_CLIENT_ID="${OCEAN__PORT__CLIENT_ID:-}"
-              PORT_CLIENT_SECRET="${OCEAN__PORT__CLIENT_SECRET:-}"
-              INTEGRATION_IDENTIFIER="${OCEAN__INTEGRATION__IDENTIFIER:-}"
-
-              log_warning() { echo "[WARN] $*" >&2; }
-              log_error()   { echo "[ERROR] $*" >&2; }
-              log_info()    { echo "[INFO] $*" >&2; }
-
-              # Returns current resync id from /isHealthy JSON (empty if none or request failed).
-              fetch_resync_id_from_is_healthy() {
-                local body
-                if ! body=$(curl -sf --max-time "$TIMEOUT_SECONDS" "$IS_HEALTHY_URL" 2>/dev/null); then
-                  echo ""
-                  return 1
-                fi
-                echo "$body" | jq -r '.resync_id // empty' 2>/dev/null || echo ""
-              }
-
-              # Abort a specific resync in Port (called when /isHealthy resync_id changes so the superseded run is reported).
-              abort_resync_to_port() {
-                local resync_id="$1"
-                [[ -z "$resync_id" ]] && return 0
-
-                local api_url="${PORT_BASE_URL%/}/v1"
-
-                local token_resp
-                token_resp=$(curl -sf --max-time 10 -X POST "${api_url}/auth/access_token" \
-                  -H "Content-Type: application/json" \
-                  -d "$(jq -n --arg clientId "$PORT_CLIENT_ID" --arg clientSecret "$PORT_CLIENT_SECRET" '{clientId:$clientId,clientSecret:$clientSecret}')" 2>/dev/null) || return 0
-                local token_type token_value
-                token_type=$(echo "$token_resp" | jq -r '.tokenType // "Bearer"')
-                token_value=$(echo "$token_resp" | jq -r '.accessToken')
-                [[ "$token_value" == "null" || -z "$token_value" ]] && return 0
-                local auth_header="${token_type} ${token_value}"
-
-                local integ_id_encoded
-                integ_id_encoded=$(printf %s "$INTEGRATION_IDENTIFIER" | jq -sRr @uri)
-
-                local abort_url="${api_url}/integration/${integ_id_encoded}/resync/${resync_id}/abort"
-                local abort_code
-                abort_code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 -X POST "$abort_url" \
-                  -H "Authorization: $auth_header" 2>/dev/null) || abort_code=000
-                if [[ "$abort_code" =~ ^2[0-9][0-9]$ ]]; then
-                  log_info "Reported superseded resync aborted to integ-service (resync_id=$resync_id, integrationIdentifier=$INTEGRATION_IDENTIFIER)"
-                else
-                  log_error "integ-service resync abort returned $abort_code (resync_id=$resync_id)"
-                fi
-              }
-
-              # Deployment: poll /isHealthy for resync_id; when it changes to a new non-empty id, abort the previous resync in Port.
-
-              last_resync_id=""
-              while true; do
-                current_resync_id=""
-                if current_resync_id=$(fetch_resync_id_from_is_healthy); then
-                  if [[ -n "$last_resync_id" && "$last_resync_id" != "$current_resync_id" ]]; then
-                    abort_resync_to_port "$last_resync_id"
-                  fi
-                  last_resync_id="$current_resync_id"
-                else
-                  log_warning "Failed to GET $IS_HEALTHY_URL (will retry)"
-                fi
-                sleep "$INTERVAL_SECONDS"
-              done
-              OCEAN_HEALTHCHECK_SCRIPT
-        resources:
-          requests:
-            memory: "32Mi"
-            cpu: "10m"
-          limits:
-            memory: "64Mi"
-            cpu: "100m"
-      {{- end }}
       volumes:
         {{- if .Values.extraVolumes }}
         {{- tpl (toYaml .Values.extraVolumes) . | nindent 8 }}

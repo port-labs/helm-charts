@@ -118,10 +118,20 @@ secret:
   #    - "y"
   #    - "c"
 
-# Health-checker sidecar. When enabled, adds a sidecar that runs a bash script with the same
+# Health checker:
+# - Deployment workload: CronJob that periodically aborts stale pending/syncing resyncs in Port (keeps the newest).
+# - CronJob workload: sidecar in the integration pod.
 healthChecker:
   enabled: false
   image: docker.io/library/alpine:3.21
+  # Deployment only: CronJob schedule (cron syntax).
+  cronSchedule: "*/5 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTtlSecondsAfterFinished: 300
+  # Set true to disable the CronJob without uninstalling the release.
+  suspend: false
 
 # DNS configuration for pod spec. Only applied when overridden from defaults below.
 # Leave as-is to use cluster defaults; override for environments like AWS Fargate where

@@ -201,6 +201,23 @@ Get deployment name
 {{- printf "%s-deployment" $prefix | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
+{{/*
+Stale-resync cleanup CronJob (Deployment workloads only).
+CronJob.metadata.name must be <= 52 characters (Kubernetes validation).
+*/}}
+{{- define "port-ocean.resyncStaleCleanupCronJobName" -}}
+{{- $prefix := include "port-ocean.metadataNamePrefix" . -}}
+{{- $jobName := printf "%s-resync-stale-cleanup" $prefix -}}
+{{- if gt (len $jobName) 52 -}}
+{{- /* len("-resync-stale-cleanup") == 21; CronJob name max 52 */ -}}
+{{- $maxPrefixLen := int (sub 52 21) -}}
+{{- $truncatedPrefix := trunc $maxPrefixLen $prefix | trimSuffix "-" -}}
+{{- printf "%s-resync-stale-cleanup" $truncatedPrefix -}}
+{{- else -}}
+{{- $jobName -}}
+{{- end -}}
+{{- end }}
+
 {{- define "port-ocean.liveEvents.deploymentName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
 {{- printf "%s-le-deployment" $prefix | trunc 63 | trimSuffix "-" }}
