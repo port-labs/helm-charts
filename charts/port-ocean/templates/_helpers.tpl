@@ -264,6 +264,46 @@ Get self signed cert secret name
 {{- printf "%s-cert" $prefix }}
 {{- end }}
 
+{{/*
+Env vars for the main Ocean integration container (CronJob + Deployment): TLS bundle paths,
+PostgreSQL connection when enabled, optional OCEAN__BASE_URL for live-events proxy mode,
+and values.extraEnv (rendered with tpl).
+
+Call with a dict:
+  root: . (chart root context)
+  includeLiveEventsBaseUrl: bool — true for main Deployment (proxy to liveEvents.baseUrl); false for CronJob
+
+Outputs YAML `{ items: [ ... ] }` (items may be empty). Use with `fromYaml` then `.items`.
+*/}}
+{{- define "port-ocean.oceanMainContainerEnvList" -}}
+{{- $root := .root }}
+{{- $includeLiveEvents := index . "includeLiveEventsBaseUrl" | default false }}
+{{- $items := list }}
+{{- if $root.Values.selfSignedCertificate.enabled }}
+{{- $items = concat $items (list
+  (dict "name" "SSL_CERT_FILE" "value" "/etc/ssl/certs/ca-certificates.crt")
+  (dict "name" "REQUESTS_CA_BUNDLE" "value" "/etc/ssl/certs/ca-certificates.crt")
+) }}
+{{- end }}
+{{- if $root.Values.postgresql.enabled }}
+{{- $items = concat $items (list
+  (dict "name" "OCEAN__DATABASE__HOST" "value" (printf "%s-postgresql" (include "port-ocean.name" $root)))
+  (dict "name" "OCEAN__DATABASE__PORT" "value" "5432")
+  (dict "name" "OCEAN__DATABASE__NAME" "value" $root.Values.postgresql.global.postgresql.auth.database)
+  (dict "name" "OCEAN__DATABASE__USERNAME" "value" $root.Values.postgresql.global.postgresql.auth.username)
+  (dict "name" "OCEAN__DATABASE__PASSWORD" "value" $root.Values.postgresql.global.postgresql.auth.password)
+) }}
+{{- end }}
+{{- if and $includeLiveEvents $root.Values.liveEvents.baseUrl (not $root.Values.liveEvents.worker.enabled) }}
+{{- $items = append $items (dict "name" "OCEAN__BASE_URL" "value" $root.Values.liveEvents.baseUrl) }}
+{{- end }}
+{{- if $root.Values.extraEnv }}
+{{- $extra := tpl (toYaml $root.Values.extraEnv) $root | fromYaml }}
+{{- $items = concat $items $extra }}
+{{- end }}
+{{- dict "items" $items | toYaml }}
+{{- end }}
+
 {{- define "port-ocean.additionalSecrets" }}
 {{- $secretsArray := list }}
 {{- if or .Values.secret.create .Values.secret.name }}

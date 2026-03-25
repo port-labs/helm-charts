@@ -124,6 +124,13 @@ healthChecker:
   image: bitnami/kubectl:latest
   intervalSeconds: 10
   failureThreshold: 3
+  resources:
+    requests:
+      memory: "32Mi"
+      cpu: "10m"
+    limits:
+      memory: "64Mi"
+      cpu: "100m"
 
 # Deployment workload only: separate CronJob Pod that aborts stale pending/syncing resyncs in Port (keeps the newest).
 resyncStaleCleanup:
@@ -136,6 +143,13 @@ resyncStaleCleanup:
   jobTtlSecondsAfterFinished: 300
   # Set true to disable without uninstalling the release.
   suspend: false
+  resources:
+    requests:
+      memory: "32Mi"
+      cpu: "10m"
+    limits:
+      memory: "64Mi"
+      cpu: "100m"
 
 # DNS configuration for pod spec. Only applied when overridden from defaults below.
 # Leave as-is to use cluster defaults; override for environments like AWS Fargate where

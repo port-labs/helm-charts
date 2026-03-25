@@ -106,13 +106,10 @@ spec:
                   done < <(echo "$syncs_resp" | jq -r '
                     (.data // [])
                     | map(select(((.syncState) | test("^(pending|syncing)$"))))
-                    | if length <= 1 then empty else .[1:] | .[].eventId end
+                    | if length <= 1 then empty else .[1:] | .[].eventId end  # Keep the newest resync, abort older pending/syncing resyncs.
                   ')
+              {{- if .Values.resyncStaleCleanup.resources }}
               resources:
-                requests:
-                  memory: "32Mi"
-                  cpu: "10m"
-                limits:
-                  memory: "64Mi"
-                  cpu: "100m"
+                {{- toYaml .Values.resyncStaleCleanup.resources | nindent 16 }}
+              {{- end }}
 {{- end }}
