@@ -201,6 +201,7 @@ spec:
                   log_warning() { echo "[WARN] $*" >&2; }
                   log_error()   { echo "[ERROR] $*" >&2; }
                   log_info()    { echo "[INFO] $*" >&2; }
+                  {{ include "port-ocean.portApiScriptHelpers" . | nindent 18 }}
 
                   check_health() {
                     curl -sf --max-time "$TIMEOUT_SECONDS" "$IS_HEALTHY_URL" > /dev/null
@@ -213,43 +214,21 @@ spec:
                     fi
 
                     local api_url="${PORT_BASE_URL%/}/v1"
+                    local auth_header internal_id_encoded syncs_resp sync_state resync_id abort_url abort_code
 
-                    # Get access token
-                    local token_resp
-                    token_resp=$(curl -sf --max-time 10 -X POST "${api_url}/auth/access_token" \
-                      -H "Content-Type: application/json" \
-                      -d "$(jq -n --arg clientId "$PORT_CLIENT_ID" --arg clientSecret "$PORT_CLIENT_SECRET" '{clientId:$clientId,clientSecret:$clientSecret}')" 2>/dev/null) || return 0
-                    local token_type token_value
-                    token_type=$(echo "$token_resp" | jq -r '.tokenType // "Bearer"')
-                    token_value=$(echo "$token_resp" | jq -r '.accessToken')
-                    [[ "$token_value" == "null" || -z "$token_value" ]] && return 0
-                    local auth_header="${token_type} ${token_value}"
-
-                    # Get integration (for _id)
-                    local integ_id_encoded
-                    integ_id_encoded=$(printf %s "$INTEGRATION_IDENTIFIER" | jq -sRr @uri)
-                    local integ_resp
-                    integ_resp=$(curl -sf --max-time 10 -X GET "${api_url}/integration/${integ_id_encoded}" \
-                      -H "Authorization: $auth_header" 2>/dev/null) || return 0
-                    local integration_internal_id
-                    integration_internal_id=$(echo "$integ_resp" | jq -r '.integration._id')
-                    [[ "$integration_internal_id" == "null" || -z "$integration_internal_id" ]] && return 0
+                    auth_header=$(get_auth_header "$api_url") || { log_error "Failed to obtain access token"; exit 0; }
+                    resolve_integration_ids "$api_url" "$auth_header" || { log_error "Could not resolve integration _id"; exit 0; }
 
                     # Get latest resync id
-                    local internal_id_encoded
                     internal_id_encoded=$(printf %s "$integration_internal_id" | jq -sRr @uri)
-                    local syncs_resp
                     syncs_resp=$(curl -sf --max-time 10 -X GET "${api_url}/integration/${internal_id_encoded}/syncsMetadata" \
                       -H "Authorization: $auth_header" 2>/dev/null) || return 0
-                    local sync_state
                     sync_state=$(echo "$syncs_resp" | jq -r '.data[0].syncState // empty')
                     [[ "$sync_state" != "syncing" ]] && return 0
-                    local resync_id
                     resync_id=$(echo "$syncs_resp" | jq -r '.data[0].eventId // empty')
                     [[ -z "$resync_id" ]] && return 0
 
-                    local abort_url="${api_url}/integration/${integ_id_encoded}/resync/${resync_id}/abort"
-                    local abort_code
+                    abort_url="${api_url}/integration/${integ_id_encoded}/resync/${resync_id}/abort"
                     abort_code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 -X POST "$abort_url" \
                       -H "Authorization: $auth_header" 2>/dev/null) || abort_code=000
                     if [[ "$abort_code" =~ ^2[0-9][0-9]$ ]]; then

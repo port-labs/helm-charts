@@ -64,6 +64,7 @@ spec:
 
                   log_error() { echo "[ERROR] $*" >&2; }
                   log_info()  { echo "[INFO] $*" >&2; }
+                  {{ include "port-ocean.portApiScriptHelpers" . | nindent 18 }}
 
                   if [[ -z "$PORT_BASE_URL" || -z "$PORT_CLIENT_ID" || -z "$PORT_CLIENT_SECRET" || -z "$INTEGRATION_IDENTIFIER" ]]; then
                     log_error "Missing Port credentials or integration identifier; skipping resync cleanup."
@@ -71,26 +72,8 @@ spec:
                   fi
 
                   api_url="${PORT_BASE_URL%/}/v1"
-
-                  token_resp=$(curl -sf --max-time 10 -X POST "${api_url}/auth/access_token" \
-                    -H "Content-Type: application/json" \
-                    -d "$(jq -n --arg clientId "$PORT_CLIENT_ID" --arg clientSecret "$PORT_CLIENT_SECRET" '{clientId:$clientId,clientSecret:$clientSecret}')" 2>/dev/null) || { log_error "Failed to obtain access token"; exit 0; }
-                  token_type=$(echo "$token_resp" | jq -r '.tokenType // "Bearer"')
-                  token_value=$(echo "$token_resp" | jq -r '.accessToken')
-                  if [[ "$token_value" == "null" || -z "$token_value" ]]; then
-                    log_error "Invalid access token response"
-                    exit 0
-                  fi
-                  auth_header="${token_type} ${token_value}"
-
-                  integ_id_encoded=$(printf %s "$INTEGRATION_IDENTIFIER" | jq -sRr @uri)
-                  integ_resp=$(curl -sf --max-time 10 -X GET "${api_url}/integration/${integ_id_encoded}" \
-                    -H "Authorization: $auth_header" 2>/dev/null) || { log_error "Failed to GET integration"; exit 0; }
-                  integration_internal_id=$(echo "$integ_resp" | jq -r '.integration._id')
-                  if [[ "$integration_internal_id" == "null" || -z "$integration_internal_id" ]]; then
-                    log_error "Could not resolve integration _id"
-                    exit 0
-                  fi
+                  auth_header=$(get_auth_header "$api_url") || { log_error "Failed to obtain access token"; exit 0; }
+                  resolve_integration_ids "$api_url" "$auth_header" || { log_error "Could not resolve integration _id"; exit 0; }
                   
                   internal_id_encoded=$(printf %s "$integration_internal_id" | jq -sRr @uri)
                   syncs_resp=$(curl -sf --max-time 10 -X GET "${api_url}/integration/${internal_id_encoded}/syncsMetadata" \
