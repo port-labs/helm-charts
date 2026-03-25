@@ -19,7 +19,7 @@ spec:
   concurrencyPolicy: {{ .Values.scheduleConcurrencyPolicy | default "Replace" }}
   jobTemplate:
     metadata:
-      generateName: {{ printf "%s-" (include "port-ocean.metadataNamePrefixShort" .) | quote }}
+      generateName: {{ include "port-ocean.metadataNamePrefixShort" . }}-
       namespace: {{ .Release.Namespace }}
       labels:
         app: {{ include "port-ocean.cronJobName" . }}
