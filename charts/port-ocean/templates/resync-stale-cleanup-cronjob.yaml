@@ -86,6 +86,11 @@ spec:
                     abort_url="${api_url}/integration/${integ_id_encoded}/resync/${eventId}/abort"
                     abort_code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 -X POST "$abort_url" \
                       -H "Authorization: $auth_header" 2>/dev/null) || abort_code=000
+                    if [[ "$abort_code" =~ ^2[0-9][0-9]$ ]]; then
+                      log_info "Aborted stale resync (eventId=$eventId, http=$abort_code)"
+                    else
+                      log_error "Abort resync failed (eventId=$eventId, http=$abort_code)"
+                    fi
                   done < <(echo "$syncs_resp" | jq -r '
                     (.data // [])
                     | map(select(((.syncState) | test("^(pending|syncing)$"))))
