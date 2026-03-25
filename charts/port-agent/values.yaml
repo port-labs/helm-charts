@@ -1,7 +1,7 @@
 image:
-  repository: port-agent
+  repository: ghcr.io/port-labs/port-agent
   pullPolicy: IfNotPresent
-  tag: local
+  tag: ""
 
 # If you increase this number, you will need to make sure that the kafka topic has enough partitions
 replicaCount: 1
@@ -22,18 +22,18 @@ podServiceAccount:
 env:
   normal:
     GITLAB_URL: "https://gitlab.com/"
-    STREAMER_NAME: "POLLING"
-    PORT_ORG_ID: "org_cfIyUvRQ1qYx0gb4"
+    STREAMER_NAME: "KAFKA"
+    PORT_ORG_ID: ""
     PORT_API_BASE_URL: 'https://api.getport.io'
-    KAFKA_CONSUMER_GROUP_ID: "org_cfIyUvRQ1qYx0gb4"
+    KAFKA_CONSUMER_GROUP_ID: ""
     KAFKA_CONSUMER_SECURITY_PROTOCOL: "SASL_SSL"
     KAFKA_CONSUMER_AUTHENTICATION_MECHANISM: "SCRAM-SHA-512"
     KAFKA_CONSUMER_AUTO_OFFSET_RESET: "largest"
     DETAILED_LOGGING: "true"
     WEBHOOK_VERIFY_SSL: "true"
   secret:
-    PORT_CLIENT_ID: "s464qygf8C27TtVyuFNWGsUeFsfipmm9"
-    PORT_CLIENT_SECRET: "knOjSMFKbpcqysol9KANN5EmxfSo0MnFwW4D10IR0xMm4fhnkAdiT1A0HBEONgAk"
+    PORT_CLIENT_ID: ""
+    PORT_CLIENT_SECRET: ""
 
 extraLabels: {}
 
