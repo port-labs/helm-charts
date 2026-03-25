@@ -5,10 +5,6 @@ metadata:
   name: {{ include "port-ocean.deploymentName" . }}
   labels:
     {{- include "port-ocean.labels" . | nindent 4 }}
-  {{- if .Values.resyncStaleCleanup.enabled }}
-  annotations:
-    port.io/stale-resync-cleanup-cronjob: {{ include "port-ocean.resyncStaleCleanupCronJobName" . | quote }}
-  {{- end }}
 spec:
   strategy:
     type: {{ .Values.workload.deployment.rolloutStrategy | default "Recreate" }}
@@ -77,10 +73,31 @@ spec:
         - containerPort: {{.Values.service.port}}
           protocol: TCP
         {{- end }}
-        {{- $oceanMainEnv := (include "port-ocean.oceanMainContainerEnvList" (dict "root" . "includeLiveEventsBaseUrl" true) | fromYaml).items }}
-        {{- if gt (len ($oceanMainEnv | default list)) 0 }}
         env:
-        {{- toYaml $oceanMainEnv | nindent 10 }}
+        {{- if .Values.selfSignedCertificate.enabled }}
+          - name: SSL_CERT_FILE
+            value: /etc/ssl/certs/ca-certificates.crt
+          - name: REQUESTS_CA_BUNDLE
+            value: /etc/ssl/certs/ca-certificates.crt
+        {{- end }}
+        {{- if .Values.postgresql.enabled }}
+          - name: OCEAN__DATABASE__HOST
+            value: {{ include "port-ocean.name" . }}-postgresql
+          - name: OCEAN__DATABASE__PORT
+            value: '5432'
+          - name: OCEAN__DATABASE__NAME
+            value: {{ .Values.postgresql.global.postgresql.auth.database }}
+          - name: OCEAN__DATABASE__USERNAME
+            value: {{ .Values.postgresql.global.postgresql.auth.username }}
+          - name: OCEAN__DATABASE__PASSWORD
+            value: {{ .Values.postgresql.global.postgresql.auth.password }}
+        {{- end }}
+        {{- if and .Values.liveEvents.baseUrl (not .Values.liveEvents.worker.enabled) }}
+          - name: OCEAN__BASE_URL
+            value: {{ .Values.liveEvents.baseUrl }}
+        {{- end }}
+        {{- if .Values.extraEnv }}
+          {{- tpl (toYaml .Values.extraEnv) . | nindent 10 }}
         {{- end }}
         envFrom:
           - configMapRef:
@@ -99,17 +116,6 @@ spec:
         {{- if eq .Values.integration.processExecution.mode "multi_process" }}
           - name: prometheus-metrics
             mountPath: "{{ .Values.integration.processExecution.prometheusMultiProcessDir }}"
-        {{- end }}
-        {{- if (.Values.livenessProbe).enabled}}
-        livenessProbe:
-          httpGet:
-            path: /docs
-            port: {{.Values.service.port}}
-          initialDelaySeconds: {{ default 30 .Values.livenessProbe.initialDelaySeconds }}
-          periodSeconds: {{ default 10 .Values.livenessProbe.periodSeconds }}
-          timeoutSeconds: {{ default 5 .Values.livenessProbe.timeoutSeconds }}
-          successThreshold: 1
-          failureThreshold: {{ default 3 .Values.livenessProbe.failureThreshold }}
         {{- end }}
         {{- if (.Values.readinessProbe).enabled}}
         readinessProbe:

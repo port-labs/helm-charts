@@ -146,10 +146,27 @@ spec:
             - containerPort: {{.Values.service.port}}
               protocol: TCP
             {{- end }}
-            {{- $oceanMainEnv := (include "port-ocean.oceanMainContainerEnvList" (dict "root" . "includeLiveEventsBaseUrl" false) | fromYaml).items }}
-            {{- if gt (len ($oceanMainEnv | default list)) 0 }}
             env:
-            {{- toYaml $oceanMainEnv | nindent 14 }}
+            {{- if .Values.selfSignedCertificate.enabled }}
+              - name: SSL_CERT_FILE
+                value: /etc/ssl/certs/ca-certificates.crt
+              - name: REQUESTS_CA_BUNDLE
+                value: /etc/ssl/certs/ca-certificates.crt
+            {{- end }}
+            {{- if .Values.extraEnv }}
+              {{- tpl (toYaml .Values.extraEnv) . | nindent 14 }}
+            {{- end }}
+            {{- if .Values.postgresql.enabled }}
+          - name: OCEAN__DATABASE__HOST
+            value: {{ include "port-ocean.name" . }}-postgresql
+          - name: OCEAN__DATABASE__PORT
+            value: '5432'
+          - name: OCEAN__DATABASE__NAME
+            value: {{ .Values.postgresql.global.postgresql.auth.database }}
+          - name: OCEAN__DATABASE__USERNAME
+            value: {{ .Values.postgresql.global.postgresql.auth.username }}
+          - name: OCEAN__DATABASE__PASSWORD
+            value: {{ .Values.postgresql.global.postgresql.auth.password }}
             {{- end }}
             envFrom:
               - configMapRef:
