@@ -186,7 +186,7 @@ spec:
               - name: prometheus-metrics
                 mountPath: "{{ .Values.integration.processExecution.prometheusMultiProcessDir }}"
             {{- end }}
-            {{- if .Values.healthChecker.enabled }}
+          {{- if .Values.healthChecker.enabled }}
           - name: health-checker
             image: {{ .Values.healthChecker.image }}
             imagePullPolicy: {{ .Values.imagePullPolicy }}
