@@ -201,6 +201,23 @@ Get deployment name
 {{- printf "%s-deployment" $prefix | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
+{{/*
+resyncStaleCleanup CronJob name (Deployment workload only).
+CronJob.metadata.name must be <= 52 characters (Kubernetes validation).
+*/}}
+{{- define "port-ocean.resyncStaleCleanupCronJobName" -}}
+{{- $prefix := include "port-ocean.metadataNamePrefix" . -}}
+{{- $jobName := printf "%s-resync-stale-cleanup" $prefix -}}
+{{- if gt (len $jobName) 52 -}}
+{{- /* len("-resync-stale-cleanup") == 21; CronJob name max 52 */ -}}
+{{- $maxPrefixLen := int (sub 52 21) -}}
+{{- $truncatedPrefix := trunc $maxPrefixLen $prefix | trimSuffix "-" -}}
+{{- printf "%s-resync-stale-cleanup" $truncatedPrefix -}}
+{{- else -}}
+{{- $jobName -}}
+{{- end -}}
+{{- end }}
+
 {{- define "port-ocean.liveEvents.deploymentName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
 {{- printf "%s-le-deployment" $prefix | trunc 63 | trimSuffix "-" }}
@@ -245,6 +262,47 @@ Get self signed cert secret name
 {{- define "port-ocean.selfSignedCertName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
 {{- printf "%s-cert" $prefix }}
+{{- end }}
+
+{{/*
+Shared bash helpers for Port API auth and integration ID lookup.
+Used by CronJob health-checker and resync stale cleanup scripts.
+Expects env vars: PORT_CLIENT_ID, PORT_CLIENT_SECRET, INTEGRATION_IDENTIFIER.
+Sets globals: integ_id_encoded, integration_internal_id.
+*/}}
+{{- define "port-ocean.portApiScriptHelpers" -}}
+get_auth_header() {
+  local api_url=$1
+  local token_resp token_type token_value
+
+  token_resp=$(curl -sf --max-time 10 -X POST "${api_url}/auth/access_token" \
+    -H "Content-Type: application/json" \
+    -d "$(jq -n --arg clientId "$PORT_CLIENT_ID" --arg clientSecret "$PORT_CLIENT_SECRET" '{clientId:$clientId,clientSecret:$clientSecret}')" 2>/dev/null) || return 1
+  token_type=$(echo "$token_resp" | jq -r '.tokenType // "Bearer"')
+  token_value=$(echo "$token_resp" | jq -r '.accessToken')
+  [[ "$token_value" == "null" || -z "$token_value" ]] && return 1
+
+  printf '%s %s' "$token_type" "$token_value"
+}
+
+resolve_integration_ids() {
+  local api_url=$1
+  local auth_header=$2
+  local integ_resp
+
+  integ_id_encoded=$(printf %s "$INTEGRATION_IDENTIFIER" | jq -sRr @uri)
+  integ_resp=$(curl -sf --max-time 10 -X GET "${api_url}/integration/${integ_id_encoded}" \
+    -H "Authorization: $auth_header" 2>/dev/null) || return 1
+
+  integration_internal_id=$(echo "$integ_resp" | jq -r '
+    .integration._id
+    // empty
+  ')
+  if [[ "$integration_internal_id" == "null" || -z "$integration_internal_id" ]]; then
+    return 1
+  fi
+  return 0
+}
 {{- end }}
 
 {{- define "port-ocean.additionalSecrets" }}

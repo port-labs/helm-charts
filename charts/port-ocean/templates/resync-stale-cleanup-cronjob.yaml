@@ -1,0 +1,103 @@
+{{- if and (eq .Values.workload.kind "Deployment") .Values.resyncStaleCleanup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "port-ocean.resyncStaleCleanupCronJobName" . }}
+  labels:
+    {{- include "port-ocean.labels" . | nindent 4 }}
+    app.kubernetes.io/component: resync-stale-cleanup
+spec:
+  {{- $scheduleValue := (.Values.resyncStaleCleanup.cronSchedule | default "*/5 * * * *") | toString }}
+  schedule: {{ if regexMatch "^[\"'].*[\"']$" $scheduleValue }}{{ $scheduleValue }}{{ else }}{{ $scheduleValue | squote }}{{ end }}
+  concurrencyPolicy: {{ .Values.resyncStaleCleanup.concurrencyPolicy | default "Forbid" }}
+  successfulJobsHistoryLimit: {{ .Values.resyncStaleCleanup.successfulJobsHistoryLimit | default 1 }}
+  failedJobsHistoryLimit: {{ .Values.resyncStaleCleanup.failedJobsHistoryLimit | default 3 }}
+  suspend: {{ .Values.resyncStaleCleanup.suspend | default false }}
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: {{ .Values.resyncStaleCleanup.jobTtlSecondsAfterFinished | default 300 }}
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/component: resync-stale-cleanup
+            {{- include "port-ocean.selectorLabels" . | nindent 12 }}
+        spec:
+          {{- if or .Values.podServiceAccount.name .Values.podServiceAccount.create }}
+          serviceAccountName: {{ include "port-ocean.serviceAccountName" . }}
+          {{- end }}
+          restartPolicy: Never
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          containers:
+            - name: resync-cleanup
+              image: {{ .Values.resyncStaleCleanup.image }}
+              imagePullPolicy: {{ .Values.imagePullPolicy }}
+              envFrom:
+                - configMapRef:
+                    name: {{ include "port-ocean.configMapName" . }}
+                {{- include "port-ocean.additionalSecrets" . | nindent 16 }}
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -euo pipefail
+
+                  PORT_BASE_URL="${OCEAN__PORT__BASE_URL:-}"
+                  PORT_CLIENT_ID="${OCEAN__PORT__CLIENT_ID:-}"
+                  PORT_CLIENT_SECRET="${OCEAN__PORT__CLIENT_SECRET:-}"
+                  INTEGRATION_IDENTIFIER="${OCEAN__INTEGRATION__IDENTIFIER:-}"
+
+                  log_error() { echo "[ERROR] $*" >&2; }
+                  log_info()  { echo "[INFO] $*" >&2; }
+                  {{ include "port-ocean.portApiScriptHelpers" . | nindent 18 }}
+
+                  if [[ -z "$PORT_BASE_URL" || -z "$PORT_CLIENT_ID" || -z "$PORT_CLIENT_SECRET" || -z "$INTEGRATION_IDENTIFIER" ]]; then
+                    log_error "Missing Port credentials or integration identifier; skipping resync cleanup."
+                    exit 0
+                  fi
+
+                  api_url="${PORT_BASE_URL%/}/v1"
+                  auth_header=$(get_auth_header "$api_url") || { log_error "Failed to obtain access token"; exit 0; }
+                  resolve_integration_ids "$api_url" "$auth_header" || { log_error "Could not resolve integration _id"; exit 0; }
+                  
+                  internal_id_encoded=$(printf %s "$integration_internal_id" | jq -sRr @uri)
+                  syncs_resp=$(curl -sf --max-time 10 -X GET "${api_url}/integration/${internal_id_encoded}/syncsMetadata" \
+                    -H "Authorization: $auth_header" 2>/dev/null) || { log_error "Failed to GET syncsMetadata"; exit 0; }
+                  
+
+                  # syncsMetadata.data is newest-first; keep the newest pending/syncing, abort older pending/syncing.
+                  while IFS= read -r eventId; do
+                    [[ -z "$eventId" || "$eventId" == "null" ]] && continue
+                    abort_url="${api_url}/integration/${integ_id_encoded}/resync/${eventId}/abort"
+                    abort_code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 -X POST "$abort_url" \
+                      -H "Authorization: $auth_header" 2>/dev/null) || abort_code=000
+                    if [[ "$abort_code" =~ ^2[0-9][0-9]$ ]]; then
+                      log_info "Aborted stale resync (eventId=$eventId, http=$abort_code)"
+                    else
+                      log_error "Abort resync failed (eventId=$eventId, http=$abort_code)"
+                    fi
+                  done < <(echo "$syncs_resp" | jq -r '
+                    (.data // [])
+                    | map(select(((.syncState) | test("^(pending|syncing)$"))))
+                    | if length <= 1 then empty else .[1:] | .[].eventId end  # Keep the newest resync, abort older pending/syncing resyncs.
+                  ')
+              {{- if .Values.resyncStaleCleanup.resources }}
+              resources:
+                {{- toYaml .Values.resyncStaleCleanup.resources | nindent 16 }}
+              {{- end }}
+{{- end }}
