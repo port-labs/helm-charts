@@ -103,11 +103,11 @@ spec:
           httpGet:
             path: /docs
             port: {{.Values.actionsProcessor.service.port}}
-          initialDelaySeconds: {{ default 30 .Values.readinessProbe.initialDelaySeconds }}
-          periodSeconds: {{ default 10 .Values.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ default 5 .Values.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ default 5 .Values.readinessProbe.periodSeconds }}
           timeoutSeconds: {{ default 5 .Values.readinessProbe.timeoutSeconds }}
-          successThreshold: {{ default 2 .Values.readinessProbe.successThreshold }}
-          failureThreshold: {{ default 3 .Values.readinessProbe.failureThreshold }}
+          successThreshold: {{ default 1 .Values.readinessProbe.successThreshold }}
+          failureThreshold: {{ default 5 .Values.readinessProbe.failureThreshold }}
         {{- end }}
       volumes:
         {{- if .Values.extraVolumes }}
