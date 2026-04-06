@@ -3,8 +3,8 @@ fullnameOverride: ""
 metadataNamePrefixOverride: ""
 
 port:
-  clientId: ""
-  clientSecret: ""
+  clientId: "<enter your client id here>"
+  clientSecret: "<enter your client secret here>"
 
   baseUrl: https://api.getport.io
   ingestUrl: https://ingest.getport.io
