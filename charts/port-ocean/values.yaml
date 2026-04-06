@@ -145,9 +145,9 @@ ingress:
   #       - "my-host.my-domain.com"
 
 integration:
-  identifier: ""
+  identifier: "default-identifier"
   version: ""
-  type: ""
+  type: "default-type"
   config: { }
   secrets: { }
   extraConfig: { }

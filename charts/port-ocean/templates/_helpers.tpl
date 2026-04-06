@@ -231,7 +231,7 @@ Enforces Kubernetes CronJob name limit of 52 characters
 {{- $prefix := include "port-ocean.metadataNamePrefix" . -}}
 {{- $cronJobName := printf "%s-cron-job" $prefix -}}
 {{- if gt (len $cronJobName) 52 -}}
-{{- $maxPrefixLen := sub 52 9 -}}
+{{- $maxPrefixLen := int (sub 52 9) -}}
 {{- $truncatedPrefix := trunc $maxPrefixLen $prefix | trimSuffix "-" -}}
 {{- printf "%s-cron-job" $truncatedPrefix -}}
 {{- else -}}
