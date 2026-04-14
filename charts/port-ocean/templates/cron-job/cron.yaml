@@ -32,7 +32,10 @@ spec:
       {{- end }}
       template:
         metadata:
-          {{- with .Values.podAnnotations }}
+          {{- $podAnnotations := .Values.podAnnotations | default dict }}
+          {{- $cronAnnotations := (.Values.workload.cron.annotations | default dict) }}
+          {{- $annotations := merge (dict) $podAnnotations $cronAnnotations }}
+          {{- with $annotations }}
           annotations:
             {{- toYaml . | nindent 12 }}
           {{- end }}
