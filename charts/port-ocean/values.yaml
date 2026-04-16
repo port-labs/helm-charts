@@ -47,6 +47,8 @@ workload:
     replicas: 1 # Currently only allows 1 or 0 replicas
 
   cron:
+    # Extra pod template annotations for the CronJob only (merged with podAnnotations; cron wins on duplicate keys).
+    annotations: { }
     # number of minutes to wait before cancelling the resync
     resyncTimeoutMinutes: null
     resyncOnInstall: true
