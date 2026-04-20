@@ -120,7 +120,7 @@ spec:
         {{- if (.Values.livenessProbe).enabled}}
         livenessProbe:
           httpGet:
-            path: /docs
+            path: /health/live
             port: {{.Values.service.port}}
           initialDelaySeconds: {{ default 30 .Values.livenessProbe.initialDelaySeconds }}
           periodSeconds: {{ default 10 .Values.livenessProbe.periodSeconds }}
@@ -131,7 +131,7 @@ spec:
         {{- if (.Values.readinessProbe).enabled}}
         readinessProbe:
           httpGet:
-            path: /docs
+            path: /health/ready
             port: {{.Values.service.port}}
           initialDelaySeconds: {{ default 5 .Values.readinessProbe.initialDelaySeconds }}
           periodSeconds: {{ default 5 .Values.readinessProbe.periodSeconds }}
