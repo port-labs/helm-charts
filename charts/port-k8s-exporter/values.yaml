@@ -33,6 +33,10 @@ httpLoggingEnabled: "true"
 loggingLevel: "info"
 metricsEnabled: "true"
 metricsPort: 9091
+# Enable container image OS detection. Adds .imageOsInfo to K8s object entities. Optional.
+imageOsDetectionEnabled: false
+# Maximum number of concurrent image OS detections. Optional.
+imageOsDetectionConcurrency: 10
 secret:
   annotations: {}
   name: ""
