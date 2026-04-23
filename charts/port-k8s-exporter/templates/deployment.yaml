@@ -66,6 +66,10 @@ spec:
               value: {{ .Values.metricsEnabled | quote }}
             - name: METRICS_PORT
               value: {{ .Values.metricsPort | quote }}
+            - name: IMAGE_OS_DETECTION_ENABLED
+              value: {{ .Values.imageOsDetectionEnabled | quote }}
+            - name: IMAGE_OS_DETECTION_CONCURRENCY
+              value: {{ .Values.imageOsDetectionConcurrency | quote }}
             {{- if eq .Values.eventListener.type "POLLING" }}
             - name: EVENT_LISTENER_POLLING_RATE
               value: {{ .Values.eventListener.pollingRate | quote }}
