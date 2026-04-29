@@ -118,7 +118,7 @@ For environments requiring multiple custom certificates, you can use the `extraV
 
 ## Streamer Types
 
-The Port Agent supports two streamer mechanisms for receiving action runs:
+The Port Agent supports two streamer mechanisms for receiving action runs and workflow node runs:
 
 ### Kafka Streamer (Default)
 
@@ -139,17 +139,18 @@ helm upgrade --install my-port-agent port-labs/port-agent \
 
 ### POLLING Streamer
 
-An alternative streamer mechanism that uses HTTP polling to retrieve action runs from the Port API.
+An alternative streamer mechanism that uses HTTP polling to retrieve action runs and workflow node runs from the Port API.
 
 **Advantages:**
 - Works in environments with Kafka connectivity restrictions
 - Simpler network requirements (HTTP only)
 - No Kafka consumer group management needed
+- Supports action runs and workflow node runs
 
 **Considerations:**
 - Polling-based, not real-time
 - Higher latency compared to Kafka
-- Only supports action runs (not changelog destinations)
+- Does not support changelog destinations
 
 **Configuration:**
 ```bash
