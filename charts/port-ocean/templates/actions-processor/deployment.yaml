@@ -87,6 +87,12 @@ spec:
             subPath: cert.crt
             readOnly: true
         {{- end }}
+        {{- if .Values.enableDefaultEmptyDirs }}
+          - name: ocean-ca-certs
+            mountPath: /home/ocean/.local/share/ca-certificates
+          - name: ocean-tmp-prometheus
+            mountPath: /tmp/ocean/prometheus/metrics/
+        {{- end }}
         {{- if .Values.livenessProbe.enabled}}
         livenessProbe:
           httpGet:
@@ -112,6 +118,12 @@ spec:
       volumes:
         {{- if .Values.extraVolumes }}
         {{- tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
+        {{- end }}
+        {{- if .Values.enableDefaultEmptyDirs }}
+        - name: ocean-ca-certs
+          emptyDir: {}
+        - name: ocean-tmp-prometheus
+          emptyDir: {}
         {{- end }}
         {{- if and .Values.selfSignedCertificate.enabled .Values.selfSignedCertificate.secret.useExistingSecret }}
         - name: certificates

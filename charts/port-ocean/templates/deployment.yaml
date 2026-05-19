@@ -117,6 +117,14 @@ spec:
           - name: prometheus-metrics
             mountPath: "{{ .Values.integration.processExecution.prometheusMultiProcessDir }}"
         {{- end }}
+        {{- if .Values.enableDefaultEmptyDirs }}
+          - name: ocean-ca-certs
+            mountPath: /home/ocean/.local/share/ca-certificates
+        {{- end }}
+        {{- if and .Values.enableDefaultEmptyDirs (ne .Values.integration.processExecution.mode "multi_process") }}
+          - name: ocean-tmp-prometheus
+            mountPath: /tmp/ocean/prometheus/metrics/
+        {{- end }}
         {{- if (.Values.livenessProbe).enabled}}
         livenessProbe:
           httpGet:
@@ -145,6 +153,14 @@ spec:
         {{- end }}
         {{- if eq .Values.integration.processExecution.mode "multi_process" }}
         - name: prometheus-metrics
+          emptyDir: {}
+        {{- end }}
+        {{- if .Values.enableDefaultEmptyDirs }}
+        - name: ocean-ca-certs
+          emptyDir: {}
+        {{- end }}
+        {{- if and .Values.enableDefaultEmptyDirs (ne .Values.integration.processExecution.mode "multi_process") }}
+        - name: ocean-tmp-prometheus
           emptyDir: {}
         {{- end }}
         {{- if and .Values.selfSignedCertificate.enabled .Values.selfSignedCertificate.secret.useExistingSecret }}

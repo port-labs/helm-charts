@@ -189,12 +189,28 @@ spec:
               - name: prometheus-metrics
                 mountPath: "{{ .Values.integration.processExecution.prometheusMultiProcessDir }}"
             {{- end }}
+            {{- if .Values.enableDefaultEmptyDirs }}
+              - name: ocean-ca-certs
+                mountPath: /home/ocean/.local/share/ca-certificates
+            {{- end }}
+            {{- if and .Values.enableDefaultEmptyDirs (ne .Values.integration.processExecution.mode "multi_process") }}
+              - name: ocean-tmp-prometheus
+                mountPath: /tmp/ocean/prometheus/metrics/
+            {{- end }}
           volumes:
             {{- if .Values.extraVolumes }}
             {{- tpl (toYaml .Values.extraVolumes) . | nindent 12 }}
             {{- end }}
             {{- if eq .Values.integration.processExecution.mode "multi_process" }}
             - name: prometheus-metrics
+              emptyDir: {}
+            {{- end }}
+            {{- if .Values.enableDefaultEmptyDirs }}
+            - name: ocean-ca-certs
+              emptyDir: {}
+            {{- end }}
+            {{- if and .Values.enableDefaultEmptyDirs (ne .Values.integration.processExecution.mode "multi_process") }}
+            - name: ocean-tmp-prometheus
               emptyDir: {}
             {{- end }}
             {{- if and .Values.selfSignedCertificate.enabled .Values.selfSignedCertificate.secret.useExistingSecret }}
