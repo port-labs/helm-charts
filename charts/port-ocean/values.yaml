@@ -39,7 +39,7 @@ extraVolumes: [ ]
 
 extraVolumeMounts: [ ]
 
-# Set to true when using readOnlyRootFilesystem: true. Mounts emptyDir volumes
+# Set to true when using readOnlyRootFilesystem: true (readonly environment). Mounts emptyDir volumes
 # for all Ocean-writable paths (/tmp/ocean/prometheus/metrics/ and
 # /home/ocean/.local/share/ca-certificates).
 enableDefaultEmptyDirs: false
