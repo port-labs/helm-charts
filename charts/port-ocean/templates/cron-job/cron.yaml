@@ -203,7 +203,7 @@ spec:
             {{- if eq .Values.integration.processExecution.mode "multi_process" }}
             - name: prometheus-metrics
               emptyDir: {}
-            {{-else if .Values.enableDefaultEmptyDirs }}
+            {{- else if .Values.enableDefaultEmptyDirs }}
             - name: ocean-tmp-prometheus
               emptyDir: {}
             {{- end }}
