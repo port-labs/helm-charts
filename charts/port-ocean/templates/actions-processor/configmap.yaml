@@ -41,7 +41,8 @@ data:
   {{ $key | snakecase | upper }}: {{ $value | quote }}
   {{- end }}
   {{- end }}
-  OCEAN__LAKEHOUSE_ENABLED: "{{ .Values.lakehouseEnabled | default false }}"
+  OCEAN__LAKEHOUSE_ENABLED: "{{ .Values.lakehouseEnabled | default true }}"
+  OCEAN__PROCESSING_MODE: {{ .Values.processingMode | default "dsp" | quote }}
   OCEAN__ACTIONS_PROCESSOR__ENABLED: "true"
   {{- if .Values.actionsProcessor.extraConfig }}
   {{- range $key, $value := .Values.actionsProcessor.extraConfig }}
