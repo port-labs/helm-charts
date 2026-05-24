@@ -188,13 +188,10 @@ spec:
             {{- if eq .Values.integration.processExecution.mode "multi_process" }}
               - name: prometheus-metrics
                 mountPath: "{{ .Values.integration.processExecution.prometheusMultiProcessDir }}"
-            {{- else if .Values.enableDefaultEmptyDirs }}
-              - name: ocean-tmp-prometheus
-                mountPath: /tmp/ocean/prometheus/metrics/
             {{- end }}
             {{- if .Values.enableDefaultEmptyDirs }}
-              - name: ocean-ca-certs
-                mountPath: /home/ocean/.local/share/ca-certificates
+              - name: ocean-tmp
+                mountPath: /tmp/ocean
             {{- end }}
           volumes:
             {{- if .Values.extraVolumes }}
@@ -203,12 +200,9 @@ spec:
             {{- if eq .Values.integration.processExecution.mode "multi_process" }}
             - name: prometheus-metrics
               emptyDir: {}
-            {{- else if .Values.enableDefaultEmptyDirs }}
-            - name: ocean-tmp-prometheus
-              emptyDir: {}
             {{- end }}
             {{- if .Values.enableDefaultEmptyDirs }}
-            - name: ocean-ca-certs
+            - name: ocean-tmp
               emptyDir: {}
             {{- end }}
             {{- if and .Values.selfSignedCertificate.enabled .Values.selfSignedCertificate.secret.useExistingSecret }}
