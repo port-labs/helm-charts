@@ -39,9 +39,6 @@ extraVolumes: [ ]
 
 extraVolumeMounts: [ ]
 
-# Mounts emptyDir volumes for writes in /tmp/ocean dir. Necessary in particular for readonly environments (when readOnlyRootFilesystem: true)
-enableDefaultEmptyDirs: true
-
 workload:
   kind: "Deployment" # Deployment, CronJob
 

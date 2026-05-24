@@ -103,6 +103,8 @@ spec:
               name: {{ include "port-ocean.liveEvents.configMapName" . }}
           {{- include "port-ocean.additionalSecrets" . | nindent 10 }}
         volumeMounts:
+          - name: ocean-tmp
+            mountPath: /tmp/ocean
         {{- if .Values.extraVolumeMounts }}
           {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 10 }}
         {{- end }}
@@ -111,10 +113,6 @@ spec:
             mountPath: /usr/local/share/ca-certificates/cert.crt
             subPath: cert.crt
             readOnly: true
-        {{- end }}
-        {{- if .Values.enableDefaultEmptyDirs }}
-          - name: ocean-tmp
-            mountPath: /tmp/ocean
         {{- end }}
         {{- if (.Values.livenessProbe).enabled}}
         livenessProbe:
@@ -139,12 +137,10 @@ spec:
           failureThreshold: {{ default 3 .Values.readinessProbe.failureThreshold }}
         {{- end }}
       volumes:
+        - name: ocean-tmp
+          emptyDir: { }
         {{- if .Values.extraVolumes }}
         {{- tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
-        {{- end }}
-        {{- if .Values.enableDefaultEmptyDirs }}
-        - name: ocean-tmp
-          emptyDir: {}
         {{- end }}
         {{- if and .Values.selfSignedCertificate.enabled .Values.selfSignedCertificate.secret.useExistingSecret }}
         - name: certificates
