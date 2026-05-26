@@ -7,7 +7,10 @@ port:
   clientSecret: "<enter your client secret here>"
 
   baseUrl: https://api.getport.io
-  ingestUrl: https://ingest.getport.io
+  # When left empty, ingestUrl is derived from baseUrl by replacing the
+  # `api.` host prefix with `ingest.` (e.g. https://api.us.getport.io ->
+  # https://ingest.us.getport.io). Set explicitly to override.
+  ingestUrl: ""
 
 podAnnotations: { }
 
