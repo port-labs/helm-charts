@@ -1,4 +1,19 @@
 {{/*
+Resolve the Port ingest URL. If `port.ingestUrl` is explicitly set it is
+used as-is; otherwise it is derived from `port.baseUrl` by replacing the
+`://api.` host prefix with `://ingest.`.
+  https://api.getport.io     -> https://ingest.getport.io
+  https://api.us.getport.io  -> https://ingest.us.getport.io
+*/}}
+{{- define "port-ocean.ingestUrl" -}}
+{{- if .Values.port.ingestUrl -}}
+{{- .Values.port.ingestUrl -}}
+{{- else -}}
+{{- .Values.port.baseUrl | replace "://api." "://ingest." -}}
+{{- end -}}
+{{- end }}
+
+{{/*
 Expand the name of the chart.
 */}}
 {{- define "port-ocean.name" -}}
