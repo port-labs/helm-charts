@@ -243,6 +243,8 @@ postgresql:
         postgresPassword: password
         username: port_admin
 
+processingMode: dsp
+
 lakehouseEnabled: true
 streamingEnabled: false
 
