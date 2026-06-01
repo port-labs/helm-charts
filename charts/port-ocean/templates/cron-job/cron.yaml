@@ -176,6 +176,8 @@ spec:
                   name: {{ include "port-ocean.configMapName" . }}
               {{- include "port-ocean.additionalSecrets" . | nindent 14 }}
             volumeMounts:
+              - name: ocean-tmp
+                mountPath: /tmp/ocean
             {{- if .Values.extraVolumeMounts }}
               {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 14 }}
             {{- end }}
@@ -190,6 +192,8 @@ spec:
                 mountPath: "{{ .Values.integration.processExecution.prometheusMultiProcessDir }}"
             {{- end }}
           volumes:
+            - name: ocean-tmp
+              emptyDir: { }
             {{- if .Values.extraVolumes }}
             {{- tpl (toYaml .Values.extraVolumes) . | nindent 12 }}
             {{- end }}

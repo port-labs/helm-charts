@@ -104,6 +104,8 @@ spec:
               name: {{ include "port-ocean.configMapName" . }}
           {{- include "port-ocean.additionalSecrets" . | nindent 10 }}
         volumeMounts:
+          - name: ocean-tmp
+            mountPath: /tmp/ocean
         {{- if .Values.extraVolumeMounts }}
           {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 10 }}
         {{- end }}
@@ -140,6 +142,8 @@ spec:
           failureThreshold: {{ default 5 .Values.readinessProbe.failureThreshold }}
         {{- end }}
       volumes:
+        - name: ocean-tmp
+          emptyDir: { }
         {{- if .Values.extraVolumes }}
         {{- tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
         {{- end }}
