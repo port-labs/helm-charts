@@ -1,19 +1,17 @@
 ---
 name: bump-port-agent
-description: Bump port-agent Helm chart appVersion and image tag to match port-labs/port-agent GitHub releases. Lists releases, diffs against Chart.yaml appVersion, checks values.yaml and README for env/doc drift, flags breaking changes, asks approval before edit. Use when user says bump port-agent, update port-agent version, sync helm chart with port-agent release, or upgrade appVersion.
+description: Bump port-agent Helm chart appVersion and image tag to match port-labs/port-agent GitHub releases. Lists releases, diffs against Chart.yaml appVersion, compares app/core/config.py Settings to values.yaml, detects stale helm env keys, classifies breaking vs notable changes, asks approval before edit. Use when user says bump port-agent, update port-agent version, sync helm chart with port-agent release, dry run port-agent bump, or upgrade appVersion.
 ---
 
 # Bump port-agent (helm + image)
 
-Caveman talk to user during this workflow. Code/commits/PR text stay normal.
-
 ## Files
 
-| File | What |
-|------|------|
-| `charts/port-agent/Chart.yaml` | `version` (chart), `appVersion` (app image tag) |
-| `charts/port-agent/values.yaml` | `env.normal`, `env.secret` defaults |
-| `charts/port-agent/README.md` | install examples + config table |
+| File                            | What                                            |
+| ------------------------------- | ----------------------------------------------- |
+| `charts/port-agent/Chart.yaml`  | `version` (chart), `appVersion` (app image tag) |
+| `charts/port-agent/values.yaml` | `env.normal`, `env.secret` defaults             |
+| `charts/port-agent/README.md`   | install examples + config table                 |
 
 Image: `ghcr.io/port-labs/port-agent` — tag from `appVersion` when `image.tag` empty.
 
@@ -24,10 +22,10 @@ Copy checklist, track progress:
 ```
 - [ ] 1. Read current versions
 - [ ] 2. List GH releases + pick target
-- [ ] 3. Diff releases + scan breaking
-- [ ] 4. Check env + docs drift
-- [ ] 5. Report + ask approval
-- [ ] 6. Apply bump (only after yes)
+- [ ] 3. Diff releases + classify breaking / notable
+- [ ] 4. Diff config.py + env/docs drift + stale helm keys
+- [ ] 5. Report (dry run stops here)
+- [ ] 6. Apply bump (after explicit yes)
 ```
 
 ### 1. Current versions
@@ -36,7 +34,7 @@ Copy checklist, track progress:
 grep -E '^(version|appVersion):' charts/port-agent/Chart.yaml
 ```
 
-Normalize tags: `v0.8.9` and `0.8.9` same thing. Compare with `v` prefix on GH tags.
+Normalize tags for compare: ensure `v` prefix (`0.8.9` → `v0.8.9`). `CURRENT` / `TARGET` must match GH release tags.
 
 ### 2. List releases
 
@@ -60,67 +58,107 @@ gh api "repos/port-labs/port-agent/compare/${CURRENT}...${TARGET}" \
 
 Read full release body too (`gh release view`).
 
-**Breaking signals** — stop at step 5, no edits until user OK:
+If chart more than one release behind TARGET, skim intermediate release notes too.
 
-| Signal | Action |
-|--------|--------|
-| Major semver jump (`v1.x` → `v2.x`) | Warn |
-| "breaking", "BREAKING", "removed", "deprecated" in release/commits | Warn |
-| Env var **removed** or **renamed** in port-agent | Warn + list |
-| New **required** env (no default in app) | Warn + list |
-| Default behavior change in app config | Warn |
+Classify findings into three tiers (report all three in step 5):
 
-Not breaking: patch/minor, new optional env, logging, internal refactors.
+| Tier         | Examples                                                                                                                             | Blocks bump?                      |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------- |
+| **Breaking** | Major semver; BREAKING/removed/deprecated in notes; `Settings` field removed/renamed; new **required** field (no default)            | Yes — need explicit yes           |
+| **Notable**  | Logging/sanitization/output changes; default behavior shift with same env keys; new **optional** `Settings` field operators may want | No — inform user; README optional |
+| **Internal** | Tests, CI, refactors, Dockerfile-only                                                                                                | No — skip unless user cares       |
+
+**Breaking signals:**
+
+| Signal                                                             | Action          |
+| ------------------------------------------------------------------ | --------------- |
+| Major semver (`v1.x` → `v2.x`)                                     | Breaking        |
+| "breaking", "BREAKING", "removed", "deprecated" in release/commits | Breaking        |
+| `Settings` field removed or renamed (`config.py` diff)             | Breaking + list |
+| New required `Settings` field (no default in pydantic model)       | Breaking + list |
+| Helm env key maps to removed/renamed upstream field                | Breaking + list |
+
+**Notable signals** (do not block; mention in report):
+
+| Signal                                                                        | Action                                                        |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Log format, redaction, verbosity (`DETAILED_LOGGING`, new `logging.py`, etc.) | Notable                                                       |
+| Webhook/invoker/streamer behavior change, same env contract                   | Notable                                                       |
+| New optional `Settings` field not yet in chart (`LOG_LEVEL`, `POLLING_*`, …)  | Notable — add to helm only if Port docs say operators need it |
 
 ### 4. Env + docs drift
 
-**Helm env keys** (source of truth for chart):
+#### 4a. Mandatory — `app/core/config.py`
+
+Always fetch and diff. Do **not** skip when compare file list omits `config.py`.
 
 ```bash
-grep -E '^\s+[A-Z][A-Z0-9_]*:' charts/port-agent/values.yaml | head -40
+CONFIG_PATH="app/core/config.py"
+gh api "repos/port-labs/port-agent/contents/${CONFIG_PATH}?ref=${CURRENT}" --jq '.content' | base64 -d > /tmp/port-agent-config-current.py
+gh api "repos/port-labs/port-agent/contents/${CONFIG_PATH}?ref=${TARGET}" --jq '.content' | base64 -d > /tmp/port-agent-config-target.py
+diff -u /tmp/port-agent-config-current.py /tmp/port-agent-config-target.py
 ```
 
-**Upstream** — for each changed file from compare (priority paths):
+Parse `class Settings(BaseSettings)` fields at CURRENT and TARGET. This is upstream env schema.
 
-- `app/**` (settings, config, `main.py`, streamers)
-- `README.md`, `CONTRIBUTING.md`, `Dockerfile`
-- anything with `environ`, `getenv`, settings models
+Also scan compare changed files under `app/**`, `README.md`, streamers — for logic tied to existing env keys.
+
+#### 4b. Helm env keys
 
 ```bash
-gh api "repos/port-labs/port-agent/contents/app?ref=${TARGET}" --jq '.[].name'
-# read diffs or file at TARGET vs CURRENT for env-related changes
+grep -E '^\s+[A-Z][A-Z0-9_]*:' charts/port-agent/values.yaml
 ```
 
-Checklist:
+Build two sets:
 
-- [ ] New env in port-agent → add to `values.yaml` `env.normal` or `env.secret` + README table row
-- [ ] Renamed env → update values + README + any template refs (`templates/_helpers.tpl`, `secret.yaml`)
-- [ ] Removed env → remove from values + README; **breaking** warn
-- [ ] README install/`--set` examples still match required vars
-- [ ] Streamer docs (`KAFKA` / `POLLING`) still accurate if streamer code touched
+- `helm_env` — keys under `env.normal` + `env.secret`
+- `settings_fields` — field names from `Settings` in config.py at TARGET
 
-Do **not** bump `values.yaml` for unrelated chart-only tweaks.
+#### 4c. Stale helm env detection
 
-### 5. Report + approval (required)
+| Check              | Condition                                                | Action                                                                                                                                                 |
+| ------------------ | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Stale helm key** | In `helm_env` but **not** in `settings_fields` at TARGET | Warn: likely dead config (e.g. legacy `GITLAB_URL`). Propose remove from `values.yaml` + README **only** with user approval — not auto on routine bump |
+| **App-only field** | In `settings_fields` but not in `helm_env`               | Info only. Flag if **new in this release** or Port docs require operator config; else skip (many internal defaults exist)                              |
+| **Release delta**  | Field added/removed/renamed in `config.py` diff          | Drive breaking/notable tier + helm/README updates                                                                                                      |
 
-Show user (caveman OK):
+```bash
+# optional: confirm stale key unused upstream
+gh api "search/code?q=${KEY}+repo:port-labs/port-agent" --jq '.total_count'
+```
+
+#### 4d. Docs checklist
+
+- [ ] New `Settings` field operators need → `values.yaml` + README table row
+- [ ] Renamed field → values + README + templates (`_helpers.tpl`, `secret.yaml`)
+- [ ] Removed field → values + README; **breaking**
+- [ ] README install/`--set` examples match required vars
+- [ ] Streamer docs (`KAFKA` / `POLLING`) if streamer code touched
+
+Do **not** bump `values.yaml` for unrelated chart-only tweaks or to expose every `Settings` field.
+
+### 5. Report + approval
+
+Show user:
 
 1. `CURRENT` → `TARGET`
-2. Short release summary (from `gh release view`)
-3. Breaking table (or "none seen")
-4. Proposed file edits:
-   - `Chart.yaml`: `appVersion: "<TARGET>"`, `version:` patch bump (e.g. `0.8.14` → `0.8.15`)
-   - `values.yaml` / `README.md` only if drift found
-5. Commits not made unless user asked
+2. Release summary (`gh release view`)
+3. **Breaking** (or none)
+4. **Notable** (or none)
+5. **Stale helm keys** (or none)
+6. Proposed edits:
+   - `Chart.yaml`: `appVersion: "<TARGET>"`, `version:` patch +1
+   - `values.yaml` / `README.md` only if drift or approved stale-key cleanup
+7. Commits not made unless user asked
 
-**Ask:** "Proceed with bump?" — wait for explicit yes.
+If there are any breaking changes -- **Ask:** "Proceed with bump?" — required before step 6. On breaking items, call them out explicitly.
 
 ### 6. Apply (after yes only)
 
 ```yaml
 # Chart.yaml example
-version: 0.8.15        # chart semver: patch +1 typical
-appVersion: "v0.8.10"  # match GH release tag exactly
+version: 0.8.15 # chart semver: patch +1 typical
+appVersion: "v0.8.10" # match GH release tag exactly
 ```
 
 Commit message style (repo norm):
@@ -149,7 +187,6 @@ echo "chart appVersion: $APP"
 
 ## Boundaries
 
-- No commit/push/PR unless user ask
-- No skip approval on breaking signals
+- Stale key removal = separate decision — never silent delete on routine bump
 - `gh` need auth; fail → tell user login (`gh auth status`)
 - Chart `version` ≠ app `appVersion`; both update on app bump
