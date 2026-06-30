@@ -111,6 +111,9 @@ spec:
           successThreshold: {{ default 1 .Values.readinessProbe.successThreshold }}
           failureThreshold: {{ default 5 .Values.readinessProbe.failureThreshold }}
         {{- end }}
+      {{- if .Values.actionsProcessor.worker.extraContainers }}
+      {{- tpl (toYaml .Values.actionsProcessor.worker.extraContainers) . | nindent 6 }}
+      {{- end }}
       volumes:
         - name: ocean-tmp
           emptyDir: { }

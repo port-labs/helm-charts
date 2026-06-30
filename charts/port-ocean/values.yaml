@@ -45,6 +45,7 @@ workload:
   deployment:
     rolloutStrategy: "Recreate"
     replicas: 1 # Currently only allows 1 or 0 replicas
+    extraContainers: []
 
   cron:
     # Extra pod template annotations for the CronJob only (merged with podAnnotations; cron wins on duplicate keys).
@@ -64,6 +65,9 @@ workload:
       serviceAccount:
         name: ""
     kubectlImage: bitnamisecure/kubectl:latest
+    # Extra containers injected into the CronJob pod alongside the integration container.
+    # Rendered via tpl — Helm template directives ({{ }}) are resolved in sub-chart context.
+    extraContainers: []
 
 resources:
   requests:
@@ -177,6 +181,7 @@ liveEvents:
     enabled: false
     replicaCount: 1
     initializePortResources: false
+    extraContainers: []
     resources:
       requests:
         memory: "512Mi"
@@ -252,6 +257,7 @@ actionsProcessor:
   enabled: false
   worker:
     enabled: false
+    extraContainers: []
     rolloutStrategy:
       type: Recreate
     revisionHistoryLimit: 1

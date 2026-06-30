@@ -191,6 +191,9 @@ spec:
               - name: prometheus-metrics
                 mountPath: "{{ .Values.integration.processExecution.prometheusMultiProcessDir }}"
             {{- end }}
+          {{- if .Values.workload.cron.extraContainers }}
+          {{- tpl (toYaml .Values.workload.cron.extraContainers) . | nindent 10 }}
+          {{- end }}
           volumes:
             - name: ocean-tmp
               emptyDir: { }
