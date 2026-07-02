@@ -4,7 +4,7 @@ kind: ConfigMap
 metadata:
   name: "{{ include "port-ocean.liveEvents.configMapName" . }}"
 data:
-  OCEAN__PORT__BASE_URL: {{ .Values.port.baseUrl | quote }}
+  OCEAN__PORT__BASE_URL: {{ tpl .Values.port.baseUrl . | quote }}
   # Make sure only sync pods will initialize resources if both are enabled
   {{- if eq .Values.initializePortResources true}}
   OCEAN__INITIALIZE_PORT_RESOURCES: "false"
@@ -31,7 +31,7 @@ data:
   {{- end }}
   {{- end }}
   {{- if .Values.liveEvents.baseUrl }}
-  OCEAN__BASE_URL: "{{ .Values.liveEvents.baseUrl }}"
+  OCEAN__BASE_URL: {{ tpl .Values.liveEvents.baseUrl . | quote }}
   {{- end }}
   {{- if .Values.liveEvents.extraConfig }}
   {{- range $key, $value := .Values.liveEvents.extraConfig }}

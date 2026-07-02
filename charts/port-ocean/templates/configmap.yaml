@@ -7,7 +7,7 @@ kind: ConfigMap
 metadata:
   name: {{ include "port-ocean.configMapName" . }}
 data:
-  OCEAN__PORT__BASE_URL: {{ .Values.port.baseUrl | quote }}
+  OCEAN__PORT__BASE_URL: {{ tpl .Values.port.baseUrl . | quote }}
   OCEAN__INITIALIZE_PORT_RESOURCES: "{{ .Values.initializePortResources | default false }}"
   {{- if .Values.createPortResourcesOrigin }}
   OCEAN__CREATE_PORT_RESOURCES_ORIGIN: "{{ .Values.createPortResourcesOrigin }}"
