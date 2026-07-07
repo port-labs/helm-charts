@@ -145,7 +145,7 @@ Get config map name
 {{- end }}
 
 {{- define "port-ocean.incrementalSync.schedule" -}}
-{{- (.Values.incrementalSync.worker.interval | default "*/15 * * * *") | toString -}}
+{{- (.Values.incrementalSync.interval | default "*/15 * * * *") | toString -}}
 {{- end -}}
 
 {{- define "port-ocean.actionsProcessor.configMapName" -}}

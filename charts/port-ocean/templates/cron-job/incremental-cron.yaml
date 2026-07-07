@@ -1,7 +1,7 @@
-{{- if .Values.incrementalSync.worker.enabled }}
+{{- if .Values.incrementalSync.enabled }}
 {{- $maxRunTimeSeconds := "" }}
-{{- if .Values.incrementalSync.worker.timeoutMinutes }}
-{{- $maxRunTimeSeconds = (mul .Values.incrementalSync.worker.timeoutMinutes 60) }}
+{{- if .Values.incrementalSync.timeoutMinutes }}
+{{- $maxRunTimeSeconds = (mul .Values.incrementalSync.timeoutMinutes 60) }}
 {{- end }}
 apiVersion: batch/v1
 kind: CronJob
@@ -10,11 +10,11 @@ metadata:
   labels:
     {{- include "port-ocean.labels" . | nindent 4 }}
 spec:
-  failedJobsHistoryLimit: {{ .Values.incrementalSync.worker.failedJobsHistoryLimit }}
-  successfulJobsHistoryLimit: {{ .Values.incrementalSync.worker.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.incrementalSync.failedJobsHistoryLimit }}
+  successfulJobsHistoryLimit: {{ .Values.incrementalSync.successfulJobsHistoryLimit }}
   schedule: {{ include "port-ocean.incrementalSync.schedule" . | squote }}
-  suspend: {{ .Values.incrementalSync.worker.suspend }}
-  concurrencyPolicy: {{ .Values.incrementalSync.worker.concurrencyPolicy | default "Forbid" }}
+  suspend: {{ .Values.incrementalSync.suspend }}
+  concurrencyPolicy: {{ .Values.incrementalSync.concurrencyPolicy | default "Forbid" }}
   jobTemplate:
     metadata:
       generateName: {{ include "port-ocean.metadataNamePrefixShort" . }}-incr-
@@ -79,8 +79,8 @@ spec:
               {{- toYaml .Values.containerSecurityContext | nindent 14 }}
               {{- end }}
             resources:
-              {{- if .Values.incrementalSync.worker.resources }}
-              {{- toYaml .Values.incrementalSync.worker.resources | nindent 14 }}
+              {{- if .Values.incrementalSync.resources }}
+              {{- toYaml .Values.incrementalSync.resources | nindent 14 }}
               {{- end }}
             env:
             {{- if .Values.selfSignedCertificate.enabled }}
