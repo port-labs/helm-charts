@@ -171,6 +171,28 @@ selfSignedCertificate:
     key: crt
     useExistingSecret: false
 
+incrementalSync:
+  worker:
+    enabled: false
+    # Cron expression for the incremental CronJob (set by integ-service via parseIntervalToCron).
+    interval: null
+    # Skip a scheduled tick while a job is still running; do not kill in-flight pods.
+    concurrencyPolicy: Forbid
+    initializePortResources: false
+    suspend: false
+    failedJobsHistoryLimit: 1
+    successfulJobsHistoryLimit: 1
+    # Optional hard cap on job duration (minutes). Unset = no activeDeadlineSeconds.
+    timeoutMinutes: null
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "800m"
+  extraConfig: { }
+
 liveEvents:
   baseUrl: ""
   worker:

@@ -127,6 +127,27 @@ Get config map name
 {{- printf "%s-le-config" $prefix | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
+{{- define "port-ocean.incrementalSync.configMapName" -}}
+{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
+{{- printf "%s-incr-config" $prefix | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{- define "port-ocean.incrementalSync.cronJobName" -}}
+{{- $prefix := include "port-ocean.metadataNamePrefix" . -}}
+{{- $cronJobName := printf "%s-incr-cron" $prefix -}}
+{{- if gt (len $cronJobName) 52 -}}
+{{- $maxPrefixLen := int (sub 52 10) -}}
+{{- $truncatedPrefix := trunc $maxPrefixLen $prefix | trimSuffix "-" -}}
+{{- printf "%s-incr-cron" $truncatedPrefix -}}
+{{- else -}}
+{{- $cronJobName -}}
+{{- end -}}
+{{- end }}
+
+{{- define "port-ocean.incrementalSync.schedule" -}}
+{{- (.Values.incrementalSync.worker.interval | default "*/15 * * * *") | toString -}}
+{{- end -}}
+
 {{- define "port-ocean.actionsProcessor.configMapName" -}}
 {{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
 {{- printf "%s-ap-config" $prefix | trunc 63 | trimSuffix "-" }}

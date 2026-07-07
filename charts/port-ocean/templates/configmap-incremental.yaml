@@ -1,0 +1,49 @@
+{{- if .Values.incrementalSync.worker.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "port-ocean.incrementalSync.configMapName" . }}
+  labels:
+    {{- include "port-ocean.labels" . | nindent 4 }}
+data:
+  OCEAN__PORT__BASE_URL: {{ .Values.port.baseUrl | quote }}
+  OCEAN__INITIALIZE_PORT_RESOURCES: "{{ .Values.incrementalSync.worker.initializePortResources | default false }}"
+  {{- if .Values.createPortResourcesOrigin }}
+  OCEAN__CREATE_PORT_RESOURCES_ORIGIN: "{{ .Values.createPortResourcesOrigin }}"
+  {{- end }}
+  OCEAN__ALLOW_ENVIRONMENT_VARIABLES_JQ_ACCESS: "{{ if hasKey .Values "allowEnvironmentVariablesJqAccess" }}{{ .Values.allowEnvironmentVariablesJqAccess }}{{ else }}true{{ end }}"
+  {{- if .Values.clientTimeout }}
+  OCEAN__CLIENT_TIMEOUT: "{{ .Values.clientTimeout }}"
+  {{- end }}
+  OCEAN__SEND_RAW_DATA_EXAMPLES: "{{ .Values.sendRawDataExamples | default true }}"
+  OCEAN__EVENT_LISTENER: '{"type":"ONCE"}'
+  {{- if .Values.integration.identifier }}
+  OCEAN__INTEGRATION__IDENTIFIER: "{{ .Values.integration.identifier }}"
+  {{- end }}
+  OCEAN__INTEGRATION__INCREMENTAL_SYNC_ENABLED: "true"
+  {{- if .Values.integration.oauth.enabled }}
+  OCEAN__OAUTH_ACCESS_TOKEN_FILE_PATH: "{{ .Values.integration.oauth.access_token_file_path }}"
+  {{- end }}
+  {{- if .Values.integration.processExecution.mode }}
+  OCEAN__PROCESS_EXECUTION_MODE: "{{ .Values.integration.processExecution.mode }}"
+  {{- if eq .Values.integration.processExecution.mode "multi_process" }}
+  PROMETHEUS_MULTIPROC_DIR: "{{ .Values.integration.processExecution.prometheusMultiProcessDir }}"
+  {{- end }}
+  {{- end }}
+  {{- if .Values.integration.config }}
+  {{- range $key, $value := .Values.integration.config }}
+  {{- if or (kindIs "map" $value) (kindIs "slice" $value) }}
+  OCEAN__INTEGRATION__CONFIG__{{ $key | snakecase | upper }}: {{ $value | toJson | quote }}
+  {{- else }}
+  OCEAN__INTEGRATION__CONFIG__{{ $key | snakecase | upper }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
+  OCEAN__LAKEHOUSE_ENABLED: "{{ .Values.lakehouseEnabled | default true }}"
+  OCEAN__PROCESSING_MODE: "{{ .Values.processingMode | default "dsp" }}"
+  {{- if .Values.incrementalSync.extraConfig }}
+  {{- range $key, $value := .Values.incrementalSync.extraConfig }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
+{{- end }}
