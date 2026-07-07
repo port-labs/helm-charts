@@ -11,7 +11,11 @@ spec:
     {{- toYaml . | trim | nindent 4 }}
   {{- end }}
   revisionHistoryLimit: {{ .Values.liveEvents.deployment.revisionHistoryLimit }}
-  replicas: {{ .Values.liveEvents.worker.replicaCount | default 1 }}
+  {{- if hasKey .Values.liveEvents.worker "replicaCount" }}
+  replicas: {{ .Values.liveEvents.worker.replicaCount }}
+  {{- else }}
+  replicas: 1
+  {{- end }}
   selector:
     matchLabels:
       app: {{ include "port-ocean.liveEvents.deploymentName" . }}
