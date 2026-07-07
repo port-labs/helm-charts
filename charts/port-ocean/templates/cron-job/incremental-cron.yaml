@@ -1,0 +1,148 @@
+{{- if .Values.incrementalSync.enabled }}
+{{- $maxRunTimeSeconds := "" }}
+{{- if .Values.incrementalSync.timeoutMinutes }}
+{{- $maxRunTimeSeconds = (mul .Values.incrementalSync.timeoutMinutes 60) }}
+{{- end }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "port-ocean.incrementalSync.cronJobName" . }}
+  labels:
+    {{- include "port-ocean.labels" . | nindent 4 }}
+spec:
+  failedJobsHistoryLimit: {{ .Values.incrementalSync.failedJobsHistoryLimit }}
+  successfulJobsHistoryLimit: {{ .Values.incrementalSync.successfulJobsHistoryLimit }}
+  schedule: {{ include "port-ocean.incrementalSync.schedule" . | squote }}
+  suspend: {{ .Values.incrementalSync.suspend }}
+  concurrencyPolicy: {{ .Values.incrementalSync.concurrencyPolicy | default "Forbid" }}
+  jobTemplate:
+    metadata:
+      generateName: {{ include "port-ocean.metadataNamePrefixShort" . }}-incr-
+      namespace: {{ .Release.Namespace }}
+      labels:
+        app: {{ include "port-ocean.incrementalSync.cronJobName" . }}
+        integrationUniqueIncrementalCronKey: {{ .Release.Name }}
+        {{- include "port-ocean.selectorLabels" . | indent 8 }}
+    spec:
+      backoffLimit: 0
+      {{- if $maxRunTimeSeconds }}
+      activeDeadlineSeconds: {{ $maxRunTimeSeconds }}
+      {{- end }}
+      template:
+        metadata:
+          {{- $podAnnotations := .Values.podAnnotations | default dict }}
+          {{- $cronAnnotations := (.Values.workload.cron.annotations | default dict) }}
+          {{- $annotations := merge (dict) $podAnnotations $cronAnnotations }}
+          {{- with $annotations }}
+          annotations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          labels:
+            app: {{ include "port-ocean.incrementalSync.cronJobName" . }}
+            {{- include "port-ocean.labels" . | nindent 12 }}
+        spec:
+          {{- if or .Values.podServiceAccount.name .Values.podServiceAccount.create }}
+          serviceAccountName: {{ include "port-ocean.serviceAccountName" . }}
+          {{- end }}
+          restartPolicy: Never
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext:
+            {{- if .Values.podSecurityContext }}
+            {{- toYaml .Values.podSecurityContext | nindent 12 }}
+            {{- end }}
+          initContainers:
+            {{- if .Values.extraInitContainers }}
+            {{- tpl (toYaml .Values.extraInitContainers) . | nindent 12 }}
+            {{- end }}
+            {{- if .Values.postgresql.enabled }}
+            - name: wait-for-postgresql
+              image: {{ .Values.postgresql.image }}
+              command:
+                - sh
+                - -c
+                - |
+                  until pg_isready -h {{ .Release.Name }}-postgresql -p 5432 -U {{ .Values.postgresql.global.postgresql.auth.username }}; do
+                    echo "Waiting for PostgreSQL to be ready..."
+                    sleep 2
+                  done
+                  echo "PostgreSQL is ready!"
+            {{- end }}
+          containers:
+          - name: {{ include "port-ocean.containerName" . }}
+            imagePullPolicy: {{ .Values.imagePullPolicy }}
+            image: {{ include "port-ocean.image" . }}
+            securityContext:
+              {{- if .Values.containerSecurityContext }}
+              {{- toYaml .Values.containerSecurityContext | nindent 14 }}
+              {{- end }}
+            resources:
+              {{- if .Values.incrementalSync.resources }}
+              {{- toYaml .Values.incrementalSync.resources | nindent 14 }}
+              {{- end }}
+            env:
+            {{- if .Values.selfSignedCertificate.enabled }}
+              - name: SSL_CERT_FILE
+                value: /etc/ssl/certs/ca-certificates.crt
+              - name: REQUESTS_CA_BUNDLE
+                value: /etc/ssl/certs/ca-certificates.crt
+            {{- end }}
+            {{- if .Values.extraEnv }}
+              {{- tpl (toYaml .Values.extraEnv) . | nindent 14 }}
+            {{- end }}
+            envFrom:
+              - configMapRef:
+                  name: {{ include "port-ocean.incrementalSync.configMapName" . }}
+              {{- include "port-ocean.additionalSecrets" . | nindent 14 }}
+            volumeMounts:
+              - name: ocean-tmp
+                mountPath: /tmp/ocean
+            {{- if .Values.extraVolumeMounts }}
+              {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 14 }}
+            {{- end }}
+            {{- if .Values.selfSignedCertificate.enabled }}
+              - name: certificates
+                mountPath: /usr/local/share/ca-certificates/cert.crt
+                subPath: cert.crt
+                readOnly: true
+            {{- end }}
+          volumes:
+            - name: ocean-tmp
+              emptyDir: { }
+            {{- if .Values.extraVolumes }}
+            {{- tpl (toYaml .Values.extraVolumes) . | nindent 12 }}
+            {{- end }}
+            {{- if and .Values.selfSignedCertificate.enabled .Values.selfSignedCertificate.secret.useExistingSecret }}
+            - name: certificates
+              projected:
+                sources:
+                  - secret:
+                      name: {{ .Values.selfSignedCertificate.secret.name }}
+                      items:
+                        - key: {{ .Values.selfSignedCertificate.secret.key }}
+                          path: cert.crt
+            {{- else if .Values.selfSignedCertificate.enabled }}
+            - name: certificates
+              projected:
+                sources:
+                  - secret:
+                      name: {{ include "port-ocean.selfSignedCertName" . }}
+                      items:
+                        - key: crt
+                          path: cert.crt
+            {{- end }}
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+{{- end }}
