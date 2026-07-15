@@ -9,17 +9,34 @@ metadata:
     helm.sh/hook: post-install, post-upgrade
     helm.sh/hook-delete-policy: hook-succeeded
   name: init-sync-{{ .Release.Name }}-{{ $jobName }}
+  labels:
+    {{- include "port-ocean.labels" . | nindent 4 }}
 spec:
   ttlSecondsAfterFinished: 600
   activeDeadlineSeconds: 180
   backoffLimit: 0
   template:
+    metadata:
+      labels:
+        {{- include "port-ocean.labels" . | nindent 8 }}
     spec:
       activeDeadlineSeconds: 180
+      securityContext:
+        {{- if .Values.podSecurityContext }}
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        {{- end }}
       containers:
         - name: kubectl
           image: {{ .Values.workload.cron.kubectlImage }}
           command: [ "sh", "-c" ]
+          securityContext:
+            {{- if .Values.containerSecurityContext }}
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- if .Values.resources }}
+            {{- toYaml .Values.resources | nindent 12 }}
+            {{- end }}
           env:
             - name: TOKEN
               valueFrom:
