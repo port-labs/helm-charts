@@ -2,11 +2,7 @@ apiVersion: v2
 name: port-ocean
 description: A Helm chart for Port Ocean integrations
 type: application
-<<<<<<< HEAD
 version: 0.21.0
-=======
-version: 0.20.1
->>>>>>> f2d95eab1db828d7208cdb05adcff670d4939bf8
 appVersion: "0.1.0"
 home: https://getport.io/
 sources:
