@@ -198,7 +198,6 @@ incrementalSync:
 
 liveEvents:
   baseUrl: ""
-  # When true, the live-events worker consumes events from Redis Streams.
   isRedisStreamConsumerEnabled: false
   worker:
     enabled: false
