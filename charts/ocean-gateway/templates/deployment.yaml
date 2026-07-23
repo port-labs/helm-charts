@@ -1,0 +1,133 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ocean-gateway.fullname" . }}
+  labels:
+    {{- include "ocean-gateway.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "ocean-gateway.selectorLabels" . | nindent 6 }}
+  # RollingUpdate: the gateway is stateless so zero-downtime deploys are safe.
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      annotations:
+        # Restart pods when the ConfigMap changes.
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "ocean-gateway.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.redis.enabled }}
+      initContainers:
+        - name: wait-for-redis
+          image: {{ include "ocean-gateway.redisWaitImage" . }}
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/bash
+            - -ec
+            - |
+              until redis-cli -h {{ include "ocean-gateway.redisHost" . }} -p 6379 \
+                {{- if and .Values.redis.auth.enabled .Values.redis.auth.password }}
+                -a "${REDIS_PASSWORD}" \
+                {{- end }}
+                ping | grep -q PONG; do
+                echo "Waiting for Redis {{ include "ocean-gateway.redisHost" . }} to be ready..."
+                sleep 2
+              done
+          {{- if and .Values.redis.auth.enabled .Values.redis.auth.password }}
+          env:
+            - name: REDIS_PASSWORD
+              value: {{ .Values.redis.auth.password | quote }}
+          {{- end }}
+      {{- end }}
+      containers:
+        - name: {{ include "ocean-gateway.name" . }}
+          image: {{ include "ocean-gateway.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "ocean-gateway.configMapName" . }}
+            {{- if .Values.redis.existingSecret }}
+            - secretRef:
+                name: {{ .Values.redis.existingSecret }}
+            {{- else if eq (include "ocean-gateway.redisSecretCreate" .) "true" }}
+            - secretRef:
+                name: {{ include "ocean-gateway.secretName" . }}
+            {{- end }}
+          {{- if .Values.extraEnv }}
+          env:
+            {{- tpl (toYaml .Values.extraEnv) . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- if .Values.extraVolumeMounts }}
+          volumeMounts:
+            {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 12 }}
+          {{- end }}
+      {{- if .Values.extraVolumes }}
+      volumes:
+        {{- tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,37 @@
+Ocean Gateway has been deployed.
+
+  Release name : {{ .Release.Name }}
+  Namespace    : {{ .Release.Namespace }}
+  Image        : {{ include "ocean-gateway.image" . }}
+{{- if .Values.redis.enabled }}
+  Redis        : bundled ({{ include "ocean-gateway.redisHost" . }}:6379)
+{{- else if .Values.redis.existingSecret }}
+  Redis        : external (secret {{ .Values.redis.existingSecret }})
+{{- else }}
+  Redis        : {{ include "ocean-gateway.redisUrl" . }}
+{{- end }}
+
+The gateway is accepting live-event webhooks at:
+
+  POST http://{{ include "ocean-gateway.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}/live-events/{liveEventsUUID}/integration/webhook
+
+Each accepted event (202) is written synchronously to the Redis stream:
+
+  {liveEventsUUID}/live-events/raw/event-stream
+
+Health check:
+
+  kubectl port-forward svc/{{ include "ocean-gateway.fullname" . }} {{ .Values.service.port }} -n {{ .Release.Namespace }}
+  curl http://localhost:{{ .Values.service.port }}/healthz
+
+Metrics (Prometheus):
+
+  curl http://localhost:{{ .Values.service.port }}/metrics
+
+Producer contract:
+  - 202 Accepted  → event is durably in the Redis stream
+  - 503            → Redis temporarily unavailable; producer must retry
+
+Consumer guidance:
+  Use XREADGROUP + XACK on the stream for at-least-once delivery.
+  See https://github.com/port-labs/ocean-gateway#consuming-the-streams

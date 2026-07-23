@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ocean-gateway.configMapName" . }}
+  labels:
+    {{- include "ocean-gateway.labels" . | nindent 4 }}
+data:
+  LISTEN_ADDR: ":{{ .Values.service.port }}"
+  {{- if not .Values.redis.existingSecret }}
+  REDIS_OCEAN_GATEWAY_URL: {{ include "ocean-gateway.redisUrl" . | quote }}
+  {{- end }}
+  REDIS_DB: {{ .Values.redis.db | toString | quote }}
+  REDIS_POOL_SIZE: {{ .Values.redis.poolSize | toString | quote }}
+  REDIS_STREAM_MAXLEN: {{ .Values.stream.maxLen | toString | quote }}
+  EVENT_TTL: {{ .Values.stream.eventTTL | quote }}
+  STREAM_TTL: {{ .Values.stream.streamTTL | quote }}
+  WRITE_MAX_RETRIES: {{ .Values.write.maxRetries | toString | quote }}
+  WRITE_BACKOFF_BASE: {{ .Values.write.backoffBase | quote }}
