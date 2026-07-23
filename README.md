@@ -17,6 +17,7 @@ Port is the Developer Platform meant to supercharge your DevOps and Developers, 
 | [charts/port-k8s-exporter](charts/port-k8s-exporter)   | Port K8s Exporter - export and map K8s objects to Port entities | https://github.com/port-labs/port-k8s-exporter |
 | [charts/port-agent](charts/port-agent)   | Port Agent - consume and invoke Port Self-Service Actions | https://github.com/port-labs/port-agent |
 | [charts/port-ocean](charts/port-ocean)   | Port Ocean - export and map data from 3rd party systems  | https://github.com/port-labs/port-ocean |
+| [charts/ocean-gateway](charts/ocean-gateway)   | Ocean Gateway - on-prem live-event webhook ingress to Redis streams | https://github.com/port-labs/ocean-gateway |
 
 ## Contributing
 

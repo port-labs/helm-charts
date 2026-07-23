@@ -5,7 +5,7 @@ description: >
   Accepts webhook events and writes them synchronously to per-integration
   Redis streams, which Ocean integrations consume via XREADGROUP.
 type: application
-version: 0.2.0
+version: 0.3.0
 appVersion: "1.0.0"
 home: https://getport.io/
 sources:

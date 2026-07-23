@@ -130,3 +130,21 @@ Image used by the wait-for-redis init container.
 {{- $tag := .Values.redis.image.tag | default "7.4.3-debian-12-r0" -}}
 {{- printf "%s/%s:%s" $registry $repository $tag -}}
 {{- end }}
+
+{{/*
+Ingress name.
+*/}}
+{{- define "ocean-gateway.ingressName" -}}
+{{- printf "%s-ingress" (include "ocean-gateway.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Public webhook base URL when Ingress is enabled (scheme + host).
+*/}}
+{{- define "ocean-gateway.publicBaseUrl" -}}
+{{- if .Values.ingress.tls -}}
+https://{{ required "ingress.host is required when ingress is enabled" .Values.ingress.host }}
+{{- else -}}
+http://{{ required "ingress.host is required when ingress is enabled" .Values.ingress.host }}
+{{- end -}}
+{{- end }}

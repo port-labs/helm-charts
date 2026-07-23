@@ -87,6 +87,23 @@ service:
   port: 8080
   annotations: {}
 
+# ── Ingress ───────────────────────────────────────────────────────────────────
+# Expose the gateway to external webhook providers. Use path `/` (Prefix) so
+# all /live-events/{uuid}/integration/... routes reach the gateway.
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  host: null
+  path: /
+  pathType: Prefix
+  tls: []
+  # Example
+  # tls:
+  #   - secretName: ocean-gateway-tls
+  #     hosts:
+  #       - gateway.example.com
+
 # ── Resources ─────────────────────────────────────────────────────────────────
 resources:
   requests:

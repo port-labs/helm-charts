@@ -45,6 +45,13 @@ jobs:
           --set redis.enabled=true \
           --set redis.auth.password=pass > /dev/null
 
+    - name: Template — ingress enabled
+      run: |
+        helm template t . \
+          --set redis.url=redis:6379 \
+          --set ingress.enabled=true \
+          --set ingress.host=gateway.example.com > /dev/null
+
     - name: Template — existing secret
       run: |
         helm template t . \
