@@ -1,0 +1,27 @@
+apiVersion: v2
+name: ocean-gateway
+description: >
+  Stateless live-event gateway for Port Ocean integrations.
+  Accepts webhook events and writes them synchronously to per-integration
+  Redis streams, which Ocean integrations consume via XREADGROUP.
+type: application
+version: 0.3.0
+appVersion: "1.0.0"
+home: https://getport.io/
+sources:
+  - https://github.com/port-labs/ocean-gateway
+dependencies:
+  - name: redis
+    version: 20.13.4
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled
+maintainers:
+  - name: Port
+    email: support@getport.io
+icon: https://port-graphical-assets.s3.eu-west-1.amazonaws.com/Port+Logo.svg
+keywords:
+  - port
+  - ocean
+  - gateway
+  - live-events
+  - webhooks

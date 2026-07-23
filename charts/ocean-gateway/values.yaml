@@ -1,0 +1,145 @@
+# ocean-gateway Helm chart values.
+#
+# The gateway writes each incoming webhook straight to a Redis stream before
+# returning 202. It holds no in-memory buffer, so it is stateless and scales
+# horizontally with no coordination between replicas.
+#
+# External Redis: set redis.url (or redis.existingSecret).
+# No external Redis: set redis.enabled=true to deploy a bundled Bitnami Redis.
+
+nameOverride: ""
+fullnameOverride: ""
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/port-labs/ocean-gateway
+  pullPolicy: IfNotPresent
+  # Defaults to Chart.appVersion when empty.
+  tag: ""
+
+imagePullSecrets: []
+
+podAnnotations: {}
+podLabels: {}
+podSecurityContext: {}
+containerSecurityContext: {}
+
+extraLabels: {}
+extraEnv: []
+extraVolumes: []
+extraVolumeMounts: []
+
+# ── Redis ─────────────────────────────────────────────────────────────────────
+redis:
+  # Deploy a bundled Redis instance (Bitnami subchart). When true, redis.url is
+  # auto-wired to the subchart service and redis.auth.password is used for the
+  # gateway connection unless redis.existingSecret is set.
+  enabled: false
+
+  # External Redis URL, e.g. "redis:6379". Required when enabled=false and
+  # existingSecret is not set.
+  url: ""
+  # Optional Redis username and password for external Redis. Stored in a Secret when set.
+  username: ""
+  password: ""
+  # Name of a pre-existing Secret to use instead of chart-managed values.
+  # The secret may contain any of: REDIS_OCEAN_GATEWAY_URL, REDIS_OCEAN_GATEWAY_USERNAME, REDIS_OCEAN_GATEWAY_PASSWORD.
+  # When set, redis.url/username/password are ignored and no Secret is created.
+  existingSecret: ""
+  db: 0
+  # Connection pool size. 0 = go-redis default (10 × GOMAXPROCS).
+  # Raise this if gateway_inflight_requests is often near the pool ceiling.
+  poolSize: 0
+
+  # ── Bundled Redis (Bitnami subchart) settings ───────────────────────────────
+  # Only applied when redis.enabled=true.
+  architecture: standalone
+  auth:
+    enabled: true
+    password: "changeme"
+  master:
+    persistence:
+      enabled: true
+      size: 8Gi
+
+# ── Stream retention ──────────────────────────────────────────────────────────
+stream:
+  # Trim stream entries older than this via XADD MINID. 0 = no age-based trim.
+  eventTTL: "1h"
+  # Refresh stream key EXPIRE on every write; idle streams are deleted after
+  # this TTL. 0 = no expiry. Set longer than eventTTL if consumers may lag.
+  streamTTL: "1h"
+  # Approx MAXLEN per stream (size-based trim). Ignored when eventTTL > 0.
+  # 0 = uncapped.
+  maxLen: 0
+
+# ── Write retry policy ────────────────────────────────────────────────────────
+write:
+  # Per-request XADD retries before returning 503 to the producer.
+  maxRetries: 2
+  # Initial retry backoff (doubles on each attempt).
+  backoffBase: "50ms"
+
+# ── Service ───────────────────────────────────────────────────────────────────
+service:
+  type: ClusterIP
+  port: 8080
+  annotations: {}
+
+# ── Ingress ───────────────────────────────────────────────────────────────────
+# Expose the gateway to external webhook providers. Use path `/` (Prefix) so
+# all /live-events/{uuid}/integration/... routes reach the gateway.
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  host: null
+  path: /
+  pathType: Prefix
+  tls: []
+  # Example
+  # tls:
+  #   - secretName: ocean-gateway-tls
+  #     hosts:
+  #       - gateway.example.com
+
+# ── Resources ─────────────────────────────────────────────────────────────────
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "500m"
+
+# ── Health probes ─────────────────────────────────────────────────────────────
+# /healthz pings Redis on every call — 200 when healthy, 503 when degraded.
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+  successThreshold: 1
+
+# ── Horizontal Pod Autoscaler ─────────────────────────────────────────────────
+# The gateway is fully stateless; scale freely without coordination.
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+# ── Scheduling ────────────────────────────────────────────────────────────────
+nodeSelector: {}
+tolerations: []
+affinity: {}
