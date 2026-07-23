@@ -2,6 +2,11 @@
 {{- $resyncOnUpgrade := ternary .Values.workload.cron.resyncOnUpgrade true (hasKey .Values.workload.cron "resyncOnUpgrade") }}
 {{- if and (eq .Values.workload.kind "CronJob") (or $resyncOnInstall $resyncOnUpgrade) }}
 {{- $jobName := (print (randAlphaNum 4) "-" .Release.Revision) | lower }}
+{{- $maxRunTimeSeconds := "" }}
+{{- if (.Values.workload.cron).resyncTimeoutMinutes }}
+{{- $minute := 60 }}
+{{- $maxRunTimeSeconds = (mul (.Values.workload.cron).resyncTimeoutMinutes $minute) }}
+{{- end }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -13,14 +18,29 @@ metadata:
     {{- include "port-ocean.labels" . | nindent 4 }}
 spec:
   ttlSecondsAfterFinished: 600
-  activeDeadlineSeconds: 180
+  {{- if $maxRunTimeSeconds }}
+  activeDeadlineSeconds: {{ $maxRunTimeSeconds }}
+  {{- end }}
   backoffLimit: 0
   template:
     metadata:
+      {{- $podAnnotations := .Values.podAnnotations | default dict }}
+      {{- $cronAnnotations := (.Values.workload.cron.annotations | default dict) }}
+      {{- $annotations := merge (dict) $podAnnotations $cronAnnotations }}
+      {{- with $annotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       labels:
         {{- include "port-ocean.labels" . | nindent 8 }}
     spec:
-      activeDeadlineSeconds: 180
+      {{- if or .Values.podServiceAccount.name .Values.podServiceAccount.create }}
+      serviceAccountName: {{ include "port-ocean.serviceAccountName" . }}
+      {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       securityContext:
         {{- if .Values.podSecurityContext }}
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -28,6 +48,7 @@ spec:
       containers:
         - name: kubectl
           image: {{ .Values.workload.cron.kubectlImage }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           command: [ "sh", "-c" ]
           securityContext:
             {{- if .Values.containerSecurityContext }}
@@ -46,4 +67,16 @@ spec:
           args:
             - kubectl create job --from=cronjob/{{ include "port-ocean.cronJobName" . }} init-sync-{{ $jobName }} --token=$TOKEN
       restartPolicy: Never
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 {{- end }}
