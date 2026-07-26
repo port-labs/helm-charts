@@ -35,7 +35,3 @@ Metrics (Prometheus):
 Producer contract:
   - 202 Accepted  → event is durably in the Redis stream
   - 503            → Redis temporarily unavailable; producer must retry
-
-Consumer guidance:
-  Use XREADGROUP + XACK on the stream for at-least-once delivery.
-  See https://github.com/port-labs/ocean-gateway#consuming-the-streams
