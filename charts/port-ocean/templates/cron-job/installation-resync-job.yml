@@ -48,16 +48,8 @@ spec:
       containers:
         - name: kubectl
           image: {{ .Values.workload.cron.kubectlImage }}
-          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          {{- include "port-ocean.initContainer.containerDefaults" . | nindent 10 }}
           command: [ "sh", "-c" ]
-          securityContext:
-            {{- if .Values.containerSecurityContext }}
-            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
-            {{- end }}
-          resources:
-            {{- if .Values.resources }}
-            {{- toYaml .Values.resources | nindent 12 }}
-            {{- end }}
           env:
             - name: TOKEN
               valueFrom:

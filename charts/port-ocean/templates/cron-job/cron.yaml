@@ -62,6 +62,7 @@ spec:
             {{- if .Values.postgresql.enabled }}
             - name: wait-for-postgresql
               image: {{ .Values.postgresql.image }}
+              {{- include "port-ocean.initContainer.containerDefaults" . | nindent 14 }}
               command:
                 - sh
                 - -c
@@ -74,6 +75,7 @@ spec:
             {{- end }}
             - name: terminate-old-resync-jobs
               image: {{ .Values.workload.cron.kubectlImage }}
+              {{- include "port-ocean.initContainer.containerDefaults" . | nindent 14 }}
               env:
                 - name: JOB_NAME
                   valueFrom:

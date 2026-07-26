@@ -282,3 +282,18 @@ Get self signed cert secret name
     name: {{ . }}
 {{- end }}
 {{- end }}
+
+{{/*
+Default container settings for chart-managed init containers (pull policy, security context, resources).
+*/}}
+{{- define "port-ocean.initContainer.containerDefaults" -}}
+imagePullPolicy: {{ .Values.imagePullPolicy }}
+securityContext:
+  {{- if .Values.containerSecurityContext }}
+  {{- toYaml .Values.containerSecurityContext | nindent 2 }}
+  {{- end }}
+resources:
+  {{- if .Values.resources }}
+  {{- toYaml .Values.resources | nindent 2 }}
+  {{- end }}
+{{- end -}}
