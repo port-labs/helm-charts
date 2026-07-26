@@ -60,6 +60,7 @@ spec:
             {{- if .Values.postgresql.enabled }}
             - name: wait-for-postgresql
               image: {{ .Values.postgresql.image }}
+              {{- include "port-ocean.initContainer.containerDefaults" . | nindent 14 }}
               command:
                 - sh
                 - -c
