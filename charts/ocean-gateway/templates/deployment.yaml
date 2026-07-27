@@ -22,6 +22,10 @@ spec:
       annotations:
         # Restart pods when the ConfigMap changes.
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with include "ocean-gateway.redisCredentialsChecksum" . }}
+        # Restart pods when chart-managed Redis credentials or credentialsRevision change.
+        checksum/redis-credentials: {{ . }}
+        {{- end }}
         {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -31,6 +35,7 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      serviceAccountName: {{ include "ocean-gateway.serviceAccountName" . }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -44,6 +49,10 @@ spec:
         - name: wait-for-redis
           image: {{ include "ocean-gateway.redisWaitImage" . }}
           imagePullPolicy: IfNotPresent
+          {{- with .Values.initContainer.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           command:
             - /bin/bash
             - -ec
@@ -59,8 +68,13 @@ spec:
           {{- if and .Values.redis.auth.enabled .Values.redis.auth.password }}
           env:
             - name: REDIS_PASSWORD
-              value: {{ .Values.redis.auth.password | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.redis.existingSecret | default (include "ocean-gateway.secretName" .) }}
+                  key: REDIS_OCEAN_LIVE_EVENTS_PASSWORD
           {{- end }}
+          resources:
+            {{- toYaml .Values.initContainer.resources | nindent 12 }}
       {{- end }}
       containers:
         - name: {{ include "ocean-gateway.name" . }}
@@ -90,8 +104,7 @@ spec:
           {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
-            httpGet:
-              path: /healthz
+            tcpSocket:
               port: http
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
@@ -101,7 +114,7 @@ spec:
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
-              path: /healthz
+              path: {{ .Values.readinessProbe.path }}
               port: http
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}

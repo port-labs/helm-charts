@@ -54,10 +54,21 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Resolved container image (repository:tag, tag defaults to appVersion).
+ServiceAccount name for gateway pods.
+*/}}
+{{- define "ocean-gateway.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+{{- default (include "ocean-gateway.fullname" .) .Values.serviceAccount.name -}}
+{{- else -}}
+{{- default "default" .Values.serviceAccount.name -}}
+{{- end -}}
+{{- end }}
+
+{{/*
+Resolved container image (repository:tag, tag defaults to latest).
 */}}
 {{- define "ocean-gateway.image" -}}
-{{- $tag := .Values.image.tag | default .Chart.AppVersion }}
+{{- $tag := .Values.image.tag | default "latest" }}
 {{- printf "%s:%s" .Values.image.repository $tag }}
 {{- end }}
 
@@ -80,6 +91,36 @@ Bundled Redis master service hostname (Bitnami standalone).
 */}}
 {{- define "ocean-gateway.redisHost" -}}
 {{- printf "%s-redis-master" .Release.Name }}
+{{- end }}
+
+{{/*
+Fail fast on incompatible Redis value combinations.
+*/}}
+{{- define "ocean-gateway.validateValues" -}}
+{{- if and .Values.redis.enabled .Values.redis.existingSecret -}}
+{{- fail "redis.enabled and redis.existingSecret are mutually exclusive" -}}
+{{- end -}}
+{{- if and .Values.redis.enabled (ne .Values.redis.url "") -}}
+{{- fail "redis.url must not be set when redis.enabled=true" -}}
+{{- end -}}
+{{- if and .Values.redis.enabled (ne .Values.redis.password "") -}}
+{{- fail "redis.password must not be set when redis.enabled=true; use redis.auth.password" -}}
+{{- end -}}
+{{- if and .Values.redis.enabled .Values.redis.tls.enabled -}}
+{{- fail "redis.tls.enabled must not be set when redis.enabled=true" -}}
+{{- end -}}
+{{- if and .Values.redis.existingSecret (ne .Values.redis.url "") -}}
+{{- fail "redis.url must not be set when redis.existingSecret is set" -}}
+{{- end -}}
+{{- if and .Values.redis.existingSecret (ne .Values.redis.password "") -}}
+{{- fail "redis.password must not be set when redis.existingSecret is set" -}}
+{{- end -}}
+{{- if and .Values.redis.existingSecret (ne .Values.redis.username "") -}}
+{{- fail "redis.username must not be set when redis.existingSecret is set" -}}
+{{- end -}}
+{{- if and .Values.redis.existingSecret .Values.redis.tls.enabled -}}
+{{- fail "redis.tls.enabled must not be set when redis.existingSecret is set" -}}
+{{- end -}}
 {{- end }}
 
 {{/*
@@ -122,12 +163,23 @@ false
 {{- end }}
 
 {{/*
+Checksum for Redis credentials — changes trigger a rolling pod restart.
+*/}}
+{{- define "ocean-gateway.redisCredentialsChecksum" -}}
+{{- if eq (include "ocean-gateway.redisSecretCreate" .) "true" -}}
+{{- include (print $.Template.BasePath "/secret.yaml") . | sha256sum -}}
+{{- else if .Values.redis.existingSecret -}}
+{{- printf "%s|%s" .Values.redis.existingSecret (.Values.redis.credentialsRevision | default "") | sha256sum -}}
+{{- end -}}
+{{- end }}
+
+{{/*
 Image used by the wait-for-redis init container.
 */}}
 {{- define "ocean-gateway.redisWaitImage" -}}
 {{- $registry := .Values.redis.image.registry | default "docker.io" -}}
-{{- $repository := .Values.redis.image.repository | default "bitnami/redis" -}}
-{{- $tag := .Values.redis.image.tag | default "7.4.3-debian-12-r0" -}}
+{{- $repository := .Values.redis.image.repository | default "bitnamisecure/redis" -}}
+{{- $tag := .Values.redis.image.tag | default "latest" -}}
 {{- printf "%s/%s:%s" $registry $repository $tag -}}
 {{- end }}
 

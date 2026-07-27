@@ -14,7 +14,7 @@ Ocean Gateway has been deployed.
 The gateway is accepting live-event webhooks at:
 
 {{- if .Values.ingress.enabled }}
-  POST {{ include "ocean-gateway.publicBaseUrl" . }}/live-events/{liveEventsUUID}/integration/webhook
+  POST {{ include "ocean-gateway.publicBaseUrl" . }}/live-events/{liveEventsUUID}/<webhookSuffix>
 {{- else }}
   POST http://{{ include "ocean-gateway.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}/live-events/{liveEventsUUID}/integration/webhook
 {{- end }}

@@ -5,6 +5,9 @@ on:
     paths:
       - charts/ocean-gateway/**
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     defaults:
@@ -20,6 +23,9 @@ jobs:
     - name: Set up Helm
       uses: azure/setup-helm@v3
 
+    - name: Create k8s Kind Cluster
+      uses: helm/kind-action@v1.5.0
+
     - name: Build dependencies of Helm Chart
       run: |
         helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -32,35 +38,131 @@ jobs:
     - name: Lint Helm Chart — bundled Redis
       run: helm lint . --set redis.enabled=true
 
-    - name: Template — external Redis
+    - name: Validate Helm Chart
       run: |
-        helm template t . \
+        set -euo pipefail
+
+        dry_run() {
+          helm template "$1" . "${@:2}" | kubectl apply --dry-run=client -f -
+        }
+
+        assert_contains() {
+          local manifest=$1 pattern=$2 message=$3
+          echo "$manifest" | grep -q "$pattern" || {
+            echo "FAIL: $message (expected pattern: $pattern)" >&2
+            exit 1
+          }
+        }
+
+        assert_not_contains() {
+          local manifest=$1 pattern=$2 message=$3
+          if echo "$manifest" | grep -q "$pattern"; then
+            echo "FAIL: $message (unexpected pattern: $pattern)" >&2
+            exit 1
+          fi
+        }
+
+        echo "=== External Redis (chart-managed Secret) ==="
+        external_manifest=$(helm template external . \
           --set redis.url=redis:6379 \
           --set redis.username=user \
-          --set redis.password=pass > /dev/null
+          --set redis.password=pass)
+        echo "$external_manifest" | kubectl apply --dry-run=client -f -
+        assert_contains "$external_manifest" 'REDIS_OCEAN_LIVE_EVENTS_URL: "redis:6379"' \
+          "ConfigMap should set Redis URL for external Redis"
+        assert_contains "$external_manifest" 'REDIS_OCEAN_LIVE_EVENTS_PASSWORD' \
+          "chart should create a Secret with the Redis password"
+        assert_contains "$external_manifest" 'REDIS_OCEAN_LIVE_EVENTS_ENABLE_TLS: "false"' \
+          "ConfigMap should expose Redis TLS setting"
+        assert_contains "$external_manifest" 'checksum/redis-credentials:' \
+          "Deployment should annotate Redis credential checksum"
+        assert_contains "$external_manifest" 'tcpSocket:' \
+          "liveness probe should use tcpSocket (no Redis ping)"
+        assert_contains "$external_manifest" 'path: /healthz' \
+          "readiness probe should hit /healthz"
+        assert_contains "$external_manifest" 'serviceAccountName: default' \
+          "Deployment should use the namespace default ServiceAccount when serviceAccount.create is false"
+        assert_not_contains "$external_manifest" 'kind: ServiceAccount' \
+          "ServiceAccount should not be created when serviceAccount.create is false"
+        assert_not_contains "$external_manifest" 'name: wait-for-redis' \
+          "external Redis should not deploy the wait-for-redis init container"
 
-    - name: Template — bundled Redis
-      run: |
-        helm template t . \
+        echo "=== Dedicated ServiceAccount (opt-in) ==="
+        sa_manifest=$(helm template sa . \
+          --set redis.url=redis:6379 \
+          --set redis.password=pass \
+          --set serviceAccount.create=true)
+        echo "$sa_manifest" | kubectl apply --dry-run=client -f -
+        assert_contains "$sa_manifest" 'kind: ServiceAccount' \
+          "chart should create a ServiceAccount when serviceAccount.create is true"
+        assert_contains "$sa_manifest" 'serviceAccountName: sa-ocean-gateway' \
+          "Deployment should use the dedicated ServiceAccount"
+
+        echo "=== Bundled Redis ==="
+        bundled_manifest=$(helm template bundled . \
           --set redis.enabled=true \
-          --set redis.auth.password=pass > /dev/null
+          --set redis.auth.password=pass)
+        echo "$bundled_manifest" | kubectl apply --dry-run=client -f -
+        assert_contains "$bundled_manifest" 'name: wait-for-redis' \
+          "bundled Redis should include the wait-for-redis init container"
+        assert_contains "$bundled_manifest" 'secretKeyRef:' \
+          "init container should load Redis password via secretKeyRef"
+        assert_contains "$bundled_manifest" 'key: REDIS_OCEAN_LIVE_EVENTS_PASSWORD' \
+          "init container should read REDIS_OCEAN_LIVE_EVENTS_PASSWORD from the Secret"
+        assert_contains "$bundled_manifest" 'bitnamisecure/redis' \
+          "bundled Redis should use bitnamisecure/redis images"
+        assert_not_contains "$bundled_manifest" 'bitnami/redis:' \
+          "bundled Redis must not reference deprecated bitnami/redis images"
 
-    - name: Template — ingress enabled
-      run: |
-        helm template t . \
+        echo "=== Existing Secret ==="
+        existing_manifest=$(helm template existing . \
+          --set redis.existingSecret=ext-redis)
+        echo "$existing_manifest" | kubectl apply --dry-run=client -f -
+        assert_contains "$existing_manifest" 'name: ext-redis' \
+          "Deployment should reference the pre-existing Secret"
+        assert_not_contains "$existing_manifest" 'REDIS_OCEAN_LIVE_EVENTS_URL' \
+          "ConfigMap should not set Redis URL when existingSecret is used"
+        assert_not_contains "$existing_manifest" 'kind: Secret' \
+          "chart should not create a gateway Secret when existingSecret is set"
+
+        echo "=== Ingress enabled ==="
+        dry_run ingress \
           --set redis.url=redis:6379 \
           --set ingress.enabled=true \
-          --set ingress.host=gateway.example.com > /dev/null
+          --set ingress.host=gateway.example.com
 
-    - name: Template — existing secret
-      run: |
-        helm template t . \
-          --set redis.existingSecret=ext-redis > /dev/null
+        echo "=== ingress.host required when ingress is enabled ==="
+        if helm template invalid-ingress . \
+          --set redis.url=redis:6379 \
+          --set ingress.enabled=true > /dev/null 2>&1; then
+          echo "FAIL: expected error when ingress.enabled=true without ingress.host" >&2
+          exit 1
+        fi
 
-    - name: Template — url required when external Redis is not configured
-      run: |
-        if helm template t . > /dev/null 2>&1; then
+        echo "=== External Redis with TLS ==="
+        tls_manifest=$(helm template tls . \
+          --set redis.url=redis.example.com:6380 \
+          --set redis.password=pass \
+          --set redis.tls.enabled=true)
+        echo "$tls_manifest" | kubectl apply --dry-run=client -f -
+        assert_contains "$tls_manifest" 'REDIS_OCEAN_LIVE_EVENTS_ENABLE_TLS: "true"' \
+          "ConfigMap should enable Redis TLS when redis.tls.enabled is true"
+
+        echo "=== redis.url required without bundled Redis or existingSecret ==="
+        if helm template invalid . > /dev/null 2>&1; then
           echo "FAIL: expected error when redis.url and redis.existingSecret are both unset" >&2
           exit 1
         fi
-        echo "PASS: chart correctly requires redis.url without bundled Redis or an existing secret"
+
+        echo "=== incompatible redis.enabled + redis.existingSecret ==="
+        if helm template invalid-redis-combo . \
+          --set redis.enabled=true \
+          --set redis.existingSecret=ext-redis > /dev/null 2>&1; then
+          echo "FAIL: expected error when redis.enabled=true and redis.existingSecret are both set" >&2
+          exit 1
+        fi
+
+        echo "PASS: all chart scenarios validated"
+
+    - name: Verify bundled Redis image exists
+      run: docker manifest inspect docker.io/bitnamisecure/redis:latest

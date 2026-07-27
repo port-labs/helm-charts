@@ -48,6 +48,12 @@ helm upgrade --install ocean-gateway port-labs/ocean-gateway \
   --set ingress.host=gateway.example.com
 ```
 
+For managed Redis with in-transit encryption (TLS), also set:
+
+```bash
+  --set redis.tls.enabled=true
+```
+
 Configure webhook providers to POST to:
 
 ```
@@ -69,14 +75,25 @@ The following table lists the main configuration parameters and default values.
 |-----------|-------------|---------|
 | `replicaCount` | Number of gateway replicas (ignored when autoscaling is enabled) | `1` |
 | `image.repository` | Gateway image repository | `ghcr.io/port-labs/ocean-gateway` |
-| `image.pullPolicy` | Image pull policy | `IfNotPresent` |
-| `image.tag` | Image tag (defaults to chart `appVersion` when empty) | `""` |
+| `image.pullPolicy` | Image pull policy | `Always` |
+| `image.tag` | Image tag (defaults to `latest` when empty) | `"latest"` |
 | `imagePullSecrets` | Image pull secrets | `[]` |
+| `serviceAccount.create` | Create a dedicated ServiceAccount for gateway pods | `false` |
+| `serviceAccount.annotations` | Annotations for the ServiceAccount (e.g. cloud workload identity) | `{}` |
+| `serviceAccount.name` | ServiceAccount name override (`""` uses the release fullname when `create=true`) | `""` |
+| `initContainer.securityContext` | Security context for the wait-for-redis init container | see `values.yaml` |
+| `initContainer.resources` | Resources for the wait-for-redis init container | see `values.yaml` |
 | `redis.enabled` | Deploy bundled Bitnami Redis | `false` |
+| `redis.image.registry` | Bundled Redis image registry (also used by the wait-for-redis init container) | `docker.io` |
+| `redis.image.repository` | Bundled Redis image repository | `bitnamisecure/redis` |
+| `redis.image.tag` | Bundled Redis image tag | `latest` |
+| `redis.global.security.allowInsecureImages` | Allow non-default Bitnami images in the Redis subchart | `true` |
 | `redis.url` | External Redis address (`host:port`). Required when `redis.enabled=false` and `redis.existingSecret` is unset | `""` |
 | `redis.username` | External Redis username (stored in a Secret when set) | `""` |
 | `redis.password` | External Redis password (stored in a Secret when set) | `""` |
-| `redis.existingSecret` | Pre-existing Secret with `REDIS_OCEAN_GATEWAY_URL` / `_USERNAME` / `_PASSWORD` | `""` |
+| `redis.tls.enabled` | Enable TLS for external Redis (`REDIS_OCEAN_LIVE_EVENTS_ENABLE_TLS`); use for managed Redis with in-transit encryption | `false` |
+| `redis.existingSecret` | Pre-existing Secret with `REDIS_OCEAN_LIVE_EVENTS_URL` / `_USERNAME` / `_PASSWORD` / `_ENABLE_TLS` | `""` |
+| `redis.credentialsRevision` | Arbitrary string; bump after out-of-band `existingSecret` rotation to roll pods | `""` |
 | `redis.auth.password` | Bundled Redis password (also used by the gateway when `redis.enabled=true`) | `"changeme"` |
 | `redis.master.persistence.enabled` | Enable persistence for bundled Redis | `true` |
 | `redis.master.persistence.size` | PVC size for bundled Redis | `8Gi` |
@@ -99,8 +116,9 @@ The following table lists the main configuration parameters and default values.
 | `autoscaling.maxReplicas` | HPA maximum replicas | `10` |
 | `autoscaling.targetCPUUtilizationPercentage` | HPA CPU target | `80` |
 | `resources` | Container resource requests and limits | see `values.yaml` |
-| `livenessProbe.enabled` | Enable liveness probe (`/healthz`) | `true` |
-| `readinessProbe.enabled` | Enable readiness probe (`/healthz`) | `true` |
+| `livenessProbe.enabled` | Enable liveness probe (tcpSocket on HTTP port; does not check Redis) | `true` |
+| `readinessProbe.enabled` | Enable readiness probe (`/healthz`, includes Redis ping) | `true` |
+| `readinessProbe.path` | Readiness probe HTTP path | `/healthz` |
 
 ## Producer contract
 
