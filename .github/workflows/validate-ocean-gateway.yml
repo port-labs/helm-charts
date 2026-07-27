@@ -162,6 +162,14 @@ jobs:
           exit 1
         fi
 
+        echo "=== redis.username not allowed with bundled Redis ==="
+        if helm template invalid-redis-username . \
+          --set redis.enabled=true \
+          --set redis.username=foo > /dev/null 2>&1; then
+          echo "FAIL: expected error when redis.enabled=true and redis.username is set" >&2
+          exit 1
+        fi
+
         echo "PASS: all chart scenarios validated"
 
     - name: Verify bundled Redis image exists

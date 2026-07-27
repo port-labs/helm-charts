@@ -16,7 +16,7 @@ The gateway is accepting live-event webhooks at:
 {{- if .Values.ingress.enabled }}
   POST {{ include "ocean-gateway.publicBaseUrl" . }}/live-events/{liveEventsUUID}/<webhookSuffix>
 {{- else }}
-  POST http://{{ include "ocean-gateway.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}/live-events/{liveEventsUUID}/integration/webhook
+  POST http://{{ include "ocean-gateway.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}/live-events/{liveEventsUUID}/<webhookSuffix>
 {{- end }}
 
 Each accepted event (202) is written synchronously to the Redis stream:

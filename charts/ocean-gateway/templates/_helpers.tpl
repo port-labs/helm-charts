@@ -106,6 +106,9 @@ Fail fast on incompatible Redis value combinations.
 {{- if and .Values.redis.enabled (ne .Values.redis.password "") -}}
 {{- fail "redis.password must not be set when redis.enabled=true; use redis.auth.password" -}}
 {{- end -}}
+{{- if and .Values.redis.enabled (ne .Values.redis.username "") -}}
+{{- fail "redis.username must not be set when redis.enabled=true" -}}
+{{- end -}}
 {{- if and .Values.redis.enabled .Values.redis.tls.enabled -}}
 {{- fail "redis.tls.enabled must not be set when redis.enabled=true" -}}
 {{- end -}}
