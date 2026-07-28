@@ -42,4 +42,5 @@ data:
   OCEAN__PROCESSING_MODE: {{ .Values.processingMode | default "dsp" | quote }}
   OCEAN__ACTIONS_PROCESSOR__ENABLED: "{{ .Values.actionsProcessor.enabled | default false }}"
   OCEAN__EVENTS_DEBUG_LOGGING: "{{ .Values.eventsDebugLogging | default false }}"
+  OCEAN__LIVE_EVENTS__IS_REDIS_STREAM_CONSUMER_ENABLED: "{{ .Values.liveEvents.isRedisStreamConsumerEnabled | default false }}"
 {{- end }}

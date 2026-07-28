@@ -46,6 +46,7 @@ spec:
         {{- if .Values.postgresql.enabled }}
         - name: wait-for-postgresql
           image: {{ .Values.postgresql.image }}
+          {{- include "port-ocean.initContainer.containerDefaults" . | nindent 10 }}
           command:
             - sh
             - -c
@@ -95,6 +96,8 @@ spec:
         {{- if and .Values.liveEvents.baseUrl (not .Values.liveEvents.worker.enabled) }}
           - name: OCEAN__BASE_URL
             value: {{ tpl .Values.liveEvents.baseUrl . }}
+          - name: OCEAN__LIVE_EVENTS__IS_REDIS_STREAM_CONSUMER_ENABLED
+            value: "{{ .Values.liveEvents.isRedisStreamConsumerEnabled | default false }}"
         {{- end }}
         {{- if .Values.extraEnv }}
           {{- tpl (toYaml .Values.extraEnv) . | nindent 10 }}

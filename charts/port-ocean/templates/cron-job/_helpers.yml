@@ -4,10 +4,11 @@ Auto-generates unique names from integration.type and integration.identifier.
 Supports optional custom naming via workload.cron.initContainer.serviceAccount.name
 */}}
 {{- define "port-ocean.cron.job-query-rbac-name" -}}
-{{- $suffix := printf "-job-query%s" .suffix -}}
-{{- if and (.root.Values.workload.cron.initContainer) (.root.Values.workload.cron.initContainer.serviceAccount) (.root.Values.workload.cron.initContainer.serviceAccount.name) -}}
-{{- printf "%s%s" .root.Values.workload.cron.initContainer.serviceAccount.name $suffix | trunc 63 | trimSuffix "-" -}}
+{{- $root := index . 0 -}}
+{{- $suffix := printf "-job-query%s" (index . 1) -}}
+{{- if and ($root.Values.workload.cron.initContainer) ($root.Values.workload.cron.initContainer.serviceAccount) ($root.Values.workload.cron.initContainer.serviceAccount.name) -}}
+{{- printf "%s%s" $root.Values.workload.cron.initContainer.serviceAccount.name $suffix | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
-{{- include "port-ocean.resourceName" (dict "root" .root "suffix" $suffix "maxLength" 63) -}}
+{{- include "port-ocean.resourceName" (list $root $suffix) -}}
 {{- end -}}
 {{- end }}

@@ -17,7 +17,7 @@ spec:
   concurrencyPolicy: {{ .Values.incrementalSync.concurrencyPolicy | default "Forbid" }}
   jobTemplate:
     metadata:
-      generateName: {{ include "port-ocean.resourceName" (dict "root" . "suffix" "-incr-" "maxLength" 58) }}
+      generateName: {{ include "port-ocean.resourceName" (list . "-incr-" 58) }}
       namespace: {{ .Release.Namespace }}
       labels:
         app: {{ include "port-ocean.incrementalSync.cronJobName" . }}
@@ -60,6 +60,7 @@ spec:
             {{- if .Values.postgresql.enabled }}
             - name: wait-for-postgresql
               image: {{ .Values.postgresql.image }}
+              {{- include "port-ocean.initContainer.containerDefaults" . | nindent 14 }}
               command:
                 - sh
                 - -c

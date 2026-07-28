@@ -198,6 +198,7 @@ incrementalSync:
 
 liveEvents:
   baseUrl: ""
+  isRedisStreamConsumerEnabled: false
   worker:
     enabled: false
     replicaCount: 1

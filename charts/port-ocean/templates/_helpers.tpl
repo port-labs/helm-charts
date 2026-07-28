@@ -111,9 +111,13 @@ Build a Kubernetes resource name without losing the identity encoded in a long
 integration identifier. A hash is added only when the name exceeds its limit.
 */}}
 {{- define "port-ocean.resourceName" -}}
-{{- $prefix := include "port-ocean.metadataNamePrefix" .root -}}
-{{- $suffix := .suffix -}}
-{{- $maxLength := int .maxLength -}}
+{{- $root := index . 0 -}}
+{{- $suffix := index . 1 -}}
+{{- $maxLength := 63 -}}
+{{- if gt (len .) 2 -}}
+{{- $maxLength = int (index . 2) -}}
+{{- end -}}
+{{- $prefix := include "port-ocean.metadataNamePrefix" $root -}}
 {{- $name := printf "%s%s" $prefix $suffix -}}
 {{- if gt (len $name) $maxLength -}}
 {{- $hash := sha256sum $prefix | trunc 8 -}}
@@ -129,19 +133,19 @@ integration identifier. A hash is added only when the name exceeds its limit.
 Get config map name 
 */}}
 {{- define "port-ocean.configMapName" -}}
-{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-config" "maxLength" 63) }}
+{{- include "port-ocean.resourceName" (list . "-config") }}
 {{- end }}
 
 {{- define "port-ocean.liveEvents.configMapName" -}}
-{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-le-config" "maxLength" 63) }}
+{{- include "port-ocean.resourceName" (list . "-le-config") }}
 {{- end }}
 
 {{- define "port-ocean.incrementalSync.configMapName" -}}
-{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-incr-config" "maxLength" 63) }}
+{{- include "port-ocean.resourceName" (list . "-incr-config") }}
 {{- end }}
 
 {{- define "port-ocean.incrementalSync.cronJobName" -}}
-{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-incr-cron" "maxLength" 52) }}
+{{- include "port-ocean.resourceName" (list . "-incr-cron" 52) }}
 {{- end }}
 
 {{- define "port-ocean.incrementalSync.schedule" -}}
@@ -149,47 +153,47 @@ Get config map name
 {{- end -}}
 
 {{- define "port-ocean.actionsProcessor.configMapName" -}}
-{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-ap-config" "maxLength" 63) }}
+{{- include "port-ocean.resourceName" (list . "-ap-config") }}
 {{- end }}
 
 {{/*
 Get secret name 
 */}}
 {{- define "port-ocean.secretName" -}}
-{{- default (include "port-ocean.resourceName" (dict "root" . "suffix" "-secret" "maxLength" 63)) .Values.secret.name }}
+{{- default (include "port-ocean.resourceName" (list . "-secret")) .Values.secret.name }}
 {{- end }}
 
 {{/*
 Get ingress name 
 */}}
 {{- define "port-ocean.ingressName" -}}
-{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-ingress" "maxLength" 63) }}
+{{- include "port-ocean.resourceName" (list . "-ingress") }}
 {{- end }}
 
 {{- define "port-ocean.liveEvents.ingressName" -}}
-{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-le-ingress" "maxLength" 63) }}
+{{- include "port-ocean.resourceName" (list . "-le-ingress") }}
 {{- end }}
 
 {{/*
 Get service name 
 */}}
 {{- define "port-ocean.serviceName" -}}
-{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-service" "maxLength" 63) }}
+{{- include "port-ocean.resourceName" (list . "-service") }}
 {{- end }}
 
 {{- define "port-ocean.liveEvents.serviceName" -}}
-{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-le-service" "maxLength" 63) }}
+{{- include "port-ocean.resourceName" (list . "-le-service") }}
 {{- end }}
 
 {{- define "port-ocean.actionsProcessor.serviceName" -}}
-{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-ap-service" "maxLength" 63) }}
+{{- include "port-ocean.resourceName" (list . "-ap-service") }}
 {{- end }}
 
 {{/*
 Get container name
 */}}
 {{- define "port-ocean.containerName" -}}
-{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-container" "maxLength" 63) }}
+{{- include "port-ocean.resourceName" (list . "-container") }}
 {{- end }}
 
 {{/*
@@ -210,15 +214,15 @@ Get container image (registry + image name)
 Get deployment name
 */}}
 {{- define "port-ocean.deploymentName" -}}
-{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-deployment" "maxLength" 63) }}
+{{- include "port-ocean.resourceName" (list . "-deployment") }}
 {{- end }}
 
 {{- define "port-ocean.liveEvents.deploymentName" -}}
-{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-le-deployment" "maxLength" 63) }}
+{{- include "port-ocean.resourceName" (list . "-le-deployment") }}
 {{- end }}
 
 {{- define "port-ocean.actionsProcessor.deploymentName" -}}
-{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-ap-deployment" "maxLength" 63) }}
+{{- include "port-ocean.resourceName" (list . "-ap-deployment") }}
 {{- end }}
 
 {{/*
@@ -226,7 +230,7 @@ Get ServiceAccount name
 */}}
 {{- define "port-ocean.serviceAccountName" -}}
 {{- if not (.Values.podServiceAccount).name }}
-{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-sa" "maxLength" 63) }}
+{{- include "port-ocean.resourceName" (list . "-sa") }}
 {{- else }}
 {{- printf "%s" (tpl .Values.podServiceAccount.name $) | trunc 63 | trimSuffix "-" }}
 {{- end }}
@@ -237,14 +241,14 @@ Get cron job name
 Enforces Kubernetes CronJob name limit of 52 characters
 */}}
 {{- define "port-ocean.cronJobName" -}}
-{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-cron-job" "maxLength" 52) }}
+{{- include "port-ocean.resourceName" (list . "-cron-job" 52) }}
 {{- end }}
 
 {{/*
 Get self signed cert secret name
 */}}
 {{- define "port-ocean.selfSignedCertName" -}}
-{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-cert" "maxLength" 63) }}
+{{- include "port-ocean.resourceName" (list . "-cert") }}
 {{- end }}
 
 {{- define "port-ocean.additionalSecrets" }}
@@ -261,3 +265,18 @@ Get self signed cert secret name
     name: {{ . }}
 {{- end }}
 {{- end }}
+
+{{/*
+Default container settings for chart-managed init containers (pull policy, security context, resources).
+*/}}
+{{- define "port-ocean.initContainer.containerDefaults" -}}
+imagePullPolicy: {{ .Values.imagePullPolicy }}
+securityContext:
+  {{- if .Values.containerSecurityContext }}
+  {{- toYaml .Values.containerSecurityContext | nindent 2 }}
+  {{- end }}
+resources:
+  {{- if .Values.resources }}
+  {{- toYaml .Values.resources | nindent 2 }}
+  {{- end }}
+{{- end -}}
