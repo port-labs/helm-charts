@@ -17,7 +17,7 @@ spec:
   concurrencyPolicy: {{ .Values.incrementalSync.concurrencyPolicy | default "Forbid" }}
   jobTemplate:
     metadata:
-      generateName: {{ include "port-ocean.metadataNamePrefixShort" . }}-incr-
+      generateName: {{ include "port-ocean.resourceName" (dict "root" . "suffix" "-incr-" "maxLength" 58) }}
       namespace: {{ .Release.Namespace }}
       labels:
         app: {{ include "port-ocean.incrementalSync.cronJobName" . }}

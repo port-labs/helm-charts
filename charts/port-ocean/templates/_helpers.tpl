@@ -100,17 +100,28 @@ Get prefix of ocean resource metadata.name
 */}}
 {{- define "port-ocean.metadataNamePrefix" -}}
 {{- if .Values.metadataNamePrefixOverride }}
-{{- printf "%s" .Values.metadataNamePrefixOverride | trunc 63 | trimSuffix "-" }}
+{{- printf "%s" .Values.metadataNamePrefixOverride }}
 {{- else }}
-{{- printf "ocean-%s-%s" .Values.integration.type .Values.integration.identifier | trunc 63 | trimSuffix "-" }}
+{{- printf "ocean-%s-%s" .Values.integration.type .Values.integration.identifier }}
 {{- end }}
 {{- end }}
 
-{{- define "port-ocean.metadataNamePrefixShort" -}}
-{{- if .Values.metadataNamePrefixOverride }}
-{{- printf "%s" .Values.metadataNamePrefixOverride | trunc 63 | trimSuffix "-" }}
+{{/*
+Build a Kubernetes resource name without losing the identity encoded in a long
+integration identifier. A hash is added only when the name exceeds its limit.
+*/}}
+{{- define "port-ocean.resourceName" -}}
+{{- $prefix := include "port-ocean.metadataNamePrefix" .root -}}
+{{- $suffix := .suffix -}}
+{{- $maxLength := int .maxLength -}}
+{{- $name := printf "%s%s" $prefix $suffix -}}
+{{- if gt (len $name) $maxLength -}}
+{{- $hash := sha256sum $prefix | trunc 8 -}}
+{{- $maxPrefixLen := int (sub $maxLength (add (len $suffix) 9)) -}}
+{{- $truncatedPrefix := trunc $maxPrefixLen $prefix | trimSuffix "-" -}}
+{{- printf "%s-%s%s" $truncatedPrefix $hash $suffix -}}
 {{- else }}
-{{- printf "%s-%s" .Values.integration.type .Values.integration.identifier | trunc 63 | trimSuffix "-" }}
+{{- $name -}}
 {{- end }}
 {{- end }}
 
@@ -118,30 +129,19 @@ Get prefix of ocean resource metadata.name
 Get config map name 
 */}}
 {{- define "port-ocean.configMapName" -}}
-{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-config" $prefix | trunc 63 | trimSuffix "-" }}
+{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-config" "maxLength" 63) }}
 {{- end }}
 
 {{- define "port-ocean.liveEvents.configMapName" -}}
-{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-le-config" $prefix | trunc 63 | trimSuffix "-" }}
+{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-le-config" "maxLength" 63) }}
 {{- end }}
 
 {{- define "port-ocean.incrementalSync.configMapName" -}}
-{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-incr-config" $prefix | trunc 63 | trimSuffix "-" }}
+{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-incr-config" "maxLength" 63) }}
 {{- end }}
 
 {{- define "port-ocean.incrementalSync.cronJobName" -}}
-{{- $prefix := include "port-ocean.metadataNamePrefix" . -}}
-{{- $cronJobName := printf "%s-incr-cron" $prefix -}}
-{{- if gt (len $cronJobName) 52 -}}
-{{- $maxPrefixLen := int (sub 52 10) -}}
-{{- $truncatedPrefix := trunc $maxPrefixLen $prefix | trimSuffix "-" -}}
-{{- printf "%s-incr-cron" $truncatedPrefix -}}
-{{- else -}}
-{{- $cronJobName -}}
-{{- end -}}
+{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-incr-cron" "maxLength" 52) }}
 {{- end }}
 
 {{- define "port-ocean.incrementalSync.schedule" -}}
@@ -149,55 +149,47 @@ Get config map name
 {{- end -}}
 
 {{- define "port-ocean.actionsProcessor.configMapName" -}}
-{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-ap-config" $prefix | trunc 63 | trimSuffix "-" }}
+{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-ap-config" "maxLength" 63) }}
 {{- end }}
 
 {{/*
 Get secret name 
 */}}
 {{- define "port-ocean.secretName" -}}
-{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- default (printf "%s-secret" $prefix) .Values.secret.name }}
+{{- default (include "port-ocean.resourceName" (dict "root" . "suffix" "-secret" "maxLength" 63)) .Values.secret.name }}
 {{- end }}
 
 {{/*
 Get ingress name 
 */}}
 {{- define "port-ocean.ingressName" -}}
-{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-ingress" $prefix | trunc 63 | trimSuffix "-" }}
+{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-ingress" "maxLength" 63) }}
 {{- end }}
 
 {{- define "port-ocean.liveEvents.ingressName" -}}
-{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-le-ingress" $prefix | trunc 63 | trimSuffix "-" }}
+{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-le-ingress" "maxLength" 63) }}
 {{- end }}
 
 {{/*
 Get service name 
 */}}
 {{- define "port-ocean.serviceName" -}}
-{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-service" $prefix | trunc 63 | trimSuffix "-" }}
+{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-service" "maxLength" 63) }}
 {{- end }}
 
 {{- define "port-ocean.liveEvents.serviceName" -}}
-{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-le-service" $prefix | trunc 63 | trimSuffix "-" }}
+{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-le-service" "maxLength" 63) }}
 {{- end }}
 
 {{- define "port-ocean.actionsProcessor.serviceName" -}}
-{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-ap-service" $prefix | trunc 63 | trimSuffix "-" }}
+{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-ap-service" "maxLength" 63) }}
 {{- end }}
 
 {{/*
 Get container name
 */}}
 {{- define "port-ocean.containerName" -}}
-{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-container" $prefix }}
+{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-container" "maxLength" 63) }}
 {{- end }}
 
 {{/*
@@ -218,18 +210,15 @@ Get container image (registry + image name)
 Get deployment name
 */}}
 {{- define "port-ocean.deploymentName" -}}
-{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-deployment" $prefix | trunc 63 | trimSuffix "-" }}
+{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-deployment" "maxLength" 63) }}
 {{- end }}
 
 {{- define "port-ocean.liveEvents.deploymentName" -}}
-{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-le-deployment" $prefix | trunc 63 | trimSuffix "-" }}
+{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-le-deployment" "maxLength" 63) }}
 {{- end }}
 
 {{- define "port-ocean.actionsProcessor.deploymentName" -}}
-{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-ap-deployment" $prefix | trunc 63 | trimSuffix "-" }}
+{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-ap-deployment" "maxLength" 63) }}
 {{- end }}
 
 {{/*
@@ -237,8 +226,7 @@ Get ServiceAccount name
 */}}
 {{- define "port-ocean.serviceAccountName" -}}
 {{- if not (.Values.podServiceAccount).name }}
-{{- $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-sa" $prefix }}
+{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-sa" "maxLength" 63) }}
 {{- else }}
 {{- printf "%s" (tpl .Values.podServiceAccount.name $) | trunc 63 | trimSuffix "-" }}
 {{- end }}
@@ -249,23 +237,14 @@ Get cron job name
 Enforces Kubernetes CronJob name limit of 52 characters
 */}}
 {{- define "port-ocean.cronJobName" -}}
-{{- $prefix := include "port-ocean.metadataNamePrefix" . -}}
-{{- $cronJobName := printf "%s-cron-job" $prefix -}}
-{{- if gt (len $cronJobName) 52 -}}
-{{- $maxPrefixLen := int (sub 52 9) -}}
-{{- $truncatedPrefix := trunc $maxPrefixLen $prefix | trimSuffix "-" -}}
-{{- printf "%s-cron-job" $truncatedPrefix -}}
-{{- else -}}
-{{- $cronJobName -}}
-{{- end -}}
+{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-cron-job" "maxLength" 52) }}
 {{- end }}
 
 {{/*
 Get self signed cert secret name
 */}}
 {{- define "port-ocean.selfSignedCertName" -}}
-{{ $prefix:= include "port-ocean.metadataNamePrefix" . }}
-{{- printf "%s-cert" $prefix }}
+{{- include "port-ocean.resourceName" (dict "root" . "suffix" "-cert" "maxLength" 63) }}
 {{- end }}
 
 {{- define "port-ocean.additionalSecrets" }}
