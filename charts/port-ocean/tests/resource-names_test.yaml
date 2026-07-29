@@ -1,16 +1,173 @@
 suite: Long resource names
-templates:
-  - templates/deployment.yaml
 tests:
-  - it: adds a deterministic hash for the first long identifier
+  - it: names core resources
+    templates:
+      - templates/configmap.yaml
+      - templates/deployment.yaml
+      - templates/service.yaml
+      - templates/secret.yaml
     values:
       - values/long-a.yaml
     asserts:
       - equal:
           path: metadata.name
+          value: ocean-github-integration-identifier-that-is-del-f7ff2587-config
+        template: templates/configmap.yaml
+      - equal:
+          path: metadata.name
           value: ocean-github-integration-identifier-that-is-f7ff2587-deployment
+        template: templates/deployment.yaml
+      - equal:
+          path: metadata.name
+          value: ocean-github-integration-identifier-that-is-de-f7ff2587-service
+        template: templates/service.yaml
+      - equal:
+          path: metadata.name
+          value: ocean-github-integration-identifier-that-is-del-f7ff2587-secret
+        template: templates/secret.yaml
+
+  - it: names opt-in core resources
+    templates:
+      - templates/service-account.yaml
+      - templates/ingress.yaml
+      - templates/certificate_secret.yaml
+    values:
+      - values/long-a.yaml
+    set:
+      podServiceAccount.create: true
+      ingress.enabled: true
+      selfSignedCertificate.enabled: true
+      selfSignedCertificate.certificate: test
+    asserts:
+      - equal:
+          path: metadata.name
+          value: ocean-github-integration-identifier-that-is-deliber-f7ff2587-sa
+        template: templates/service-account.yaml
+      - equal:
+          path: metadata.name
+          value: ocean-github-integration-identifier-that-is-de-f7ff2587-ingress
+        template: templates/ingress.yaml
+      - equal:
+          path: metadata.name
+          value: ocean-github-integration-identifier-that-is-delib-f7ff2587-cert
+        template: templates/certificate_secret.yaml
+
+  - it: names live-events resources
+    templates:
+      - templates/configmap-live-events.yaml
+      - templates/deployment-live-events.yaml
+      - templates/service-live-events.yaml
+      - templates/ingress-live-events.yaml
+    values:
+      - values/long-a.yaml
+    set:
+      liveEvents.worker.enabled: true
+      liveEvents.ingress.enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: ocean-github-integration-identifier-that-is-f7ff2587-le-config
+        template: templates/configmap-live-events.yaml
+      - equal:
+          path: metadata.name
+          value: ocean-github-integration-identifier-that-f7ff2587-le-deployment
+        template: templates/deployment-live-events.yaml
+      - equal:
+          path: metadata.name
+          value: ocean-github-integration-identifier-that-is-f7ff2587-le-service
+        template: templates/service-live-events.yaml
+      - equal:
+          path: metadata.name
+          value: ocean-github-integration-identifier-that-is-f7ff2587-le-ingress
+        template: templates/ingress-live-events.yaml
+
+  - it: names actions-processor resources
+    templates:
+      - templates/actions-processor/configmap.yaml
+      - templates/actions-processor/deployment.yaml
+      - templates/actions-processor/service.yaml
+    values:
+      - values/long-a.yaml
+    set:
+      actionsProcessor.enabled: true
+      actionsProcessor.worker.enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: ocean-github-integration-identifier-that-is-f7ff2587-ap-config
+        template: templates/actions-processor/configmap.yaml
+      - equal:
+          path: metadata.name
+          value: ocean-github-integration-identifier-that-f7ff2587-ap-deployment
+        template: templates/actions-processor/deployment.yaml
+      - equal:
+          path: metadata.name
+          value: ocean-github-integration-identifier-that-is-f7ff2587-ap-service
+        template: templates/actions-processor/service.yaml
+
+  - it: names resync CronJob resources
+    templates:
+      - templates/cron-job/cron.yaml
+      - templates/cron-job/cron-jobs-init-container-sa.yml
+    values:
+      - values/long-a.yaml
+    set:
+      workload.kind: CronJob
+    asserts:
+      - equal:
+          path: metadata.name
+          value: ocean-github-integration-identifie-f7ff2587-cron-job
+        template: templates/cron-job/cron.yaml
+      - equal:
+          path: spec.jobTemplate.metadata.generateName
+          value: ocean-github-integration-identifier-that-is-deli-f7ff2587-
+        template: templates/cron-job/cron.yaml
+      - equal:
+          path: metadata.name
+          value: ocean-github-integration-identifier-that-f7ff2587-job-query-sa
+        template: templates/cron-job/cron-jobs-init-container-sa.yml
+        documentIndex: 0
+      - equal:
+          path: metadata.name
+          value: ocean-github-integration-identifier-tha-f7ff2587-job-query-role
+        template: templates/cron-job/cron-jobs-init-container-sa.yml
+        documentIndex: 1
+      - equal:
+          path: metadata.name
+          value: ocean-github-integration-identif-f7ff2587-job-query-rolebinding
+        template: templates/cron-job/cron-jobs-init-container-sa.yml
+        documentIndex: 2
+      - equal:
+          path: metadata.name
+          value: ocean-github-integration-identifier-f7ff2587-job-query-sa-token
+        template: templates/cron-job/cron-jobs-init-container-sa.yml
+        documentIndex: 3
+
+  - it: names incremental sync resources
+    templates:
+      - templates/configmap-incremental.yaml
+      - templates/cron-job/incremental-cron.yaml
+    values:
+      - values/long-a.yaml
+    set:
+      incrementalSync.enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: ocean-github-integration-identifier-that-i-f7ff2587-incr-config
+        template: templates/configmap-incremental.yaml
+      - equal:
+          path: metadata.name
+          value: ocean-github-integration-identifi-f7ff2587-incr-cron
+        template: templates/cron-job/incremental-cron.yaml
+      - equal:
+          path: spec.jobTemplate.metadata.generateName
+          value: ocean-github-integration-identifier-that-is-f7ff2587-incr-
+        template: templates/cron-job/incremental-cron.yaml
 
   - it: adds a different hash for the second long identifier
+    templates:
+      - templates/deployment.yaml
     values:
       - values/long-b.yaml
     asserts:
