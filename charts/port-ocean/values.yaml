@@ -199,6 +199,9 @@ incrementalSync:
 liveEvents:
   baseUrl: ""
   isRedisStreamConsumerEnabled: false
+  redis:
+    # Set this to the name of the secret holding your Redis credentials.
+    credentialsSecretName: ""
   worker:
     enabled: false
     replicaCount: 1
