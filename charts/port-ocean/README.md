@@ -188,8 +188,6 @@ The following table lists the configuration parameters of the `port-ocean` chart
 | `liveEvents.ingress.host`                        | Hostname for the ingress.                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | `null`                      |
 | `liveEvents.ingress.path`                        | Path for the ingress.                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `/`                         |
 | `liveEvents.ingress.pathType`                    | Path type for the ingress.                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | `Prefix`                    |
-| `integration.processExecution.mode`                           | Process execution mode. Can be either `single_process` or `multi_process`                                                                                                                                                                                                                                                                                                                                                                                                                      | `multi_process`                        |
-| `integration.processExecution.prometheusMultiProcessDir`      | Directory for Prometheus multi-process mode metrics.                                                                                                                                                                                                                                                                                                                                                                            | `/tmp/ocean/prometheus/metrics`                        |
 | `actionsProcessor.worker.replicaCount`          | Number of replicas for the dedicated actions processor Deployment (when `actionsProcessor.enabled` and `actionsProcessor.worker.enabled` are true). Using values other than `0` or `1` is not recommended.                                                                                                                                                                                                                                                                                       | `1`                         |
 | `actionsProcessor.service.portName`               | Name of the port exposed by the Service created for the Actions Processor worker. Defaults to `ocean-port`.                                                                                                                                                                                                                                                                                                                                                   | `ocean-port`                |
 | `streamingEnabled` | Process large HTTP responses via disk-buffered chunks instead of loading entire response into memory, preventing OOM on multi-GB payloads. | `false`
@@ -204,26 +202,11 @@ processingMode: ocean-core
 lakehouseEnabled: false
 ```
 
-## Process Execution Modes
+### Deprecated: Process Execution Mode
 
-The chart supports two process execution modes:
+The `integration.processExecution.mode` and `integration.processExecution.prometheusMultiProcessDir` chart values have been removed. `OCEAN__PROCESS_EXECUTION_MODE` is also deprecated in the Ocean framework itself — Ocean now always runs in single-process mode.
 
-1. `single_process` - Runs the integration in a single process. This is the default mode and is suitable for most use cases.
-2. `multi_process` - Runs the integration in multiple processes, which can be useful for handling high concurrency or when you need to scale horizontally.
-
-To configure the process execution mode, set the following in your values:
-
-```yaml
-integration:
-  processExecution:
-    mode: "multi_process" # or "single_process"
-    prometheusMultiProcessDir: "/custom/path" # Optional: Directory for Prometheus metrics in multi-process mode
-```
-
-**Note**: When using `multi_process` mode:
-
-- If `prometheusMultiProcessDir` is not provided, it will default to `/tmp/ocean/prometheus/metrics`
-- The directory must be writable by the container and have sufficient space for metrics storage
+If these keys are still present in your values file, Helm will ignore them and upgrades will not fail. You can safely remove them from your values.
 
 To override values in `helm install`, use either the `--set` flag.
 
