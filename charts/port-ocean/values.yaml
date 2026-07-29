@@ -157,9 +157,6 @@ integration:
   config: { }
   secrets: { }
   extraConfig: { }
-  processExecution:
-    mode: "single_process"
-    prometheusMultiProcessDir: "/tmp/ocean/prometheus/metrics"
   oauth:
     enabled: false
     access_token_file_path: "/tmp/ocean/.config/oauth_token"
@@ -256,22 +253,6 @@ readinessProbe:
 #  timeoutSeconds: 5
 #  failureThreshold: 3
 #  successThreshold: 2
-
-postgresql:
-  enabled: false
-
-  image:
-    registry: docker.io
-    repository: bitnamisecure/postgresql
-    tag: latest
-
-  global:
-    postgresql:
-      auth:
-        database: ocean
-        password: password
-        postgresPassword: password
-        username: port_admin
 
 processingMode: dsp
 
