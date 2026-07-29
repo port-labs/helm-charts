@@ -157,9 +157,6 @@ integration:
   config: { }
   secrets: { }
   extraConfig: { }
-  processExecution:
-    mode: "single_process"
-    prometheusMultiProcessDir: "/tmp/ocean/prometheus/metrics"
   oauth:
     enabled: false
     access_token_file_path: "/tmp/ocean/.config/oauth_token"
