@@ -110,9 +110,7 @@ tests:
       - templates/cron-job/cron.yaml
       - templates/cron-job/cron-jobs-init-container-sa.yml
     values:
-      - values/long-a.yaml
-    set:
-      workload.kind: CronJob
+      - values/long-hybrid-cron.yaml
     asserts:
       - equal:
           path: metadata.name
