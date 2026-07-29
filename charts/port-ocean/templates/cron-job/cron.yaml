@@ -19,7 +19,7 @@ spec:
   concurrencyPolicy: {{ .Values.scheduleConcurrencyPolicy | default "Replace" }}
   jobTemplate:
     metadata:
-      generateName: {{ include "port-ocean.metadataNamePrefixShort" . }}-
+      generateName: {{ include "port-ocean.resourceName" (list . "-" 58) }}
       namespace: {{ .Release.Namespace }}
       labels:
         app: {{ include "port-ocean.cronJobName" . }}
@@ -84,7 +84,7 @@ spec:
                 - name: TOKEN
                   valueFrom:
                     secretKeyRef:
-                      name: {{ include "port-ocean.cron.job-query-rbac-prefix" . }}-sa-token
+                      name: {{ include "port-ocean.cron.job-query-rbac-name" (list . "-sa-token") }}
                       key: token
               command:
                 - /bin/bash

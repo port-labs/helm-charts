@@ -1,0 +1,27 @@
+suite: Actions-processor deployment
+templates:
+  - templates/actions-processor/deployment.yaml
+tests:
+  - it: does not render for the single architecture
+    values:
+      - values/single.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders for split workers
+    values:
+      - values/split.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.name
+          value: ocean-github-test-id-ap-deployment
+
+  - it: renders for hybrid architecture
+    values:
+      - values/hybrid-cron.yaml
+    asserts:
+      - hasDocuments:
+          count: 1

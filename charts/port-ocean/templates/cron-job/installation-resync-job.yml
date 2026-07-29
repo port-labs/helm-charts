@@ -54,7 +54,7 @@ spec:
             - name: TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "port-ocean.cron.job-query-rbac-prefix" . }}-sa-token
+                  name: {{ include "port-ocean.cron.job-query-rbac-name" (list . "-sa-token") }}
                   key: token
           args:
             - kubectl create job --from=cronjob/{{ include "port-ocean.cronJobName" . }} init-sync-{{ $jobName }} --token=$TOKEN
