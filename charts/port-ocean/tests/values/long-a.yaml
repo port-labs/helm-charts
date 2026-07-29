@@ -1,0 +1,7 @@
+port:
+  clientId: test
+  clientSecret: test
+integration:
+  type: github
+  identifier: integration-identifier-that-is-deliberately-long-and-differs-at-the-end-a
+  version: 0.1.0
