@@ -1,0 +1,27 @@
+suite: Main deployment
+templates:
+  - templates/deployment.yaml
+tests:
+  - it: renders for the single architecture
+    values:
+      - values/single.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.name
+          value: ocean-github-test-id-deployment
+
+  - it: renders for split workers
+    values:
+      - values/split.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: does not render for hybrid architecture
+    values:
+      - values/hybrid-cron.yaml
+    asserts:
+      - hasDocuments:
+          count: 0

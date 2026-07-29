@@ -19,9 +19,14 @@ jobs:
 
     - name: Set up Helm
       uses: azure/setup-helm@v3
+      with:
+        version: v3.21.0
 
     - name: Create k8s Kind Cluster
       uses: helm/kind-action@v1.5.0
+
+    - name: Install Helm unit test plugin
+      run: helm plugin install https://github.com/helm-unittest/helm-unittest --version v1.0.3
 
     - name: Lint Helm Chart
       run: helm lint .
@@ -32,6 +37,12 @@ jobs:
         helm repo update
         helm dependency update
 
-    - name: Validate Helm Chart
+    - name: Run Helm unit tests
+      run: helm unittest . --strict
+
+    - name: Validate test manifests against Kubernetes schemas
       run: |
-        helm template --set port.clientId=test --set port.clientSecret=test --set configMap.config=test . | kubectl apply --dry-run=client -f -
+        for values_file in tests/values/*.yaml; do
+          helm template "$(basename "$values_file" .yaml)" . --values "$values_file" |
+            kubectl apply --dry-run=client -f -
+        done
