@@ -1,0 +1,27 @@
+suite: Resync CronJob
+templates:
+  - templates/cron-job/cron.yaml
+tests:
+  - it: does not render for single deployment
+    values:
+      - values/single.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: does not render for split workers
+    values:
+      - values/split.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders for hybrid architecture
+    values:
+      - values/hybrid-cron.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.name
+          value: ocean-github-test-id-cron-job

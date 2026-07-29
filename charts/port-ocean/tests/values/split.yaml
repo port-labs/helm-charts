@@ -1,0 +1,17 @@
+port:
+  clientId: test
+  clientSecret: test
+integration:
+  type: github
+  identifier: test-id
+  version: 0.1.0
+workload:
+  kind: Deployment
+liveEvents:
+  worker:
+    enabled: true
+  baseUrl: http://le.example
+actionsProcessor:
+  enabled: true
+  worker:
+    enabled: true

@@ -1,0 +1,19 @@
+suite: Long resource names
+templates:
+  - templates/deployment.yaml
+tests:
+  - it: adds a deterministic hash for the first long identifier
+    values:
+      - values/long-a.yaml
+    asserts:
+      - equal:
+          path: metadata.name
+          value: ocean-github-integration-identifier-that-is-f7ff2587-deployment
+
+  - it: adds a different hash for the second long identifier
+    values:
+      - values/long-b.yaml
+    asserts:
+      - equal:
+          path: metadata.name
+          value: ocean-github-integration-identifier-that-is-81b6484d-deployment
