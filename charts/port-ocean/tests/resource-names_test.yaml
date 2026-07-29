@@ -9,22 +9,34 @@ tests:
     values:
       - values/long-a.yaml
     asserts:
-      - equal:
+      - matchRegex:
           path: metadata.name
-          value: ocean-github-integration-identifier-that-is-del-f7ff2587-config
+          pattern: ^[a-z0-9-]{1,47}-[a-f0-9]{8}-config$
         template: templates/configmap.yaml
-      - equal:
+      - matchRegex:
           path: metadata.name
-          value: ocean-github-integration-identifier-that-is-f7ff2587-deployment
+          pattern: ^[a-z0-9-]{1,43}-[a-f0-9]{8}-deployment$
         template: templates/deployment.yaml
-      - equal:
+      - matchRegex:
           path: metadata.name
-          value: ocean-github-integration-identifier-that-is-de-f7ff2587-service
+          pattern: ^[a-z0-9-]{1,46}-[a-f0-9]{8}-service$
         template: templates/service.yaml
+      - matchRegex:
+          path: metadata.name
+          pattern: ^[a-z0-9-]{1,47}-[a-f0-9]{8}-secret$
+        template: templates/secret.yaml
+
+  - it: normalizes a trailing dash in a metadata name override
+    templates:
+      - templates/deployment.yaml
+    values:
+      - values/long-a.yaml
+    set:
+      metadataNamePrefixOverride: custom-prefix-
+    asserts:
       - equal:
           path: metadata.name
-          value: ocean-github-integration-identifier-that-is-del-f7ff2587-secret
-        template: templates/secret.yaml
+          value: custom-prefix-deployment
 
   - it: names opt-in core resources
     templates:
@@ -39,17 +51,17 @@ tests:
       selfSignedCertificate.enabled: true
       selfSignedCertificate.certificate: test
     asserts:
-      - equal:
+      - matchRegex:
           path: metadata.name
-          value: ocean-github-integration-identifier-that-is-deliber-f7ff2587-sa
+          pattern: ^[a-z0-9-]{1,51}-[a-f0-9]{8}-sa$
         template: templates/service-account.yaml
-      - equal:
+      - matchRegex:
           path: metadata.name
-          value: ocean-github-integration-identifier-that-is-de-f7ff2587-ingress
+          pattern: ^[a-z0-9-]{1,46}-[a-f0-9]{8}-ingress$
         template: templates/ingress.yaml
-      - equal:
+      - matchRegex:
           path: metadata.name
-          value: ocean-github-integration-identifier-that-is-delib-f7ff2587-cert
+          pattern: ^[a-z0-9-]{1,49}-[a-f0-9]{8}-cert$
         template: templates/certificate_secret.yaml
 
   - it: names live-events resources
@@ -64,21 +76,21 @@ tests:
       liveEvents.worker.enabled: true
       liveEvents.ingress.enabled: true
     asserts:
-      - equal:
+      - matchRegex:
           path: metadata.name
-          value: ocean-github-integration-identifier-that-is-f7ff2587-le-config
+          pattern: ^[a-z0-9-]{1,44}-[a-f0-9]{8}-le-config$
         template: templates/configmap-live-events.yaml
-      - equal:
+      - matchRegex:
           path: metadata.name
-          value: ocean-github-integration-identifier-that-f7ff2587-le-deployment
+          pattern: ^[a-z0-9-]{1,40}-[a-f0-9]{8}-le-deployment$
         template: templates/deployment-live-events.yaml
-      - equal:
+      - matchRegex:
           path: metadata.name
-          value: ocean-github-integration-identifier-that-is-f7ff2587-le-service
+          pattern: ^[a-z0-9-]{1,43}-[a-f0-9]{8}-le-service$
         template: templates/service-live-events.yaml
-      - equal:
+      - matchRegex:
           path: metadata.name
-          value: ocean-github-integration-identifier-that-is-f7ff2587-le-ingress
+          pattern: ^[a-z0-9-]{1,43}-[a-f0-9]{8}-le-ingress$
         template: templates/ingress-live-events.yaml
 
   - it: names actions-processor resources
@@ -92,17 +104,17 @@ tests:
       actionsProcessor.enabled: true
       actionsProcessor.worker.enabled: true
     asserts:
-      - equal:
+      - matchRegex:
           path: metadata.name
-          value: ocean-github-integration-identifier-that-is-f7ff2587-ap-config
+          pattern: ^[a-z0-9-]{1,44}-[a-f0-9]{8}-ap-config$
         template: templates/actions-processor/configmap.yaml
-      - equal:
+      - matchRegex:
           path: metadata.name
-          value: ocean-github-integration-identifier-that-f7ff2587-ap-deployment
+          pattern: ^[a-z0-9-]{1,40}-[a-f0-9]{8}-ap-deployment$
         template: templates/actions-processor/deployment.yaml
-      - equal:
+      - matchRegex:
           path: metadata.name
-          value: ocean-github-integration-identifier-that-is-f7ff2587-ap-service
+          pattern: ^[a-z0-9-]{1,43}-[a-f0-9]{8}-ap-service$
         template: templates/actions-processor/service.yaml
 
   - it: names resync CronJob resources
@@ -112,34 +124,47 @@ tests:
     values:
       - values/long-hybrid-cron.yaml
     asserts:
-      - equal:
+      - matchRegex:
           path: metadata.name
-          value: ocean-github-integration-identifie-f7ff2587-cron-job
+          pattern: ^[a-z0-9-]{1,34}-[a-f0-9]{8}-cron-job$
         template: templates/cron-job/cron.yaml
-      - equal:
+      - matchRegex:
           path: spec.jobTemplate.metadata.generateName
-          value: ocean-github-integration-identifier-that-is-deli-f7ff2587-
+          pattern: ^[a-z0-9-]{1,48}-[a-f0-9]{8}-$
         template: templates/cron-job/cron.yaml
-      - equal:
+      - matchRegex:
           path: metadata.name
-          value: ocean-github-integration-identifier-that-f7ff2587-job-query-sa
+          pattern: ^[a-z0-9-]{1,41}-[a-f0-9]{8}-job-query-sa$
         template: templates/cron-job/cron-jobs-init-container-sa.yml
         documentIndex: 0
-      - equal:
+      - matchRegex:
           path: metadata.name
-          value: ocean-github-integration-identifier-tha-f7ff2587-job-query-role
+          pattern: ^[a-z0-9-]{1,39}-[a-f0-9]{8}-job-query-role$
         template: templates/cron-job/cron-jobs-init-container-sa.yml
         documentIndex: 1
-      - equal:
+      - matchRegex:
           path: metadata.name
-          value: ocean-github-integration-identif-f7ff2587-job-query-rolebinding
+          pattern: ^[a-z0-9-]{1,32}-[a-f0-9]{8}-job-query-rolebinding$
         template: templates/cron-job/cron-jobs-init-container-sa.yml
         documentIndex: 2
-      - equal:
+      - matchRegex:
           path: metadata.name
-          value: ocean-github-integration-identifier-f7ff2587-job-query-sa-token
+          pattern: ^[a-z0-9-]{1,35}-[a-f0-9]{8}-job-query-sa-token$
         template: templates/cron-job/cron-jobs-init-container-sa.yml
         documentIndex: 3
+
+  - it: hashes long custom CronJob service account names
+    templates:
+      - templates/cron-job/cron-jobs-init-container-sa.yml
+    values:
+      - values/long-hybrid-cron.yaml
+    set:
+      workload.cron.initContainer.serviceAccount.name: custom-service-account-name-that-is-deliberately-long-and-differs-at-the-end
+    asserts:
+      - matchRegex:
+          path: metadata.name
+          pattern: ^custom-[a-z0-9-]{0,34}-[a-f0-9]{8}-job-query-sa$
+        documentIndex: 0
 
   - it: names incremental sync resources
     templates:
@@ -150,20 +175,20 @@ tests:
     set:
       incrementalSync.enabled: true
     asserts:
-      - equal:
+      - matchRegex:
           path: metadata.name
-          value: ocean-github-integration-identifier-that-i-f7ff2587-incr-config
+          pattern: ^[a-z0-9-]{1,42}-[a-f0-9]{8}-incr-config$
         template: templates/configmap-incremental.yaml
-      - equal:
+      - matchRegex:
           path: metadata.name
-          value: ocean-github-integration-identifi-f7ff2587-incr-cron
+          pattern: ^[a-z0-9-]{1,33}-[a-f0-9]{8}-incr-cron$
         template: templates/cron-job/incremental-cron.yaml
-      - equal:
+      - matchRegex:
           path: spec.jobTemplate.metadata.generateName
-          value: ocean-github-integration-identifier-that-is-f7ff2587-incr-
+          pattern: ^[a-z0-9-]{1,43}-[a-f0-9]{8}-incr-$
         template: templates/cron-job/incremental-cron.yaml
 
-  - it: adds a different hash for the second long identifier
+  - it: preserves one deterministic compatibility name
     templates:
       - templates/deployment.yaml
     values:

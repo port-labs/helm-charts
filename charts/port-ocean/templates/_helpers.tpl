@@ -100,24 +100,23 @@ Get prefix of ocean resource metadata.name
 */}}
 {{- define "port-ocean.metadataNamePrefix" -}}
 {{- if .Values.metadataNamePrefixOverride }}
-{{- printf "%s" .Values.metadataNamePrefixOverride }}
+{{- printf "%s" .Values.metadataNamePrefixOverride | trimSuffix "-" }}
 {{- else }}
-{{- printf "ocean-%s-%s" .Values.integration.type .Values.integration.identifier }}
+{{- printf "ocean-%s-%s" .Values.integration.type .Values.integration.identifier | trimSuffix "-" }}
 {{- end }}
 {{- end }}
 
 {{/*
-Build a Kubernetes resource name without losing the identity encoded in a long
-integration identifier. A hash is added only when the name exceeds its limit.
+Build a bounded Kubernetes resource name from a prefix and suffix. A hash is
+added only when the name exceeds its limit.
 */}}
-{{- define "port-ocean.resourceName" -}}
-{{- $root := index . 0 -}}
+{{- define "port-ocean.resourceNameFromPrefix" -}}
+{{- $prefix := index . 0 | trimSuffix "-" -}}
 {{- $suffix := index . 1 -}}
 {{- $maxLength := 63 -}}
 {{- if gt (len .) 2 -}}
 {{- $maxLength = int (index . 2) -}}
 {{- end -}}
-{{- $prefix := include "port-ocean.metadataNamePrefix" $root -}}
 {{- $name := printf "%s%s" $prefix $suffix -}}
 {{- if gt (len $name) $maxLength -}}
 {{- $hash := sha256sum $prefix | trunc 8 -}}
@@ -127,6 +126,20 @@ integration identifier. A hash is added only when the name exceeds its limit.
 {{- else }}
 {{- $name -}}
 {{- end }}
+{{- end }}
+
+{{/*
+Build a Kubernetes resource name from the Ocean integration identity.
+*/}}
+{{- define "port-ocean.resourceName" -}}
+{{- $root := index . 0 -}}
+{{- $suffix := index . 1 -}}
+{{- $prefix := include "port-ocean.metadataNamePrefix" $root -}}
+{{- if gt (len .) 2 -}}
+{{- include "port-ocean.resourceNameFromPrefix" (list $prefix $suffix (index . 2)) -}}
+{{- else -}}
+{{- include "port-ocean.resourceNameFromPrefix" (list $prefix $suffix) -}}
+{{- end -}}
 {{- end }}
 
 {{/*
