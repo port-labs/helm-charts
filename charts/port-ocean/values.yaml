@@ -251,22 +251,6 @@ readinessProbe:
 #  failureThreshold: 3
 #  successThreshold: 2
 
-postgresql:
-  enabled: false
-
-  image:
-    registry: docker.io
-    repository: bitnamisecure/postgresql
-    tag: latest
-
-  global:
-    postgresql:
-      auth:
-        database: ocean
-        password: password
-        postgresPassword: password
-        username: port_admin
-
 processingMode: dsp
 
 lakehouseEnabled: true
