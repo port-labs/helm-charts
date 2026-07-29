@@ -2365,6 +2365,23 @@ entries:
   port-ocean:
   - apiVersion: v2
     appVersion: 0.1.0
+    created: "2026-07-29T15:06:07.010443155Z"
+    description: A Helm chart for Port Ocean integrations
+    digest: 7f791ed140ff8a89494f4ae63e524acebb78486820f3c95126c9a44188c23064
+    home: https://getport.io/
+    icon: https://port-graphical-assets.s3.eu-west-1.amazonaws.com/Port+Logo.svg
+    maintainers:
+    - email: support@getport.io
+      name: Port
+    name: port-ocean
+    sources:
+    - https://github.com/port-labs/port-ocean
+    type: application
+    urls:
+    - https://github.com/port-labs/helm-charts/releases/download/port-ocean-0.22.3/port-ocean-0.22.3.tgz
+    version: 0.22.3
+  - apiVersion: v2
+    appVersion: 0.1.0
     created: "2026-07-29T14:33:07.412418183Z"
     dependencies:
     - condition: postgresql.enabled
@@ -4819,4 +4836,4 @@ entries:
     urls:
     - https://github.com/port-labs/helm-charts/releases/download/port-ocean-0.1.0/port-ocean-0.1.0.tgz
     version: 0.1.0
-generated: "2026-07-29T14:33:07.412865091Z"
+generated: "2026-07-29T15:06:07.010952947Z"
