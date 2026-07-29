@@ -208,6 +208,12 @@ lakehouseEnabled: false
 
 When PostgreSQL is enabled, all workloads (Deployment, CronJob, and Live Events) will wait for PostgreSQL to be ready before starting their main containers. This is done using an init container that checks PostgreSQL availability using `pg_isready`. The init container will retry every 2 seconds until PostgreSQL is available.
 
+### Deprecated: Process Execution Mode
+
+The `integration.processExecution.mode` and `integration.processExecution.prometheusMultiProcessDir` chart values have been removed. `OCEAN__PROCESS_EXECUTION_MODE` is also deprecated in the Ocean framework itself — Ocean now always runs in single-process mode.
+
+If these keys are still present in your values file, Helm will ignore them and upgrades will not fail. You can safely remove them from your values.
+
 To override values in `helm install`, use either the `--set` flag.
 
 Alternatively, you can use a YAML file that specifies the values while installing the chart. For example:
