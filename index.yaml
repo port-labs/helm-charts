@@ -3,6 +3,36 @@ entries:
   ocean-gateway:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2026-07-30T11:21:31.682473448Z"
+    dependencies:
+    - condition: redis.enabled
+      name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: 20.13.4
+    description: 'Stateless live-event gateway for Port Ocean integrations. Accepts
+      webhook events and writes them synchronously to per-integration Redis streams,
+      which Ocean integrations consume via XREADGROUP. '
+    digest: 0fa377fdc54104007c9b4eaeeb8d67eebe0de18ddc02cb27491f652fa70985e4
+    home: https://getport.io/
+    icon: https://port-graphical-assets.s3.eu-west-1.amazonaws.com/Port+Logo.svg
+    keywords:
+    - port
+    - ocean
+    - gateway
+    - live-events
+    - webhooks
+    maintainers:
+    - email: support@getport.io
+      name: Port
+    name: ocean-gateway
+    sources:
+    - https://github.com/port-labs/ocean-gateway
+    type: application
+    urls:
+    - https://github.com/port-labs/helm-charts/releases/download/ocean-gateway-0.1.1/ocean-gateway-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2026-07-28T07:53:14.660893059Z"
     dependencies:
     - condition: redis.enabled
@@ -4853,4 +4883,4 @@ entries:
     urls:
     - https://github.com/port-labs/helm-charts/releases/download/port-ocean-0.1.0/port-ocean-0.1.0.tgz
     version: 0.1.0
-generated: "2026-07-30T07:44:18.140543114Z"
+generated: "2026-07-30T11:21:31.683047633Z"
