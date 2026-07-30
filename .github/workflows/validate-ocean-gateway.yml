@@ -68,11 +68,11 @@ jobs:
           --set redis.username=user \
           --set redis.password=pass)
         echo "$external_manifest" | kubectl apply --dry-run=client -f -
-        assert_contains "$external_manifest" 'REDIS_OCEAN_LIVE_EVENTS_URL: "redis:6379"' \
+        assert_contains "$external_manifest" 'REDIS_LIVE_EVENTS_URL: "redis:6379"' \
           "ConfigMap should set Redis URL for external Redis"
-        assert_contains "$external_manifest" 'REDIS_OCEAN_LIVE_EVENTS_PASSWORD' \
+        assert_contains "$external_manifest" 'REDIS_LIVE_EVENTS_PASSWORD' \
           "chart should create a Secret with the Redis password"
-        assert_contains "$external_manifest" 'REDIS_OCEAN_LIVE_EVENTS_ENABLE_TLS: "false"' \
+        assert_contains "$external_manifest" 'REDIS_LIVE_EVENTS_ENABLE_TLS: "false"' \
           "ConfigMap should expose Redis TLS setting"
         assert_contains "$external_manifest" 'checksum/redis-credentials:' \
           "Deployment should annotate Redis credential checksum"
@@ -107,8 +107,8 @@ jobs:
           "bundled Redis should include the wait-for-redis init container"
         assert_contains "$bundled_manifest" 'secretKeyRef:' \
           "init container should load Redis password via secretKeyRef"
-        assert_contains "$bundled_manifest" 'key: REDIS_OCEAN_LIVE_EVENTS_PASSWORD' \
-          "init container should read REDIS_OCEAN_LIVE_EVENTS_PASSWORD from the Secret"
+        assert_contains "$bundled_manifest" 'key: REDIS_LIVE_EVENTS_PASSWORD' \
+          "init container should read REDIS_LIVE_EVENTS_PASSWORD from the Secret"
         assert_contains "$bundled_manifest" 'bitnamisecure/redis' \
           "bundled Redis should use bitnamisecure/redis images"
         assert_not_contains "$bundled_manifest" 'bitnami/redis:' \
@@ -120,7 +120,7 @@ jobs:
         echo "$existing_manifest" | kubectl apply --dry-run=client -f -
         assert_contains "$existing_manifest" 'name: ext-redis' \
           "Deployment should reference the pre-existing Secret"
-        assert_not_contains "$existing_manifest" 'REDIS_OCEAN_LIVE_EVENTS_URL' \
+        assert_not_contains "$existing_manifest" 'REDIS_LIVE_EVENTS_URL' \
           "ConfigMap should not set Redis URL when existingSecret is used"
         assert_not_contains "$existing_manifest" 'kind: Secret' \
           "chart should not create a gateway Secret when existingSecret is set"
@@ -145,7 +145,7 @@ jobs:
           --set redis.password=pass \
           --set redis.tls.enabled=true)
         echo "$tls_manifest" | kubectl apply --dry-run=client -f -
-        assert_contains "$tls_manifest" 'REDIS_OCEAN_LIVE_EVENTS_ENABLE_TLS: "true"' \
+        assert_contains "$tls_manifest" 'REDIS_LIVE_EVENTS_ENABLE_TLS: "true"' \
           "ConfigMap should enable Redis TLS when redis.tls.enabled is true"
 
         echo "=== redis.url required without bundled Redis or existingSecret ==="

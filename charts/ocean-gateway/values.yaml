@@ -69,8 +69,8 @@ redis:
   username: ""
   password: ""
   # Name of a pre-existing Secret to use instead of chart-managed values.
-  # The secret may contain any of: REDIS_OCEAN_LIVE_EVENTS_URL, REDIS_OCEAN_LIVE_EVENTS_USERNAME,
-  # REDIS_OCEAN_LIVE_EVENTS_PASSWORD, REDIS_OCEAN_LIVE_EVENTS_ENABLE_TLS.
+  # The secret may contain any of: REDIS_LIVE_EVENTS_URL, REDIS_LIVE_EVENTS_USERNAME,
+  # REDIS_LIVE_EVENTS_PASSWORD, REDIS_LIVE_EVENTS_ENABLE_TLS.
   # When set, redis.url/username/password/tls.enabled are ignored and no Secret is created.
   existingSecret: ""
   # Bump after rotating redis.existingSecret out-of-band to trigger a pod rollout.

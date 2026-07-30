@@ -7,8 +7,8 @@ metadata:
 data:
   LISTEN_ADDR: ":{{ .Values.service.port }}"
   {{- if not .Values.redis.existingSecret }}
-  REDIS_OCEAN_LIVE_EVENTS_URL: {{ include "ocean-gateway.redisUrl" . | quote }}
-  REDIS_OCEAN_LIVE_EVENTS_ENABLE_TLS: {{ .Values.redis.tls.enabled | toString | quote }}
+  REDIS_LIVE_EVENTS_URL: {{ include "ocean-gateway.redisUrl" . | quote }}
+  REDIS_LIVE_EVENTS_ENABLE_TLS: {{ .Values.redis.tls.enabled | toString | quote }}
   {{- end }}
   REDIS_DB: {{ .Values.redis.db | toString | quote }}
   REDIS_POOL_SIZE: {{ .Values.redis.poolSize | toString | quote }}

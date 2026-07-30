@@ -71,7 +71,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.redis.existingSecret | default (include "ocean-gateway.secretName" .) }}
-                  key: REDIS_OCEAN_LIVE_EVENTS_PASSWORD
+                  key: REDIS_LIVE_EVENTS_PASSWORD
           {{- end }}
           resources:
             {{- toYaml .Values.initContainer.resources | nindent 12 }}
