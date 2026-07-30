@@ -81,6 +81,11 @@ spec:
           - configMapRef:
               name: {{ include "port-ocean.liveEvents.configMapName" . }}
           {{- include "port-ocean.additionalSecrets" . | nindent 10 }}
+          {{- if .Values.liveEvents.isRedisStreamConsumerEnabled }}
+          - secretRef:
+              name: {{ .Values.liveEvents.redis.credentialsSecretName }}
+              optional: true
+          {{- end }}
         volumeMounts:
           - name: ocean-tmp
             mountPath: /tmp/ocean
