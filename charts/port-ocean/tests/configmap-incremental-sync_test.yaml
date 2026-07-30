@@ -1,0 +1,21 @@
+suite: Main ConfigMap incremental sync
+templates:
+  - templates/configmap.yaml
+tests:
+  - it: sets incremental sync enabled to false by default
+    values:
+      - values/single.yaml
+    asserts:
+      - equal:
+          path: data.OCEAN__INTEGRATION__INCREMENTAL_SYNC_ENABLED
+          value: "false"
+
+  - it: sets incremental sync enabled when values enable it
+    values:
+      - values/single.yaml
+    set:
+      incrementalSync.enabled: true
+    asserts:
+      - equal:
+          path: data.OCEAN__INTEGRATION__INCREMENTAL_SYNC_ENABLED
+          value: "true"

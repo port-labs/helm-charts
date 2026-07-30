@@ -45,6 +45,7 @@ data:
   OCEAN__PROCESSING_MODE: {{ .Values.processingMode | default "dsp" | quote }}
   OCEAN__STREAMING__ENABLED: "{{ .Values.streamingEnabled | default false }}"
   OCEAN__ACTIONS_PROCESSOR__ENABLED: "{{ .Values.actionsProcessor.enabled | default false }}"
+  OCEAN__INTEGRATION__INCREMENTAL_SYNC_ENABLED: "{{ .Values.incrementalSync.enabled | default false }}"
   {{- if .Values.actionsProcessor.extraConfig }}
   {{- range $key, $value := .Values.actionsProcessor.extraConfig }}
   OCEAN__ACTIONS_PROCESSOR__{{ $key | snakecase | upper }}: {{ $value | quote }}
