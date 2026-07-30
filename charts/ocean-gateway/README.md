@@ -91,8 +91,8 @@ The following table lists the main configuration parameters and default values.
 | `redis.url` | External Redis address (`host:port`). Required when `redis.enabled=false` and `redis.existingSecret` is unset | `""` |
 | `redis.username` | External Redis username (stored in a Secret when set) | `""` |
 | `redis.password` | External Redis password (stored in a Secret when set) | `""` |
-| `redis.tls.enabled` | Enable TLS for external Redis (`REDIS_OCEAN_LIVE_EVENTS_ENABLE_TLS`); use for managed Redis with in-transit encryption | `false` |
-| `redis.existingSecret` | Pre-existing Secret with `REDIS_OCEAN_LIVE_EVENTS_URL` / `_USERNAME` / `_PASSWORD` / `_ENABLE_TLS` | `""` |
+| `redis.tls.enabled` | Enable TLS for external Redis (`REDIS_LIVE_EVENTS_ENABLE_TLS`); use for managed Redis with in-transit encryption | `false` |
+| `redis.existingSecret` | Pre-existing Secret with `REDIS_LIVE_EVENTS_URL` / `_USERNAME` / `_PASSWORD` / `_ENABLE_TLS` | `""` |
 | `redis.credentialsRevision` | Arbitrary string; bump after out-of-band `existingSecret` rotation to roll pods | `""` |
 | `redis.auth.password` | Bundled Redis password (also used by the gateway when `redis.enabled=true`) | `"changeme"` |
 | `redis.master.persistence.enabled` | Enable persistence for bundled Redis | `true` |
