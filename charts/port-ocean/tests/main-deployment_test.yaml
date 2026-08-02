@@ -12,6 +12,14 @@ tests:
           path: metadata.name
           value: ocean-github-test-id-deployment
 
+  - it: renders deployment annotations
+    values:
+      - values/deployment-annotations.yaml
+    asserts:
+      - equal:
+          path: metadata.annotations["example.com/monitoring"]
+          value: enabled
+
   - it: renders for split workers
     values:
       - values/split.yaml
