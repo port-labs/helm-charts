@@ -9,6 +9,7 @@ port:
   baseUrl: https://api.getport.io
   ingestUrl: https://ingest.getport.io
 
+deploymentAnnotations: { }
 podAnnotations: { }
 
 podServiceAccount:

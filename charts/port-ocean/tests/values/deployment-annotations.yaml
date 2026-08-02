@@ -1,0 +1,9 @@
+port:
+  clientId: test
+  clientSecret: test
+integration:
+  type: github
+  identifier: test-id
+  version: 0.1.0
+deploymentAnnotations:
+  example.com/monitoring: enabled
