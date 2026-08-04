@@ -1,0 +1,69 @@
+suite: Installation resync job
+templates:
+  - templates/cron-job/installation-resync-job.yml
+tests:
+  - it: skips non-CronJob workloads
+    values:
+      - values/single.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: on install runs full and incremental jobs when enabled
+    values:
+      - values/hybrid-cron.yaml
+    set:
+      incrementalSync.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.annotations["helm.sh/hook"]
+          value: post-install, post-upgrade
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: kubectl create job --from=cronjob/ocean-github-test-id-cron-job init-sync-
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: kubectl create job --from=cronjob/ocean-github-test-id-incr-cron init-incremental-
+
+  - it: on install skips all jobs when resyncOnInstall is false
+    values:
+      - values/hybrid-cron.yaml
+    set:
+      incrementalSync.enabled: true
+      workload.cron.resyncOnInstall: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: on upgrade skips all jobs when resyncOnUpgrade is false
+    values:
+      - values/hybrid-cron.yaml
+    release:
+      upgrade: true
+    set:
+      incrementalSync.enabled: true
+      workload.cron.resyncOnUpgrade: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: on upgrade runs jobs when resyncOnUpgrade is true
+    values:
+      - values/hybrid-cron.yaml
+    release:
+      upgrade: true
+    set:
+      incrementalSync.enabled: true
+      workload.cron.resyncOnInstall: false
+      workload.cron.resyncOnUpgrade: true
+    asserts:
+      - hasDocuments:
+          count: 1
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: kubectl create job --from=cronjob/ocean-github-test-id-cron-job init-sync-
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: kubectl create job --from=cronjob/ocean-github-test-id-incr-cron init-incremental-

@@ -1,6 +1,8 @@
 {{- $resyncOnInstall := ternary .Values.workload.cron.resyncOnInstall true (hasKey .Values.workload.cron "resyncOnInstall") }}
 {{- $resyncOnUpgrade := ternary .Values.workload.cron.resyncOnUpgrade true (hasKey .Values.workload.cron "resyncOnUpgrade") }}
-{{- if and (eq .Values.workload.kind "CronJob") (or $resyncOnInstall $resyncOnUpgrade) }}
+{{- $runOnInstall := and (eq .Values.workload.kind "CronJob") .Release.IsInstall $resyncOnInstall }}
+{{- $runOnUpgrade := and (eq .Values.workload.kind "CronJob") .Release.IsUpgrade $resyncOnUpgrade }}
+{{- if or $runOnInstall $runOnUpgrade }}
 {{- $jobName := (print (randAlphaNum 4) "-" .Release.Revision) | lower }}
 {{- $maxRunTimeSeconds := "" }}
 {{- if (.Values.workload.cron).resyncTimeoutMinutes }}
@@ -57,7 +59,19 @@ spec:
                   name: {{ include "port-ocean.cron.job-query-rbac-name" (list . "-sa-token") }}
                   key: token
           args:
-            - kubectl create job --from=cronjob/{{ include "port-ocean.cronJobName" . }} init-sync-{{ $jobName }} --token=$TOKEN
+            - |
+              {{- if $runOnInstall }}
+              kubectl create job --from=cronjob/{{ include "port-ocean.cronJobName" . }} init-sync-{{ $jobName }} --token=$TOKEN
+              {{- if .Values.incrementalSync.enabled }}
+              kubectl create job --from=cronjob/{{ include "port-ocean.incrementalSync.cronJobName" . }} init-incremental-{{ $jobName }} --token=$TOKEN
+              {{- end }}
+              {{- end }}
+              {{- if $runOnUpgrade }}
+              kubectl create job --from=cronjob/{{ include "port-ocean.cronJobName" . }} init-sync-{{ $jobName }} --token=$TOKEN
+              {{- if .Values.incrementalSync.enabled }}
+              kubectl create job --from=cronjob/{{ include "port-ocean.incrementalSync.cronJobName" . }} init-incremental-{{ $jobName }} --token=$TOKEN
+              {{- end }}
+              {{- end }}
       restartPolicy: Never
       {{- with .Values.nodeSelector }}
       nodeSelector:
