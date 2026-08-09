@@ -6,6 +6,7 @@ metadata:
     {{- include "ocean-gateway.labels" . | nindent 4 }}
 data:
   LISTEN_ADDR: ":{{ .Values.service.port }}"
+  METRICS_LISTEN_ADDR: ":{{ .Values.metrics.port }}"
   {{- if not .Values.redis.existingSecret }}
   REDIS_LIVE_EVENTS_URL: {{ include "ocean-gateway.redisUrl" . | quote }}
   REDIS_LIVE_EVENTS_ENABLE_TLS: {{ .Values.redis.tls.enabled | toString | quote }}

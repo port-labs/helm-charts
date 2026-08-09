@@ -88,6 +88,9 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
+            - name: metrics
+              containerPort: {{ .Values.metrics.port }}
+              protocol: TCP
           envFrom:
             - configMapRef:
                 name: {{ include "ocean-gateway.configMapName" . }}

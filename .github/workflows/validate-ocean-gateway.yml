@@ -80,6 +80,12 @@ jobs:
           "liveness probe should use tcpSocket (no Redis ping)"
         assert_contains "$external_manifest" 'path: /healthz' \
           "readiness probe should hit /healthz"
+        assert_contains "$external_manifest" 'METRICS_LISTEN_ADDR: ":9100"' \
+          "ConfigMap should set metrics listen address"
+        assert_contains "$external_manifest" 'name: metrics' \
+          "Deployment should expose the metrics container port"
+        assert_contains "$external_manifest" 'containerPort: 9100' \
+          "Deployment metrics containerPort should default to 9100"
         assert_contains "$external_manifest" 'serviceAccountName: default' \
           "Deployment should use the namespace default ServiceAccount when serviceAccount.create is false"
         assert_not_contains "$external_manifest" 'kind: ServiceAccount' \

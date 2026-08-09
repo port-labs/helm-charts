@@ -104,6 +104,7 @@ The following table lists the main configuration parameters and default values.
 | `write.backoffBase` | Initial retry backoff | `"50ms"` |
 | `service.type` | Kubernetes Service type | `ClusterIP` |
 | `service.port` | Service and container HTTP port | `8080` |
+| `metrics.port` | Dedicated metrics listener and Service port | `9100` |
 | `ingress.enabled` | Enable Ingress for external webhook providers | `false` |
 | `ingress.className` | Ingress class name | `""` |
 | `ingress.annotations` | Ingress annotations | `{}` |
