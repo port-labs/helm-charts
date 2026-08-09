@@ -126,6 +126,13 @@ service:
   port: 8080
   annotations: {}
 
+# ── Metrics ───────────────────────────────────────────────────────────────────
+# Dedicated HTTP listener for Prometheus. Exposed via a separate *-metrics
+# ClusterIP Service so metrics stay cluster-internal when service.type is
+# LoadBalancer or NodePort (every port on those Services is published).
+metrics:
+  port: 9100
+
 # ── Ingress ───────────────────────────────────────────────────────────────────
 # Expose the gateway to external webhook providers. Use path `/` (Prefix) so
 # all /live-events/{uuid}/integration/... routes reach the gateway.
