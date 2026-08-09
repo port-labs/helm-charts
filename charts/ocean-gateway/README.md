@@ -102,9 +102,9 @@ The following table lists the main configuration parameters and default values.
 | `stream.maxLen` | Approx `MAXLEN` per stream (ignored when `eventTTL` > 0) | `0` |
 | `write.maxRetries` | Per-request `XADD` retries before returning 503 | `2` |
 | `write.backoffBase` | Initial retry backoff | `"50ms"` |
-| `service.type` | Kubernetes Service type | `ClusterIP` |
-| `service.port` | Service and container HTTP port | `8080` |
-| `metrics.port` | Dedicated metrics listener and Service port | `9100` |
+| `service.type` | Kubernetes Service type for webhooks (`LoadBalancer`/`NodePort` publish every port on the main Service) | `ClusterIP` |
+| `service.port` | Main Service and container HTTP port (used by Ingress when enabled) | `8080` |
+| `metrics.port` | Metrics listener and `*-metrics` ClusterIP Service port (cluster-internal; not on the main Service) | `9100` |
 | `ingress.enabled` | Enable Ingress for external webhook providers | `false` |
 | `ingress.className` | Ingress class name | `""` |
 | `ingress.annotations` | Ingress annotations | `{}` |

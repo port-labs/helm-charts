@@ -28,9 +28,9 @@ Health check:
   kubectl port-forward svc/{{ include "ocean-gateway.fullname" . }} {{ .Values.service.port }} -n {{ .Release.Namespace }}
   curl http://localhost:{{ .Values.service.port }}/healthz
 
-Metrics (Prometheus):
+Metrics (Prometheus, cluster-internal via *-metrics Service):
 
-  kubectl port-forward svc/{{ include "ocean-gateway.fullname" . }} {{ .Values.metrics.port }}:{{ .Values.metrics.port }} -n {{ .Release.Namespace }}
+  kubectl port-forward svc/{{ include "ocean-gateway.fullname" . }}-metrics {{ .Values.metrics.port }}:{{ .Values.metrics.port }} -n {{ .Release.Namespace }}
   curl http://localhost:{{ .Values.metrics.port }}/metrics
 
 Producer contract:

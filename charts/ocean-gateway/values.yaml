@@ -127,7 +127,9 @@ service:
   annotations: {}
 
 # ── Metrics ───────────────────────────────────────────────────────────────────
-# Dedicated HTTP listener for Prometheus metrics (not exposed via Ingress).
+# Dedicated HTTP listener for Prometheus. Exposed via a separate *-metrics
+# ClusterIP Service so metrics stay cluster-internal when service.type is
+# LoadBalancer or NodePort (every port on those Services is published).
 metrics:
   port: 9100
 

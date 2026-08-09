@@ -15,9 +15,5 @@ spec:
       protocol: TCP
       port: {{ .Values.service.port }}
       targetPort: http
-    - name: metrics
-      protocol: TCP
-      port: {{ .Values.metrics.port }}
-      targetPort: metrics
   selector:
     {{- include "ocean-gateway.selectorLabels" . | nindent 4 }}
