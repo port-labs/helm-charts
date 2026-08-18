@@ -27,6 +27,9 @@ jobs:
     name: Open infra-apps PR for ocean-saas-chart-wrap
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      # secrets cannot be referenced in `if:` — copy to env first.
+      OCEAN_SLACK_WEBHOOK: ${{ secrets.OCEAN_SLACK_WEBHOOK }}
 
     steps:
       - name: Checkout helm-charts
@@ -119,9 +122,7 @@ jobs:
             - [ ] Review wrap chart version bump and `Chart.lock`
 
       - name: Notify Slack
-        if: >
-          steps.open_pr.outputs.pull-request-url != '' &&
-          secrets.OCEAN_SLACK_WEBHOOK != ''
+        if: steps.open_pr.outputs.pull-request-url != '' && env.OCEAN_SLACK_WEBHOOK != ''
         continue-on-error: true
         uses: fjogeleit/http-request-action@v2
         with:
