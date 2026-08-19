@@ -59,6 +59,10 @@ spec:
           args:
             - kubectl create job --from=cronjob/{{ include "port-ocean.cronJobName" . }} init-sync-{{ $jobName }} --token=$TOKEN
       restartPolicy: Never
+      {{- with .Values.hostAliases }}
+      hostAliases:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
