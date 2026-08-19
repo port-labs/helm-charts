@@ -120,6 +120,10 @@ spec:
                         - key: crt
                           path: cert.crt
             {{- end }}
+          {{- with .Values.hostAliases }}
+          hostAliases:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- with .Values.nodeSelector }}
           nodeSelector:
             {{- toYaml . | nindent 12 }}
