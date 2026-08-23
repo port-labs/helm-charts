@@ -41,6 +41,32 @@ data:
   {{ $key | snakecase | upper }}: {{ $value | quote }}
   {{- end }}
   {{- end }}
+  {{- if (.Values.identityPropagation).enabled }}
+  OCEAN__IDENTITY_PROPAGATION__ENABLED: "true"
+  OCEAN__IDENTITY_PROPAGATION__VAULT__TYPE: {{ .Values.identityPropagation.vault.type | default "aws_secrets_manager" | quote }}
+  OCEAN__IDENTITY_PROPAGATION__VAULT__SECRET_PREFIX: {{ .Values.identityPropagation.vault.secretPrefix | default "port/tokens" | quote }}
+  {{- with .Values.identityPropagation.vault.awsRegion }}
+  OCEAN__IDENTITY_PROPAGATION__VAULT__AWS_REGION: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.identityPropagation.vault.endpointUrl }}
+  OCEAN__IDENTITY_PROPAGATION__VAULT__ENDPOINT_URL: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.identityPropagation.oauth.github }}
+  {{- include "port-ocean.identityPropagation.providerConfig" (list "GITHUB" .) | trim | nindent 2 }}
+  {{- end }}
+  {{- with .Values.identityPropagation.oauth.gitlab }}
+  {{- include "port-ocean.identityPropagation.providerConfig" (list "GITLAB" .) | trim | nindent 2 }}
+  {{- with .host }}
+  OCEAN__IDENTITY_PROPAGATION__OAUTH__GITLAB__HOST: {{ . | quote }}
+  {{- end }}
+  {{- end }}
+  {{- with .Values.identityPropagation.oauth.azureDevops }}
+  {{- include "port-ocean.identityPropagation.providerConfig" (list "AZURE_DEVOPS" .) | trim | nindent 2 }}
+  {{- with .tenantId }}
+  OCEAN__IDENTITY_PROPAGATION__OAUTH__AZURE_DEVOPS__TENANT_ID: {{ . | quote }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
   OCEAN__LAKEHOUSE_ENABLED: "{{ .Values.lakehouseEnabled | default true }}"
   OCEAN__PROCESSING_MODE: {{ .Values.processingMode | default "dsp" | quote }}
   OCEAN__STREAMING__ENABLED: "{{ .Values.streamingEnabled | default false }}"

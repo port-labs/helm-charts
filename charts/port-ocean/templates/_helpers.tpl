@@ -293,3 +293,30 @@ resources:
   {{- toYaml .Values.resources | nindent 2 }}
   {{- end }}
 {{- end -}}
+
+{{/*
+Non-sensitive OAuth settings shared by every identity propagation provider.
+Takes (list "<ENV_NAME>" <provider values>); provider-specific keys are rendered by the caller.
+*/}}
+{{- define "port-ocean.identityPropagation.providerConfig" -}}
+{{- $envName := index . 0 -}}
+{{- $provider := index . 1 -}}
+{{- with $provider.clientId }}
+OCEAN__IDENTITY_PROPAGATION__OAUTH__{{ $envName }}__CLIENT_ID: {{ . | quote }}
+{{- end }}
+{{- with $provider.scopes }}
+OCEAN__IDENTITY_PROPAGATION__OAUTH__{{ $envName }}__SCOPES: {{ . | quote }}
+{{- end }}
+{{- end }}
+
+{{/*
+Sensitive OAuth settings shared by every identity propagation provider.
+Takes (list "<ENV_NAME>" <provider values>).
+*/}}
+{{- define "port-ocean.identityPropagation.providerSecret" -}}
+{{- $envName := index . 0 -}}
+{{- $provider := index . 1 -}}
+{{- with $provider.clientSecret }}
+OCEAN__IDENTITY_PROPAGATION__OAUTH__{{ $envName }}__CLIENT_SECRET: {{ . | b64enc | quote }}
+{{- end }}
+{{- end }}

@@ -204,6 +204,45 @@ incrementalSync:
       cpu: "800m"
   extraConfig: { }
 
+# Identity propagation: integration actions run against the triggering user's own downstream
+# credentials instead of a shared service account. Ocean hosts the OAuth broker that collects
+# those credentials, so enabling this requires a publicly reachable baseUrl.
+identityPropagation:
+  enabled: false
+  # Public URL of this Ocean deployment. Ocean registers it with Port and derives the OAuth
+  # redirect_uri from it, so the provider and the user's browser must both be able to reach it.
+  # Separate from liveEvents.baseUrl; set that one instead if you already use live events.
+  baseUrl: ""
+  vault:
+    # aws_secrets_manager, or custom to plug in your own VaultClient implementation.
+    type: aws_secrets_manager
+    secretPrefix: port/tokens
+    # Defaults to the pod's ambient AWS region when empty.
+    awsRegion: ""
+    # LocalStack/dev only. Leave empty to talk to real AWS Secrets Manager.
+    endpointUrl: ""
+    awsAccessKeyId: ""
+    awsSecretAccessKey: ""
+  oauth:
+    # Signs the OAuth state parameter. Derived from port.clientSecret when left empty.
+    stateSigningSecret: ""
+    # Configure only the providers you use. Each needs an OAuth app whose callback URL is
+    # {baseUrl}/v1/oauth-broker/callback.
+    github: { }
+    #   clientId: ""
+    #   clientSecret: ""
+    #   scopes: "repo,workflow"
+    gitlab: { }
+    #   clientId: ""
+    #   clientSecret: ""
+    #   scopes: "api"
+    #   host: "https://gitlab.com"   # override for self-managed GitLab
+    azureDevops: { }
+    #   clientId: ""
+    #   clientSecret: ""
+    #   tenantId: ""
+    #   scopes: "499b84ac-1321-427f-aa17-267ca6975798/user_impersonation offline_access"
+
 liveEvents:
   baseUrl: ""
   isRedisStreamConsumerEnabled: false
