@@ -1,0 +1,37 @@
+port:
+  clientId: test
+  clientSecret: test
+integration:
+  type: github
+  identifier: test-id
+  version: 0.1.0
+workload:
+  kind: Deployment
+liveEvents:
+  worker:
+    enabled: false
+identityPropagation:
+  enabled: true
+  baseUrl: https://ocean.example.com
+  vault:
+    type: aws_secrets_manager
+    secretPrefix: port/tokens
+    awsRegion: eu-west-1
+    endpointUrl: http://localhost:4566
+    awsAccessKeyId: test
+    awsSecretAccessKey: test
+  oauth:
+    stateSigningSecret: state-secret
+    github:
+      clientId: gh-id
+      clientSecret: gh-secret
+      scopes: "repo,workflow"
+    gitlab:
+      clientId: gl-id
+      clientSecret: gl-secret
+      scopes: "api"
+      host: https://gitlab.acme.com
+    azureDevops:
+      clientId: ado-id
+      clientSecret: ado-secret
+      tenantId: tenant-1
