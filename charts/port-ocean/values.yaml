@@ -8,6 +8,10 @@ port:
 
   baseUrl: https://api.getport.io
   ingestUrl: https://ingest.getport.io
+  # Port's app (web UI) URL, e.g. https://app.getport.io. Only needed if identityPropagation is
+  # enabled and this URL can't be derived from port.baseUrl (api.X -> app.X); required whenever the
+  # api/app domains don't follow that convention, e.g. staging.
+  appUrl: ""
 
 deploymentAnnotations: { }
 podAnnotations: { }

@@ -8,6 +8,9 @@ metadata:
   name: {{ include "port-ocean.configMapName" . }}
 data:
   OCEAN__PORT__BASE_URL: {{ tpl .Values.port.baseUrl . | quote }}
+  {{- with .Values.port.appUrl }}
+  OCEAN__PORT__APP_URL: {{ tpl . $ | quote }}
+  {{- end }}
   OCEAN__INITIALIZE_PORT_RESOURCES: "{{ .Values.initializePortResources | default false }}"
   {{- if .Values.createPortResourcesOrigin }}
   OCEAN__CREATE_PORT_RESOURCES_ORIGIN: "{{ .Values.createPortResourcesOrigin }}"
