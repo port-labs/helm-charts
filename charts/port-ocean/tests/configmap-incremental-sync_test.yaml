@@ -1,21 +1,73 @@
 suite: Main ConfigMap incremental sync
-templates:
-  - templates/configmap.yaml
 tests:
-  - it: sets incremental sync enabled to false by default
+  - it: does not set incremental sync flag by default
+    templates:
+      - templates/configmap.yaml
     values:
       - values/single.yaml
     asserts:
-      - equal:
+      - notExists:
           path: data.OCEAN__INTEGRATION__INCREMENTAL_SYNC_ENABLED
-          value: "false"
 
-  - it: sets incremental sync enabled when values enable it
+  - it: does not set incremental sync flag when incremental sync is enabled
+    templates:
+      - templates/configmap.yaml
     values:
       - values/single.yaml
     set:
       incrementalSync.enabled: true
     asserts:
+      - notExists:
+          path: data.OCEAN__INTEGRATION__INCREMENTAL_SYNC_ENABLED
+
+  - it: does not render incremental configmap by default
+    templates:
+      - templates/configmap-incremental.yaml
+    values:
+      - values/single.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: does not render incremental cronjob by default
+    templates:
+      - templates/cron-job/incremental-cron.yaml
+    values:
+      - values/single.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders incremental configmap with incremental sync enabled
+    templates:
+      - templates/configmap-incremental.yaml
+    values:
+      - values/single.yaml
+    set:
+      incrementalSync.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.name
+          value: ocean-github-test-id-incr-config
       - equal:
           path: data.OCEAN__INTEGRATION__INCREMENTAL_SYNC_ENABLED
           value: "true"
+
+  - it: renders incremental cronjob wired to incremental configmap
+    templates:
+      - templates/cron-job/incremental-cron.yaml
+    values:
+      - values/single.yaml
+    set:
+      incrementalSync.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.name
+          value: ocean-github-test-id-incr-cron
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.containers[0].envFrom[0].configMapRef.name
+          value: ocean-github-test-id-incr-config
