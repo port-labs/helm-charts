@@ -1,8 +1,8 @@
 suite: Main ConfigMap incremental sync
-templates:
-  - templates/configmap.yaml
 tests:
   - it: does not set incremental sync flag by default
+    templates:
+      - templates/configmap.yaml
     values:
       - values/single.yaml
     asserts:
@@ -10,6 +10,8 @@ tests:
           path: data.OCEAN__INTEGRATION__INCREMENTAL_SYNC_ENABLED
 
   - it: does not set incremental sync flag when incremental sync is enabled
+    templates:
+      - templates/configmap.yaml
     values:
       - values/single.yaml
     set:
