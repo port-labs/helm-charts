@@ -1,0 +1,128 @@
+suite: Identity propagation
+templates:
+  - templates/configmap.yaml
+  - templates/secret.yaml
+  - templates/deployment.yaml
+tests:
+  - it: stays out of the config when disabled
+    template: templates/configmap.yaml
+    values:
+      - values/single.yaml
+    asserts:
+      - notExists:
+          path: data.OCEAN__IDENTITY_PROPAGATION__ENABLED
+
+  - it: renders vault settings when enabled
+    template: templates/configmap.yaml
+    values:
+      - values/identity-propagation.yaml
+    asserts:
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__ENABLED
+          value: "true"
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__VAULT__TYPE
+          value: aws_secrets_manager
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__VAULT__SECRET_PREFIX
+          value: port/tokens
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__VAULT__AWS_REGION
+          value: eu-west-1
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__VAULT__ENDPOINT_URL
+          value: http://localhost:4566
+
+  - it: keeps vault AWS credentials out of the config map
+    template: templates/configmap.yaml
+    values:
+      - values/identity-propagation.yaml
+    asserts:
+      - notExists:
+          path: data.OCEAN__IDENTITY_PROPAGATION__VAULT__AWS_ACCESS_KEY_ID
+      - notExists:
+          path: data.OCEAN__IDENTITY_PROPAGATION__VAULT__AWS_SECRET_ACCESS_KEY
+
+  - it: stores vault AWS credentials in the secret
+    template: templates/secret.yaml
+    values:
+      - values/identity-propagation.yaml
+    asserts:
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__VAULT__AWS_ACCESS_KEY_ID
+          value: dGVzdA==
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__VAULT__AWS_SECRET_ACCESS_KEY
+          value: dGVzdA==
+
+  - it: renders each provider with its own settings
+    template: templates/configmap.yaml
+    values:
+      - values/identity-propagation.yaml
+    asserts:
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__GITHUB__CLIENT_ID
+          value: gh-id
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__GITHUB__SCOPES
+          value: repo,workflow
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__GITLAB__HOST
+          value: https://gitlab.acme.com
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__AZURE_DEVOPS__TENANT_ID
+          value: tenant-1
+
+  - it: keeps client secrets out of the config map
+    template: templates/configmap.yaml
+    values:
+      - values/identity-propagation.yaml
+    asserts:
+      - notExists:
+          path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__GITHUB__CLIENT_SECRET
+      - notExists:
+          path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__STATE_SIGNING_SECRET
+
+  - it: stores client secrets in the secret
+    template: templates/secret.yaml
+    values:
+      - values/identity-propagation.yaml
+    asserts:
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__STATE_SIGNING_SECRET
+          value: c3RhdGUtc2VjcmV0
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__GITHUB__CLIENT_SECRET
+          value: Z2gtc2VjcmV0
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__AZURE_DEVOPS__CLIENT_SECRET
+          value: YWRvLXNlY3JldA==
+
+  - it: publishes the base url the oauth broker needs
+    template: templates/deployment.yaml
+    values:
+      - values/identity-propagation.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: OCEAN__BASE_URL
+            value: https://ocean.example.com
+
+  - it: defers to the live events base url rather than setting it twice
+    template: templates/deployment.yaml
+    values:
+      - values/identity-propagation.yaml
+    set:
+      liveEvents.baseUrl: https://live.example.com
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: OCEAN__BASE_URL
+            value: https://live.example.com
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: OCEAN__BASE_URL
+            value: https://ocean.example.com
