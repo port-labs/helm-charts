@@ -54,19 +54,14 @@ data:
   {{- with .Values.identityPropagation.vault.endpointUrl }}
   OCEAN__IDENTITY_PROPAGATION__VAULT__ENDPOINT_URL: {{ . | quote }}
   {{- end }}
-  {{- with .Values.identityPropagation.oauth.github }}
-  {{- include "port-ocean.identityPropagation.providerConfig" (list "GITHUB" .) | trim | nindent 2 }}
+  {{- range $p := include "port-ocean.identityPropagation.providers" . | fromYamlArray }}
+  {{- with index $.Values.identityPropagation.oauth $p.key }}
+  {{- include "port-ocean.identityPropagation.providerConfig" (list $p.env .) | trim | nindent 2 }}
+  {{- if $p.extraField }}
+  {{- with index . $p.extraField }}
+  OCEAN__IDENTITY_PROPAGATION__OAUTH__{{ $p.env }}__{{ $p.extraEnv }}: {{ . | quote }}
   {{- end }}
-  {{- with .Values.identityPropagation.oauth.gitlab }}
-  {{- include "port-ocean.identityPropagation.providerConfig" (list "GITLAB" .) | trim | nindent 2 }}
-  {{- with .host }}
-  OCEAN__IDENTITY_PROPAGATION__OAUTH__GITLAB__HOST: {{ . | quote }}
   {{- end }}
-  {{- end }}
-  {{- with .Values.identityPropagation.oauth.azureDevops }}
-  {{- include "port-ocean.identityPropagation.providerConfig" (list "AZURE_DEVOPS" .) | trim | nindent 2 }}
-  {{- with .tenantId }}
-  OCEAN__IDENTITY_PROPAGATION__OAUTH__AZURE_DEVOPS__TENANT_ID: {{ . | quote }}
   {{- end }}
   {{- end }}
   {{- end }}

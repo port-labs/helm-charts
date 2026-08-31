@@ -320,3 +320,19 @@ Takes (list "<ENV_NAME>" <provider values>).
 OCEAN__IDENTITY_PROPAGATION__OAUTH__{{ $envName }}__CLIENT_SECRET: {{ . | b64enc | quote }}
 {{- end }}
 {{- end }}
+
+{{/*
+Identity propagation providers: values key, env prefix, and an optional provider-specific extra field.
+*/}}
+{{- define "port-ocean.identityPropagation.providers" -}}
+- key: github
+  env: GITHUB
+- key: gitlab
+  env: GITLAB
+  extraField: host
+  extraEnv: HOST
+- key: azureDevops
+  env: AZURE_DEVOPS
+  extraField: tenantId
+  extraEnv: TENANT_ID
+{{- end }}
