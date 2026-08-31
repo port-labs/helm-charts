@@ -6,8 +6,9 @@ Streams, which Ocean integrations consume via `XREADGROUP`.
 
 ## Introduction
 
-This chart installs Ocean Gateway via a `Deployment` resource. Optionally deploy a
-bundled Redis instance (Bitnami subchart) or connect to an existing Redis cluster.
+This chart installs Ocean Gateway via a `Deployment` resource. By default it
+deploys a bundled Redis instance (Bitnami subchart). Set `redis.enabled=false` to
+connect to an existing Redis cluster instead.
 
 ## Usage
 
@@ -22,14 +23,13 @@ If you had already added this repo earlier, run `helm repo update` to retrieve
 the latest versions of the packages. You can then run `helm search repo
 port-labs` to see the charts.
 
-### With bundled Redis
+### Default (bundled Redis)
 
-For clusters without an existing Redis instance:
+Bundled Redis is enabled by default. Set a strong password before installing:
 
 ```bash
 helm upgrade --install ocean-gateway port-labs/ocean-gateway \
   --create-namespace --namespace ocean-gateway \
-  --set redis.enabled=true \
   --set redis.auth.password=<strong-password> \
   --set ingress.enabled=true \
   --set ingress.className=nginx \
@@ -38,9 +38,12 @@ helm upgrade --install ocean-gateway port-labs/ocean-gateway \
 
 ### With external Redis
 
+Disable bundled Redis and point at your own instance:
+
 ```bash
 helm upgrade --install ocean-gateway port-labs/ocean-gateway \
   --create-namespace --namespace ocean-gateway \
+  --set redis.enabled=false \
   --set redis.url=redis.example.svc.cluster.local:6379 \
   --set redis.password=<password> \
   --set ingress.enabled=true \
@@ -83,7 +86,7 @@ The following table lists the main configuration parameters and default values.
 | `serviceAccount.name` | ServiceAccount name override (`""` uses the release fullname when `create=true`) | `""` |
 | `initContainer.securityContext` | Security context for the wait-for-redis init container | see `values.yaml` |
 | `initContainer.resources` | Resources for the wait-for-redis init container | see `values.yaml` |
-| `redis.enabled` | Deploy bundled Bitnami Redis | `false` |
+| `redis.enabled` | Deploy bundled Bitnami Redis | `true` |
 | `redis.image.registry` | Bundled Redis image registry (also used by the wait-for-redis init container) | `docker.io` |
 | `redis.image.repository` | Bundled Redis image repository | `bitnamisecure/redis` |
 | `redis.image.tag` | Bundled Redis image tag | `latest` |
