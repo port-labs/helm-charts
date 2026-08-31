@@ -1,0 +1,164 @@
+# After port-ocean is released from this repo, open a PR in infra-apps that
+# bumps internal-charts/ocean-saas-chart-wrap (Chart.yaml + Chart.lock).
+#
+# TEST TRIGGER: workflow_dispatch (Actions tab, this branch) plus pull_request
+# so GitHub will actually run a workflow that does not exist on main yet.
+# Revert to workflow_run on Release Charts before merging the real PR.
+name: Bump Ocean SaaS after release
+
+on:
+  workflow_dispatch:
+    inputs:
+      port_ocean_version:
+        description: port-ocean chart version to bump to (defaults to charts/port-ocean/Chart.yaml)
+        required: false
+        type: string
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bump-ocean-saas-after-release
+  cancel-in-progress: false
+
+jobs:
+  bump-ocean-saas:
+    name: Open infra-apps PR for ocean-saas-chart-wrap
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # secrets cannot be referenced in `if:` — copy to env first.
+      OCEAN_SLACK_WEBHOOK: ${{ secrets.OCEAN_SLACK_WEBHOOK }}
+
+    steps:
+      - name: Checkout helm-charts
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+          path: helm-charts
+
+      - name: Resolve port-ocean version
+        id: ver
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.port_ocean_version }}
+        run: |
+          set -euo pipefail
+          VERSION="${INPUT_VERSION}"
+          if [[ -z "${VERSION}" ]]; then
+            VERSION="$(awk '$1 == "version:" { print $2; exit }' helm-charts/charts/port-ocean/Chart.yaml)"
+          fi
+          if [[ -z "${VERSION}" ]]; then
+            echo "::error::Could not resolve port-ocean version"
+            exit 1
+          fi
+          if [[ "${VERSION}" == *rc* ]]; then
+            echo "skip=true" >> "${GITHUB_OUTPUT}"
+            echo "Skipping RC version ${VERSION}"
+            exit 0
+          fi
+          echo "skip=false" >> "${GITHUB_OUTPUT}"
+          echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "Resolved port-ocean version ${VERSION}"
+
+      - name: Checkout infra-apps
+        if: steps.ver.outputs.skip != 'true'
+        uses: actions/checkout@v5
+        with:
+          repository: port-labs/infra-apps
+          token: ${{ secrets.PORT_MACHINE_USER_GITHUB_TOKEN }}
+          path: infra-apps
+
+      - name: Install Helm
+        if: steps.ver.outputs.skip != 'true'
+        uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3.5
+
+      - name: Install yq
+        if: steps.ver.outputs.skip != 'true'
+        uses: dcarbone/install-yq-action@v1.3.1
+        with:
+          force: true
+
+      - name: Bump ocean-saas-chart-wrap
+        if: steps.ver.outputs.skip != 'true'
+        id: bump
+        env:
+          PORT_OCEAN_VERSION: ${{ steps.ver.outputs.version }}
+        run: bash helm-charts/.github/scripts/bump-ocean-saas-chart-wrap.sh infra-apps "${PORT_OCEAN_VERSION}"
+
+      - name: Open pull request
+        if: steps.ver.outputs.skip != 'true' && steps.bump.outputs.changed == 'true'
+        id: open_pr
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.PORT_MACHINE_USER_GITHUB_TOKEN }}
+          path: infra-apps
+          base: main
+          branch: automated/bump-ocean-saas-port-ocean-${{ steps.ver.outputs.version }}
+          delete-branch: true
+          commit-message: "chore(ocean-saas): bump port-ocean to ${{ steps.ver.outputs.version }}"
+          committer: port-gitops[bot] <port-gitops[bot]@users.noreply.github.com>
+          author: port-gitops[bot] <port-gitops[bot]@users.noreply.github.com>
+          title: "chore(ocean-saas): bump port-ocean to ${{ steps.ver.outputs.version }}"
+          add-paths: |
+            internal-charts/ocean-saas-chart-wrap/Chart.yaml
+            internal-charts/ocean-saas-chart-wrap/Chart.lock
+          body: |
+            Automated bump after `port-ocean` ${{ steps.ver.outputs.version }} was released from `port-labs/helm-charts`.
+
+            ## Summary
+            - Set `ocean-saas-chart-wrap` dependency `port-ocean` to `${{ steps.ver.outputs.version }}`
+            - Patch-bump the wrap chart version
+            - Regenerate `Chart.lock` via `helm dependency update`
+
+            ## Source
+            - Helm charts commit: ${{ github.sha }}
+            - Workflow run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            - Task: [task_tj99o5](https://app.getport.io/org_ukrSy0JXDGngBGUH/taskEntity?identifier=task_tj99o5)
+
+            ## Test plan
+            - [ ] `helm dependency update`
+            - [ ] `helm lint .`
+            - [ ] Review wrap chart version bump and `Chart.lock`
+
+      - name: Notify Slack
+        if: steps.open_pr.outputs.pull-request-url != '' && env.OCEAN_SLACK_WEBHOOK != ''
+        continue-on-error: true
+        uses: fjogeleit/http-request-action@v2
+        with:
+          url: ${{ secrets.OCEAN_SLACK_WEBHOOK }}
+          method: POST
+          customHeaders: '{"Content-Type": "application/json"}'
+          data: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Ocean SaaS port-ocean bump is ready for review!* :ocean:"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Version:* `${{ steps.ver.outputs.version }}`"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Pull request:* <${{ steps.open_pr.outputs.pull-request-url }}|Review and merge>"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Workflow run:* <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>"
+                  }
+                }
+              ]
+            }
