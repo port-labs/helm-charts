@@ -114,7 +114,7 @@ spec:
           httpGet:
             path: /health/ready
             port: {{.Values.liveEvents.service.port}}
-          initialDelaySeconds: {{ default 30 .Values.readinessProbe.initialDelaySeconds }}
+          initialDelaySeconds: {{ default 5 .Values.readinessProbe.initialDelaySeconds }}
           periodSeconds: {{ default 10 .Values.readinessProbe.periodSeconds }}
           timeoutSeconds: {{ default 5 .Values.readinessProbe.timeoutSeconds }}
           successThreshold: {{ default 2 .Values.readinessProbe.successThreshold }}
