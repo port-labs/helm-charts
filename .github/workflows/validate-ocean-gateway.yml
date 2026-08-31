@@ -33,10 +33,10 @@ jobs:
         helm dependency update
 
     - name: Lint Helm Chart — external Redis
-      run: helm lint . --set redis.url=redis:6379
+      run: helm lint . --set redis.enabled=false --set redis.url=redis:6379
 
-    - name: Lint Helm Chart — bundled Redis
-      run: helm lint . --set redis.enabled=true
+    - name: Lint Helm Chart — bundled Redis (default)
+      run: helm lint . --set redis.auth.password=pass
 
     - name: Validate Helm Chart
       run: |
@@ -131,6 +131,7 @@ jobs:
 
         echo "=== External Redis (chart-managed Secret) ==="
         external_manifest=$(helm template external . \
+          --set redis.enabled=false \
           --set redis.url=redis:6379 \
           --set redis.username=user \
           --set redis.password=pass)
@@ -168,6 +169,7 @@ jobs:
 
         echo "=== LoadBalancer Service (metrics not publicly exposed) ==="
         lb_manifest=$(helm template lb . \
+          --set redis.enabled=false \
           --set redis.url=redis:6379 \
           --set service.type=LoadBalancer)
         echo "$lb_manifest" | kubectl apply --dry-run=client -f -
@@ -182,6 +184,7 @@ jobs:
 
         echo "=== Dedicated ServiceAccount (opt-in) ==="
         sa_manifest=$(helm template sa . \
+          --set redis.enabled=false \
           --set redis.url=redis:6379 \
           --set redis.password=pass \
           --set serviceAccount.create=true)
@@ -191,9 +194,8 @@ jobs:
         assert_contains "$sa_manifest" 'serviceAccountName: sa-ocean-gateway' \
           "Deployment should use the dedicated ServiceAccount"
 
-        echo "=== Bundled Redis ==="
+        echo "=== Bundled Redis (default) ==="
         bundled_manifest=$(helm template bundled . \
-          --set redis.enabled=true \
           --set redis.auth.password=pass)
         echo "$bundled_manifest" | kubectl apply --dry-run=client -f -
         assert_contains "$bundled_manifest" 'name: wait-for-redis' \
@@ -209,6 +211,7 @@ jobs:
 
         echo "=== Existing Secret ==="
         existing_manifest=$(helm template existing . \
+          --set redis.enabled=false \
           --set redis.existingSecret=ext-redis)
         echo "$existing_manifest" | kubectl apply --dry-run=client -f -
         assert_contains "$existing_manifest" 'name: ext-redis' \
@@ -220,12 +223,14 @@ jobs:
 
         echo "=== Ingress enabled ==="
         dry_run ingress \
+          --set redis.enabled=false \
           --set redis.url=redis:6379 \
           --set ingress.enabled=true \
           --set ingress.host=gateway.example.com
 
         echo "=== ingress.host required when ingress is enabled ==="
         if helm template invalid-ingress . \
+          --set redis.enabled=false \
           --set redis.url=redis:6379 \
           --set ingress.enabled=true > /dev/null 2>&1; then
           echo "FAIL: expected error when ingress.enabled=true without ingress.host" >&2
@@ -234,6 +239,7 @@ jobs:
 
         echo "=== External Redis with TLS ==="
         tls_manifest=$(helm template tls . \
+          --set redis.enabled=false \
           --set redis.url=redis.example.com:6380 \
           --set redis.password=pass \
           --set redis.tls.enabled=true)
@@ -241,9 +247,10 @@ jobs:
         assert_contains "$tls_manifest" 'REDIS_LIVE_EVENTS_ENABLE_TLS: "true"' \
           "ConfigMap should enable Redis TLS when redis.tls.enabled is true"
 
-        echo "=== redis.url required without bundled Redis or existingSecret ==="
-        if helm template invalid . > /dev/null 2>&1; then
-          echo "FAIL: expected error when redis.url and redis.existingSecret are both unset" >&2
+        echo "=== redis.url required when bundled Redis is disabled ==="
+        if helm template invalid . \
+          --set redis.enabled=false > /dev/null 2>&1; then
+          echo "FAIL: expected error when redis.enabled=false and redis.url/redis.existingSecret are unset" >&2
           exit 1
         fi
 

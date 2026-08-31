@@ -4,8 +4,8 @@
 # returning 202. It holds no in-memory buffer, so it is stateless and scales
 # horizontally with no coordination between replicas.
 #
-# External Redis: set redis.url (or redis.existingSecret).
-# No external Redis: set redis.enabled=true to deploy a bundled Bitnami Redis.
+# Bundled Redis is deployed by default (Bitnami subchart).
+# External Redis: set redis.enabled=false and redis.url (or redis.existingSecret).
 
 nameOverride: ""
 fullnameOverride: ""
@@ -60,7 +60,7 @@ redis:
   # Deploy a bundled Redis instance (Bitnami subchart). When true, redis.url is
   # auto-wired to the subchart service and redis.auth.password is used for the
   # gateway connection unless redis.existingSecret is set.
-  enabled: false
+  enabled: true
 
   # External Redis URL, e.g. "redis:6379". Required when enabled=false and
   # existingSecret is not set.
