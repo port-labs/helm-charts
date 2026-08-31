@@ -94,22 +94,22 @@ spec:
           httpGet:
             path: /health/live
             port: {{.Values.actionsProcessor.service.port}}
-          initialDelaySeconds: {{ default 30 .Values.livenessProbe.initialDelaySeconds }}
-          periodSeconds: {{ default 10 .Values.livenessProbe.periodSeconds }}
-          timeoutSeconds: {{ default 5 .Values.livenessProbe.timeoutSeconds }}
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
           successThreshold: 1
-          failureThreshold: {{ default 3 .Values.livenessProbe.failureThreshold }}
+          failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
         {{- end }}
         {{- if (.Values.readinessProbe).enabled}}
         readinessProbe:
           httpGet:
             path: /health/ready
             port: {{.Values.actionsProcessor.service.port}}
-          initialDelaySeconds: {{ default 5 .Values.readinessProbe.initialDelaySeconds }}
-          periodSeconds: {{ default 5 .Values.readinessProbe.periodSeconds }}
-          timeoutSeconds: {{ default 5 .Values.readinessProbe.timeoutSeconds }}
-          successThreshold: {{ default 1 .Values.readinessProbe.successThreshold }}
-          failureThreshold: {{ default 5 .Values.readinessProbe.failureThreshold }}
+          initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.readinessProbe.successThreshold }}
+          failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
         {{- end }}
       {{- if .Values.actionsProcessor.worker.extraContainers }}
       {{- tpl (toYaml .Values.actionsProcessor.worker.extraContainers) . | nindent 6 }}
