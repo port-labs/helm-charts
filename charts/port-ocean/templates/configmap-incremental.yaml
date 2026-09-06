@@ -35,6 +35,7 @@ data:
   {{- end }}
   OCEAN__LAKEHOUSE_ENABLED: "{{ .Values.lakehouseEnabled | default true }}"
   OCEAN__PROCESSING_MODE: "{{ .Values.processingMode | default "dsp" }}"
+  OCEAN__ACTIONS_PROCESSOR__ENABLED: "{{ .Values.actionsProcessor.enabled | default false }}"
   {{- if .Values.incrementalSync.extraConfig }}
   {{- range $key, $value := .Values.incrementalSync.extraConfig }}
   {{ $key }}: {{ $value | quote }}
