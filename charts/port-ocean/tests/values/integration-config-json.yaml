@@ -1,0 +1,25 @@
+port:
+  clientId: test
+  clientSecret: test
+integration:
+  type: github
+  identifier: test-id
+  version: 0.1.0
+  config:
+    organizationUrl: https://dev.azure.com/example
+    excludedTags:
+      - "tr:restricted"
+    nested:
+      foo: bar
+workload:
+  kind: Deployment
+liveEvents:
+  worker:
+    enabled: true
+  baseUrl: http://le.example
+actionsProcessor:
+  enabled: true
+  worker:
+    enabled: true
+incrementalSync:
+  enabled: true
