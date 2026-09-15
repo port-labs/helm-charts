@@ -1,0 +1,86 @@
+suite: Integration config JSON encoding
+tests:
+  - it: encodes list and map integration config as JSON on the main configmap
+    templates:
+      - templates/configmap.yaml
+    values:
+      - values/integration-config-json.yaml
+    asserts:
+      - equal:
+          path: data.OCEAN__INTEGRATION__CONFIG__EXCLUDED_TAGS
+          value: '["tr:restricted"]'
+      - equal:
+          path: data.OCEAN__INTEGRATION__CONFIG__NESTED
+          value: '{"foo":"bar"}'
+      - equal:
+          path: data.OCEAN__INTEGRATION__CONFIG__ORGANIZATION_URL
+          value: https://dev.azure.com/example
+
+  - it: encodes list and map integration config as JSON on the live-events configmap
+    templates:
+      - templates/configmap-live-events.yaml
+    values:
+      - values/integration-config-json.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.name
+          value: ocean-github-test-id-le-config
+      - equal:
+          path: data.OCEAN__INTEGRATION__CONFIG__EXCLUDED_TAGS
+          value: '["tr:restricted"]'
+      - equal:
+          path: data.OCEAN__INTEGRATION__CONFIG__NESTED
+          value: '{"foo":"bar"}'
+      - equal:
+          path: data.OCEAN__INTEGRATION__CONFIG__ORGANIZATION_URL
+          value: https://dev.azure.com/example
+
+  - it: does not render live-events configmap when the worker is disabled
+    templates:
+      - templates/configmap-live-events.yaml
+    values:
+      - values/single.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: encodes list and map integration config as JSON on the actions-processor configmap
+    templates:
+      - templates/actions-processor/configmap.yaml
+    values:
+      - values/integration-config-json.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.name
+          value: ocean-github-test-id-ap-config
+      - equal:
+          path: data.OCEAN__INTEGRATION__CONFIG__EXCLUDED_TAGS
+          value: '["tr:restricted"]'
+      - equal:
+          path: data.OCEAN__INTEGRATION__CONFIG__NESTED
+          value: '{"foo":"bar"}'
+      - equal:
+          path: data.OCEAN__INTEGRATION__CONFIG__ORGANIZATION_URL
+          value: https://dev.azure.com/example
+
+  - it: encodes list and map integration config as JSON on the incremental configmap
+    templates:
+      - templates/configmap-incremental.yaml
+    values:
+      - values/integration-config-json.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: data.OCEAN__INTEGRATION__CONFIG__EXCLUDED_TAGS
+          value: '["tr:restricted"]'
+      - equal:
+          path: data.OCEAN__INTEGRATION__CONFIG__NESTED
+          value: '{"foo":"bar"}'
+      - equal:
+          path: data.OCEAN__INTEGRATION__CONFIG__ORGANIZATION_URL
+          value: https://dev.azure.com/example
