@@ -110,6 +110,18 @@ The Port Ocean chart supports multiple architectures to fit different operationa
       enabled: true
   ```
 
+### 5. **Connection probe** (test connection)
+
+- **Description**: Renders a suspended CronJob that serves as a reusable job template for integration connection probes (`ocean probe`). The CronJob never runs on a schedule; probe Jobs are created on demand.
+- **Resource name**: `ocean-{integration.type}-{integration.identifier}-probe-cron`
+- **Trigger contract**: The caller clones `spec.jobTemplate` from that CronJob, creates a `batch/v1` Job, and injects `OCEAN__PROBE_ID` (UUID v7 from Port) into the container environment. The probe pod uses the same image, ConfigMap, Secrets, ServiceAccount, and labels as the main integration workload.
+- **Configuration**:
+  ```yaml
+  probe:
+    enabled: true
+    reportingMode: port   # requires OCEAN__PROBE_ID when the Job is created
+  ```
+
 ## Configuration
 
 The following table lists the configuration parameters of the `port-ocean` chart and default values.
@@ -192,6 +204,20 @@ The following table lists the configuration parameters of the `port-ocean` chart
 | `actionsProcessor.worker.replicaCount`          | Number of replicas for the dedicated actions processor Deployment (when `actionsProcessor.enabled` and `actionsProcessor.worker.enabled` are true). Using values other than `0` or `1` is not recommended.                                                                                                                                                                                                                                                                                       | `1`                         |
 | `actionsProcessor.service.portName`               | Name of the port exposed by the Service created for the Actions Processor worker. Defaults to `ocean-port`.                                                                                                                                                                                                                                                                                                                                                   | `ocean-port`                |
 | `streamingEnabled` | Process large HTTP responses via disk-buffered chunks instead of loading entire response into memory, preventing OOM on multi-GB payloads. | `false`
+| `probe.enabled` | Render the suspended probe CronJob template for on-demand connection probes. | `true` |
+| `probe.suspend` | Keep the probe CronJob suspended so it never auto-schedules Jobs. | `true` |
+| `probe.schedule` | Required CronJob schedule (safety placeholder only; use with `probe.suspend: true`). | `"0 0 31 2 *"` |
+| `probe.reportingMode` | Probe reporting mode passed as `OCEAN__PROBE_REPORTING_MODE` (`log`, `file`, or `port`). Production uses `port` and requires `OCEAN__PROBE_ID` on each Job. | `port` |
+| `probe.mode` | Probe mode passed to `ocean probe --mode`. | `shallow` |
+| `probe.kinds` | Optional list of kinds passed to `ocean probe --kinds` (comma-separated). Empty = all kinds. | `[]` |
+| `probe.backoffLimit` | Job backoff limit for probe runs. | `0` |
+| `probe.ttlSecondsAfterFinished` | TTL for finished probe Jobs. | `600` |
+| `probe.activeDeadlineSeconds` | Optional hard cap on probe Job duration in seconds. Unset = no limit. | `null` |
+| `probe.failedJobsHistoryLimit` | Failed probe Job history kept on the CronJob. | `1` |
+| `probe.successfulJobsHistoryLimit` | Successful probe Job history kept on the CronJob. | `1` |
+| `probe.annotations` | Extra pod annotations for probe Jobs (merged with `podAnnotations`). | `{}` |
+| `probe.extraEnv` | Extra environment variables for the probe container only. | `[]` |
+| `probe.resources` | Resource requests/limits for probe Jobs. Empty = inherit top-level `resources`. | `{}` |
 
 ### Centralized Ocean
 
