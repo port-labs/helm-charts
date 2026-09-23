@@ -188,6 +188,23 @@ tests:
           pattern: ^[a-z0-9-]{1,43}-[a-f0-9]{8}-incr-$
         template: templates/cron-job/incremental-cron.yaml
 
+  - it: names probe CronJob resources
+    templates:
+      - templates/probe/job.yaml
+    values:
+      - values/long-a.yaml
+    set:
+      probe.enabled: true
+    asserts:
+      - matchRegex:
+          path: metadata.name
+          pattern: ^[a-z0-9-]{1,33}-[a-f0-9]{8}-probe-cron$
+        template: templates/probe/job.yaml
+      - matchRegex:
+          path: spec.jobTemplate.metadata.generateName
+          pattern: ^[a-z0-9-]{1,42}-[a-f0-9]{8}-probe-$
+        template: templates/probe/job.yaml
+
   - it: preserves one deterministic compatibility name
     templates:
       - templates/deployment.yaml

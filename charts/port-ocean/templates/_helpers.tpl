@@ -258,6 +258,14 @@ Enforces Kubernetes CronJob name limit of 52 characters
 {{- end }}
 
 {{/*
+Get probe cron job name (suspended template for on-demand probe Jobs)
+Enforces Kubernetes CronJob name limit of 52 characters
+*/}}
+{{- define "port-ocean.probe.cronJobName" -}}
+{{- include "port-ocean.resourceName" (list . "-probe-cron" 52) }}
+{{- end }}
+
+{{/*
 Get self signed cert secret name
 */}}
 {{- define "port-ocean.selfSignedCertName" -}}
