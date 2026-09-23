@@ -1,0 +1,18 @@
+port:
+  clientId: test
+  clientSecret: test
+integration:
+  type: github
+  identifier: test-id
+  version: 0.1.0
+workload:
+  kind: Deployment
+probe:
+  enabled: true
+liveEvents:
+  worker:
+    enabled: false
+actionsProcessor:
+  enabled: false
+  worker:
+    enabled: false

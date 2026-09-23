@@ -1,0 +1,75 @@
+suite: Probe CronJob
+templates:
+  - templates/probe/job.yaml
+tests:
+  - it: does not render when probe is disabled
+    set:
+      probe.enabled: false
+    values:
+      - values/single.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders suspended probe CronJob for deployment architecture
+    values:
+      - values/probe-enabled.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.name
+          value: ocean-github-test-id-probe-cron
+      - equal:
+          path: spec.suspend
+          value: true
+      - equal:
+          path: spec.schedule
+          value: "0 0 31 2 *"
+      - equal:
+          path: spec.concurrencyPolicy
+          value: Allow
+      - isNull:
+          path: metadata.annotations
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.containers[0].command[0]
+          value: ocean
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.containers[0].command[1]
+          value: probe
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.containers[0].args[0]
+          value: "."
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.containers[0].envFrom[0].configMapRef.name
+          value: ocean-github-test-id-config
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.containers[0].envFrom[1].secretRef.name
+          value: ocean-github-test-id-secret
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.containers[0].image
+          value: ghcr.io/port-labs/port-ocean-github:0.1.0
+      - contains:
+          path: spec.jobTemplate.spec.template.spec.containers[0].env
+          content:
+            name: OCEAN__PROBE_REPORTING_MODE
+            value: port
+      - contains:
+          path: spec.jobTemplate.spec.template.spec.containers[0].env
+          content:
+            name: OCEAN__EVENT_LISTENER
+            value: '{"type":"ONCE"}'
+      - notExists:
+          path: spec.jobTemplate.spec.template.spec.initContainers[0].name
+          value: terminate-old-resync-jobs
+
+  - it: renders alongside hybrid resync CronJob architecture
+    values:
+      - values/probe-enabled.yaml
+      - values/hybrid-cron.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.name
+          value: ocean-github-test-id-probe-cron

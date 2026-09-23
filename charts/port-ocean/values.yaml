@@ -265,6 +265,23 @@ readinessProbe:
   failureThreshold: 5
   successThreshold: 1
 
+# Suspended CronJob template for on-demand integration connection probes
+probe:
+  enabled: true
+  suspend: true
+  schedule: "0 0 31 2 *" # cron expression for template only, never auto-runs
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 600
+  activeDeadlineSeconds: null
+  reportingMode: port
+  mode: shallow
+  kinds: [ ]
+  failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 1
+  annotations: { }
+  extraEnv: [ ]
+  resources: { }
+
 processingMode: dsp
 
 lakehouseEnabled: true

@@ -1,0 +1,162 @@
+{{- if .Values.probe.enabled }}
+{{- $maxRunTimeSeconds := "" }}
+{{- if .Values.probe.activeDeadlineSeconds }}
+{{- $maxRunTimeSeconds = (.Values.probe.activeDeadlineSeconds | int) }}
+{{- end }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "port-ocean.probe.cronJobName" . }}
+  labels:
+    {{- include "port-ocean.labels" . | nindent 4 }}
+spec:
+  failedJobsHistoryLimit: {{ .Values.probe.failedJobsHistoryLimit }}
+  successfulJobsHistoryLimit: {{ .Values.probe.successfulJobsHistoryLimit }}
+  schedule: {{ .Values.probe.schedule | squote }}
+  suspend: {{ .Values.probe.suspend }}
+  concurrencyPolicy: Allow
+  jobTemplate:
+    metadata:
+      generateName: {{ include "port-ocean.resourceName" (list . "-probe-" 58) }}
+      namespace: {{ .Release.Namespace }}
+      labels:
+        app: {{ include "port-ocean.probe.cronJobName" . }}
+        integrationUniqueProbeKey: {{ .Release.Name }}
+        {{- include "port-ocean.selectorLabels" . | indent 8 }}
+    spec:
+      backoffLimit: {{ .Values.probe.backoffLimit }}
+      ttlSecondsAfterFinished: {{ .Values.probe.ttlSecondsAfterFinished }}
+      {{- if $maxRunTimeSeconds }}
+      activeDeadlineSeconds: {{ $maxRunTimeSeconds }}
+      {{- end }}
+      template:
+        metadata:
+          {{- $podAnnotations := .Values.podAnnotations | default dict }}
+          {{- $probeAnnotations := (.Values.probe.annotations | default dict) }}
+          {{- $annotations := merge (dict) $podAnnotations $probeAnnotations }}
+          {{- with $annotations }}
+          annotations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          labels:
+            app: {{ include "port-ocean.probe.cronJobName" . }}
+            {{- include "port-ocean.labels" . | nindent 12 }}
+        spec:
+          {{- if or .Values.podServiceAccount.name .Values.podServiceAccount.create }}
+          serviceAccountName: {{ include "port-ocean.serviceAccountName" . }}
+          {{- end }}
+          restartPolicy: Never
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext:
+            {{- if .Values.podSecurityContext }}
+            {{- toYaml .Values.podSecurityContext | nindent 12 }}
+            {{- end }}
+          {{- if .Values.extraInitContainers }}
+          initContainers:
+            {{- tpl (toYaml .Values.extraInitContainers) . | nindent 12 }}
+          {{- end }}
+          containers:
+          - name: {{ include "port-ocean.containerName" . }}
+            imagePullPolicy: {{ .Values.imagePullPolicy }}
+            image: {{ include "port-ocean.image" . }}
+            command:
+              - ocean
+              - probe
+            args:
+              - "."
+              {{- if .Values.probe.mode }}
+              - --mode
+              - {{ .Values.probe.mode | quote }}
+              {{- end }}
+              {{- if .Values.probe.kinds }}
+              - --kinds
+              - {{ join "," .Values.probe.kinds | quote }}
+              {{- end }}
+            securityContext:
+              {{- if .Values.containerSecurityContext }}
+              {{- toYaml .Values.containerSecurityContext | nindent 14 }}
+              {{- end }}
+            resources:
+              {{- if .Values.probe.resources }}
+              {{- toYaml .Values.probe.resources | nindent 14 }}
+              {{- else if .Values.resources }}
+              {{- toYaml .Values.resources | nindent 14 }}
+              {{- end }}
+            env:
+              - name: OCEAN__EVENT_LISTENER
+                value: '{"type":"ONCE"}'
+              - name: OCEAN__PROBE_REPORTING_MODE
+                value: {{ .Values.probe.reportingMode | quote }}
+            {{- if .Values.selfSignedCertificate.enabled }}
+              - name: SSL_CERT_FILE
+                value: /etc/ssl/certs/ca-certificates.crt
+              - name: REQUESTS_CA_BUNDLE
+                value: /etc/ssl/certs/ca-certificates.crt
+            {{- end }}
+            {{- if .Values.probe.extraEnv }}
+              {{- tpl (toYaml .Values.probe.extraEnv) . | nindent 14 }}
+            {{- end }}
+            {{- if .Values.extraEnv }}
+              {{- tpl (toYaml .Values.extraEnv) . | nindent 14 }}
+            {{- end }}
+            envFrom:
+              - configMapRef:
+                  name: {{ include "port-ocean.configMapName" . }}
+              {{- include "port-ocean.additionalSecrets" . | nindent 14 }}
+            volumeMounts:
+              - name: ocean-tmp
+                mountPath: /tmp/ocean
+            {{- if .Values.extraVolumeMounts }}
+              {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 14 }}
+            {{- end }}
+            {{- if .Values.selfSignedCertificate.enabled }}
+              - name: certificates
+                mountPath: /usr/local/share/ca-certificates/cert.crt
+                subPath: cert.crt
+                readOnly: true
+            {{- end }}
+          volumes:
+            - name: ocean-tmp
+              emptyDir: { }
+            {{- if .Values.extraVolumes }}
+            {{- tpl (toYaml .Values.extraVolumes) . | nindent 12 }}
+            {{- end }}
+            {{- if and .Values.selfSignedCertificate.enabled .Values.selfSignedCertificate.secret.useExistingSecret }}
+            - name: certificates
+              projected:
+                sources:
+                  - secret:
+                      name: {{ .Values.selfSignedCertificate.secret.name }}
+                      items:
+                        - key: {{ .Values.selfSignedCertificate.secret.key }}
+                          path: cert.crt
+            {{- else if .Values.selfSignedCertificate.enabled }}
+            - name: certificates
+              projected:
+                sources:
+                  - secret:
+                      name: {{ include "port-ocean.selfSignedCertName" . }}
+                      items:
+                        - key: crt
+                          path: cert.crt
+            {{- end }}
+          {{- with .Values.hostAliases }}
+          hostAliases:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+{{- end }}
