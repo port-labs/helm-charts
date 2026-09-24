@@ -76,6 +76,9 @@ spec:
             value: {{ tpl .Values.liveEvents.baseUrl . }}
           - name: OCEAN__LIVE_EVENTS__IS_REDIS_STREAM_CONSUMER_ENABLED
             value: "{{ .Values.liveEvents.isRedisStreamConsumerEnabled | default false }}"
+        {{- else if and (.Values.identityPropagation).enabled .Values.identityPropagation.baseUrl }}
+          - name: OCEAN__BASE_URL
+            value: {{ tpl .Values.identityPropagation.baseUrl . }}
         {{- end }}
         {{- if .Values.extraEnv }}
           {{- tpl (toYaml .Values.extraEnv) . | nindent 10 }}
