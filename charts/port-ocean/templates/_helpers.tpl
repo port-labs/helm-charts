@@ -303,28 +303,43 @@ resources:
 {{- end -}}
 
 {{/*
-Non-sensitive OAuth settings shared by every identity propagation provider.
-Takes (list "<ENV_NAME>" <provider values>); provider-specific keys are rendered by the caller.
+OCEAN__PORT__APP_URL, when port.appUrl is set.
+`with` rebinds `.`, so `$` is the chart root `tpl` needs. Do not change the action below to `tpl . .`.
 */}}
-{{- define "port-ocean.identityPropagation.providerConfig" -}}
-{{- $envName := index . 0 -}}
-{{- $provider := index . 1 -}}
-{{- with $provider.clientId }}
-OCEAN__IDENTITY_PROPAGATION__OAUTH__{{ $envName }}__CLIENT_ID: {{ . | quote }}
-{{- end }}
-{{- with $provider.scopes }}
-OCEAN__IDENTITY_PROPAGATION__OAUTH__{{ $envName }}__SCOPES: {{ . | quote }}
+{{- define "port-ocean.port.appUrl" -}}
+{{- with .Values.port.appUrl -}}
+OCEAN__PORT__APP_URL: {{ tpl . $ | quote }}
 {{- end }}
 {{- end }}
 
 {{/*
-Sensitive OAuth settings shared by every identity propagation provider.
-Takes (list "<ENV_NAME>" <provider values>).
+Fail the render when identity propagation is on and liveEvents.baseUrl is empty.
+That value is the only OCEAN__BASE_URL; Ocean registers the OAuth broker on it.
 */}}
-{{- define "port-ocean.identityPropagation.providerSecret" -}}
-{{- $envName := index . 0 -}}
-{{- $provider := index . 1 -}}
-{{- with $provider.clientSecret }}
-OCEAN__IDENTITY_PROPAGATION__OAUTH__{{ $envName }}__CLIENT_SECRET: {{ . | b64enc | quote }}
+{{- define "port-ocean.identityPropagation.requirePublicBaseUrl" -}}
+{{- if and .Values.identityPropagation.enabled (not .Values.liveEvents.baseUrl) }}
+{{- fail "identityPropagation.enabled requires liveEvents.baseUrl" }}
+{{- end }}
+{{- end }}
+
+{{/*
+Non-sensitive identity-propagation env. Rendered on every workload that serves the
+public base URL or executes actions. Credentials stay in the shared Secret.
+*/}}
+{{- define "port-ocean.identityPropagation.config" -}}
+OCEAN__IDENTITY_PROPAGATION__ENABLED: "true"
+OCEAN__IDENTITY_PROPAGATION__VAULT__TYPE: {{ .Values.identityPropagation.vault.type | default "aws_secrets_manager" | quote }}
+OCEAN__IDENTITY_PROPAGATION__VAULT__SECRET_PREFIX: {{ .Values.identityPropagation.vault.secretPrefix | default "port/tokens" | quote }}
+{{- with .Values.identityPropagation.vault.awsRegion }}
+OCEAN__IDENTITY_PROPAGATION__VAULT__AWS_REGION: {{ . | quote }}
+{{- end }}
+{{- with .Values.identityPropagation.vault.endpointUrl }}
+OCEAN__IDENTITY_PROPAGATION__VAULT__ENDPOINT_URL: {{ . | quote }}
+{{- end }}
+{{- with .Values.identityPropagation.oauth.clientId }}
+OCEAN__INTEGRATION__CONFIG__IDENTITY_OAUTH_CLIENT_ID: {{ . | quote }}
+{{- end }}
+{{- with .Values.identityPropagation.oauth.tenantId }}
+OCEAN__INTEGRATION__CONFIG__IDENTITY_OAUTH_TENANT_ID: {{ . | quote }}
 {{- end }}
 {{- end }}

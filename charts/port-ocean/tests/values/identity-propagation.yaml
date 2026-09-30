@@ -8,11 +8,11 @@ integration:
 workload:
   kind: Deployment
 liveEvents:
+  baseUrl: https://ocean.example.com
   worker:
     enabled: false
 identityPropagation:
   enabled: true
-  baseUrl: https://ocean.example.com
   vault:
     type: aws_secrets_manager
     secretPrefix: port/tokens
@@ -22,16 +22,6 @@ identityPropagation:
     awsSecretAccessKey: test
   oauth:
     stateSigningSecret: state-secret
-    github:
-      clientId: gh-id
-      clientSecret: gh-secret
-      scopes: "repo,workflow"
-    gitlab:
-      clientId: gl-id
-      clientSecret: gl-secret
-      scopes: "api"
-      host: https://gitlab.acme.com
-    azureDevops:
-      clientId: ado-id
-      clientSecret: ado-secret
-      tenantId: tenant-1
+    clientId: oauth-id
+    clientSecret: oauth-secret
+    tenantId: tenant-1

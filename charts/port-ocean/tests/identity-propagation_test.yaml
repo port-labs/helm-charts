@@ -3,6 +3,8 @@ templates:
   - templates/configmap.yaml
   - templates/secret.yaml
   - templates/deployment.yaml
+  - templates/actions-processor/configmap.yaml
+  - templates/configmap-live-events.yaml
 tests:
   - it: stays out of the config when disabled
     template: templates/configmap.yaml
@@ -55,23 +57,19 @@ tests:
           path: data.OCEAN__IDENTITY_PROPAGATION__VAULT__AWS_SECRET_ACCESS_KEY
           value: dGVzdA==
 
-  - it: renders each provider with its own settings
+  - it: renders the integration oauth client id and tenant id
     template: templates/configmap.yaml
     values:
       - values/identity-propagation.yaml
     asserts:
       - equal:
-          path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__GITHUB__CLIENT_ID
-          value: gh-id
+          path: data.OCEAN__INTEGRATION__CONFIG__IDENTITY_OAUTH_CLIENT_ID
+          value: oauth-id
       - equal:
-          path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__GITHUB__SCOPES
-          value: repo,workflow
-      - equal:
-          path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__GITLAB__HOST
-          value: https://gitlab.acme.com
-      - equal:
-          path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__AZURE_DEVOPS__TENANT_ID
+          path: data.OCEAN__INTEGRATION__CONFIG__IDENTITY_OAUTH_TENANT_ID
           value: tenant-1
+      - notExists:
+          path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__GITHUB__CLIENT_ID
 
   - it: keeps client secrets out of the config map
     template: templates/configmap.yaml
@@ -79,7 +77,7 @@ tests:
       - values/identity-propagation.yaml
     asserts:
       - notExists:
-          path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__GITHUB__CLIENT_SECRET
+          path: data.OCEAN__INTEGRATION__CONFIG__IDENTITY_OAUTH_CLIENT_SECRET
       - notExists:
           path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__STATE_SIGNING_SECRET
 
@@ -92,13 +90,23 @@ tests:
           path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__STATE_SIGNING_SECRET
           value: c3RhdGUtc2VjcmV0
       - equal:
-          path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__GITHUB__CLIENT_SECRET
-          value: Z2gtc2VjcmV0
-      - equal:
-          path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__AZURE_DEVOPS__CLIENT_SECRET
-          value: YWRvLXNlY3JldA==
+          path: data.OCEAN__INTEGRATION__CONFIG__IDENTITY_OAUTH_CLIENT_SECRET
+          value: b2F1dGgtc2VjcmV0
 
-  - it: publishes the base url the oauth broker needs
+  - it: skips the oauth client id when it is empty
+    template: templates/configmap.yaml
+    values:
+      - values/identity-propagation.yaml
+    set:
+      identityPropagation.oauth.clientId: ""
+    asserts:
+      - notExists:
+          path: data.OCEAN__INTEGRATION__CONFIG__IDENTITY_OAUTH_CLIENT_ID
+      - equal:
+          path: data.OCEAN__INTEGRATION__CONFIG__IDENTITY_OAUTH_TENANT_ID
+          value: tenant-1
+
+  - it: publishes liveEvents.baseUrl as the only base url
     template: templates/deployment.yaml
     values:
       - values/identity-propagation.yaml
@@ -109,20 +117,65 @@ tests:
             name: OCEAN__BASE_URL
             value: https://ocean.example.com
 
-  - it: defers to the live events base url rather than setting it twice
+  - it: leaves the base url off the main deployment when the live events worker owns it
     template: templates/deployment.yaml
     values:
       - values/identity-propagation.yaml
     set:
-      liveEvents.baseUrl: https://live.example.com
+      liveEvents.worker.enabled: true
     asserts:
-      - contains:
+      - isNull:
           path: spec.template.spec.containers[0].env
-          content:
-            name: OCEAN__BASE_URL
-            value: https://live.example.com
-      - notContains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: OCEAN__BASE_URL
-            value: https://ocean.example.com
+
+  - it: copies identity propagation onto the live events worker that publishes the base url
+    template: templates/configmap-live-events.yaml
+    values:
+      - values/identity-propagation.yaml
+    set:
+      liveEvents.worker.enabled: true
+      port.appUrl: https://app.example.com
+    asserts:
+      - equal:
+          path: data.OCEAN__BASE_URL
+          value: https://ocean.example.com
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__ENABLED
+          value: "true"
+      - equal:
+          path: data.OCEAN__PORT__APP_URL
+          value: https://app.example.com
+      - equal:
+          path: data.OCEAN__INTEGRATION__CONFIG__IDENTITY_OAUTH_CLIENT_ID
+          value: oauth-id
+
+  - it: copies identity propagation onto the actions processor that exchanges tokens
+    template: templates/actions-processor/configmap.yaml
+    values:
+      - values/identity-propagation.yaml
+    set:
+      actionsProcessor.enabled: true
+      actionsProcessor.worker.enabled: true
+      port.appUrl: https://app.example.com
+    asserts:
+      - equal:
+          path: data.OCEAN__BASE_URL
+          value: https://ocean.example.com
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__ENABLED
+          value: "true"
+      - equal:
+          path: data.OCEAN__PORT__APP_URL
+          value: https://app.example.com
+      - equal:
+          path: data.OCEAN__INTEGRATION__CONFIG__IDENTITY_OAUTH_TENANT_ID
+          value: tenant-1
+
+  - it: fails when identity propagation is enabled without a public base url
+    template: templates/configmap.yaml
+    values:
+      - values/single.yaml
+    set:
+      identityPropagation.enabled: true
+    asserts:
+      - failedTemplate:
+          errorMessage: identityPropagation.enabled requires liveEvents.baseUrl

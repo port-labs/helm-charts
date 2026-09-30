@@ -74,14 +74,12 @@ spec:
           - name: REQUESTS_CA_BUNDLE
             value: /etc/ssl/certs/ca-certificates.crt
         {{- end }}
+        {{- /* One public URL: liveEvents.baseUrl. Kept off this pod when the live-events worker is enabled so webhook processing stays there. That worker, and the actions processor, get the same URL plus identity-propagation settings. */}}
         {{- if and .Values.liveEvents.baseUrl (not .Values.liveEvents.worker.enabled) }}
           - name: OCEAN__BASE_URL
             value: {{ tpl .Values.liveEvents.baseUrl . }}
           - name: OCEAN__LIVE_EVENTS__IS_REDIS_STREAM_CONSUMER_ENABLED
             value: "{{ .Values.liveEvents.isRedisStreamConsumerEnabled | default false }}"
-        {{- else if and (.Values.identityPropagation).enabled .Values.identityPropagation.baseUrl }}
-          - name: OCEAN__BASE_URL
-            value: {{ tpl .Values.identityPropagation.baseUrl . }}
         {{- end }}
         {{- if .Values.extraEnv }}
           {{- tpl (toYaml .Values.extraEnv) . | nindent 10 }}
