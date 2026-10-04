@@ -301,3 +301,65 @@ resources:
   {{- toYaml .Values.resources | nindent 2 }}
   {{- end }}
 {{- end -}}
+
+{{/*
+Fail fast when identity propagation is enabled without the runtime contract Ocean requires.
+*/}}
+{{- define "port-ocean.identityPropagation.validate" -}}
+{{- if .Values.identityPropagation.enabled }}
+{{- if not .Values.actionsProcessor.enabled }}
+{{- fail "identityPropagation.enabled requires actionsProcessor.enabled" }}
+{{- end }}
+{{- if not .Values.liveEvents.baseUrl }}
+{{- fail "identityPropagation.enabled requires liveEvents.baseUrl" }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Non-sensitive identity-propagation settings. OAuth app credentials are integration config
+(identityOauthClientId / identityOauthClientSecret / identityOauthTenantId), not chart-level providers.
+*/}}
+{{- define "port-ocean.identityPropagation.configData" -}}
+{{- if .Values.identityPropagation.enabled }}
+OCEAN__IDENTITY_PROPAGATION__ENABLED: "true"
+{{- with .Values.identityPropagation.vault.type }}
+OCEAN__IDENTITY_PROPAGATION__VAULT__TYPE: {{ . | quote }}
+{{- end }}
+{{- with .Values.identityPropagation.vault.secretPrefix }}
+OCEAN__IDENTITY_PROPAGATION__VAULT__SECRET_PREFIX: {{ . | quote }}
+{{- end }}
+{{- with .Values.identityPropagation.vault.awsRegion }}
+OCEAN__IDENTITY_PROPAGATION__VAULT__AWS_REGION: {{ . | quote }}
+{{- end }}
+{{- with .Values.identityPropagation.vault.endpointUrl }}
+OCEAN__IDENTITY_PROPAGATION__VAULT__ENDPOINT_URL: {{ . | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Sensitive identity-propagation settings for the shared Secret.
+*/}}
+{{- define "port-ocean.identityPropagation.secretData" -}}
+{{- if .Values.identityPropagation.enabled }}
+{{- with .Values.identityPropagation.vault.awsAccessKeyId }}
+OCEAN__IDENTITY_PROPAGATION__VAULT__AWS_ACCESS_KEY_ID: {{ . | b64enc | quote }}
+{{- end }}
+{{- with .Values.identityPropagation.vault.awsSecretAccessKey }}
+OCEAN__IDENTITY_PROPAGATION__VAULT__AWS_SECRET_ACCESS_KEY: {{ . | b64enc | quote }}
+{{- end }}
+{{- with .Values.identityPropagation.oauth.stateSigningSecret }}
+OCEAN__IDENTITY_PROPAGATION__OAUTH__STATE_SIGNING_SECRET: {{ . | b64enc | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+OCEAN__PORT__APP_URL. `with` rebinds `.`, so tpl must use `$` as the template root.
+*/}}
+{{- define "port-ocean.port.appUrl" -}}
+{{- with .Values.port.appUrl }}
+OCEAN__PORT__APP_URL: {{ tpl . $ | quote }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,29 @@
+port:
+  clientId: test
+  clientSecret: test
+  appUrl: https://app.example.com
+integration:
+  type: github
+  identifier: test-id
+  version: 0.1.0
+  config:
+    identityOauthClientId: gh-id
+  secrets:
+    identityOauthClientSecret: gh-secret
+workload:
+  kind: Deployment
+liveEvents:
+  baseUrl: https://ocean.example.com
+actionsProcessor:
+  enabled: true
+identityPropagation:
+  enabled: true
+  vault:
+    type: aws_secrets_manager
+    secretPrefix: port/tokens
+    awsRegion: eu-west-1
+    endpointUrl: http://localhost:4566
+    awsAccessKeyId: test
+    awsSecretAccessKey: test
+  oauth:
+    stateSigningSecret: state-secret

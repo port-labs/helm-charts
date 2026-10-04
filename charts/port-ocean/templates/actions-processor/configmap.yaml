@@ -7,6 +7,7 @@ metadata:
     {{- include "port-ocean.actionsProcessor.labels" . | nindent 4 }}
 data:
   OCEAN__PORT__BASE_URL: {{ .Values.port.baseUrl | quote }}
+  {{- include "port-ocean.port.appUrl" . | nindent 2 }}
   # Make sure only sync pods will initialize resources if both are enabled
   {{- if eq .Values.initializePortResources true}}
   OCEAN__INITIALIZE_PORT_RESOURCES: "false"
@@ -52,4 +53,5 @@ data:
   OCEAN__ACTIONS_PROCESSOR__{{ $key | snakecase | upper }}: {{ $value | quote }}
   {{- end }}
   {{- end }}
+  {{- include "port-ocean.identityPropagation.configData" . | nindent 2 }}
 {{- end }}

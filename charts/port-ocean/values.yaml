@@ -8,6 +8,10 @@ port:
 
   baseUrl: https://api.getport.io
   ingestUrl: https://ingest.getport.io
+  # Port's app (web UI) URL, e.g. https://app.getport.io. Only needed if identityPropagation is
+  # enabled and this URL can't be derived from port.baseUrl (api.X -> app.X); required whenever the
+  # api/app domains don't follow that convention, e.g. staging.
+  appUrl: ""
 
 deploymentAnnotations: { }
 podAnnotations: { }
@@ -203,6 +207,29 @@ incrementalSync:
       memory: "512Mi"
       cpu: "800m"
   extraConfig: { }
+
+# Identity propagation: integration actions run as the triggering user via a per-integration
+# OAuth app instead of a shared service account. Ocean hosts the OAuth broker, so this needs
+# a publicly reachable liveEvents.baseUrl (that value is OCEAN__BASE_URL).
+# OAuth app credentials are not chart-level provider blocks - set them on the integration:
+#   integration.config.identityOauthClientId
+#   integration.secrets.identityOauthClientSecret
+#   integration.config.identityOauthTenantId   # Azure DevOps only
+identityPropagation:
+  enabled: false
+  vault:
+    # aws_secrets_manager, or custom to plug in your own VaultClient implementation.
+    type: aws_secrets_manager
+    secretPrefix: port/tokens
+    # Defaults to the pod's ambient AWS region when empty.
+    awsRegion: ""
+    # LocalStack/dev only. Leave empty to talk to real AWS Secrets Manager.
+    endpointUrl: ""
+    awsAccessKeyId: ""
+    awsSecretAccessKey: ""
+  oauth:
+    # Signs the OAuth state parameter. Derived from port.clientSecret when left empty.
+    stateSigningSecret: ""
 
 liveEvents:
   baseUrl: ""

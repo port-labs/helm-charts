@@ -2,12 +2,14 @@
 {{- if eq .Values.workload.kind "CronJob" }}
   {{- $eventListener = dict "type" "ONCE" }}
 {{- end}}
+{{- include "port-ocean.identityPropagation.validate" . }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "port-ocean.configMapName" . }}
 data:
   OCEAN__PORT__BASE_URL: {{ tpl .Values.port.baseUrl . | quote }}
+  {{- include "port-ocean.port.appUrl" . | nindent 2 }}
   OCEAN__INITIALIZE_PORT_RESOURCES: "{{ .Values.initializePortResources | default false }}"
   {{- if .Values.createPortResourcesOrigin }}
   OCEAN__CREATE_PORT_RESOURCES_ORIGIN: "{{ .Values.createPortResourcesOrigin }}"
@@ -50,3 +52,4 @@ data:
   OCEAN__ACTIONS_PROCESSOR__{{ $key | snakecase | upper }}: {{ $value | quote }}
   {{- end }}
   {{- end }}
+  {{- include "port-ocean.identityPropagation.configData" . | nindent 2 }}

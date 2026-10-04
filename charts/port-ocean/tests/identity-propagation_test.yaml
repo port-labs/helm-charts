@@ -1,0 +1,173 @@
+suite: Identity propagation
+tests:
+  - it: stays out of the config when disabled
+    templates:
+      - templates/configmap.yaml
+    values:
+      - values/single.yaml
+    asserts:
+      - notExists:
+          path: data.OCEAN__IDENTITY_PROPAGATION__ENABLED
+
+  - it: renders vault settings when enabled
+    templates:
+      - templates/configmap.yaml
+    values:
+      - values/identity-propagation.yaml
+    asserts:
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__ENABLED
+          value: "true"
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__VAULT__TYPE
+          value: aws_secrets_manager
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__VAULT__SECRET_PREFIX
+          value: port/tokens
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__VAULT__AWS_REGION
+          value: eu-west-1
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__VAULT__ENDPOINT_URL
+          value: http://localhost:4566
+      - equal:
+          path: data.OCEAN__PORT__APP_URL
+          value: https://app.example.com
+
+  - it: keeps vault AWS credentials out of the config map
+    templates:
+      - templates/configmap.yaml
+    values:
+      - values/identity-propagation.yaml
+    asserts:
+      - notExists:
+          path: data.OCEAN__IDENTITY_PROPAGATION__VAULT__AWS_ACCESS_KEY_ID
+      - notExists:
+          path: data.OCEAN__IDENTITY_PROPAGATION__VAULT__AWS_SECRET_ACCESS_KEY
+      - notExists:
+          path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__STATE_SIGNING_SECRET
+
+  - it: stores vault AWS credentials and state signing secret in the secret
+    templates:
+      - templates/secret.yaml
+    values:
+      - values/identity-propagation.yaml
+    asserts:
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__VAULT__AWS_ACCESS_KEY_ID
+          value: dGVzdA==
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__VAULT__AWS_SECRET_ACCESS_KEY
+          value: dGVzdA==
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__STATE_SIGNING_SECRET
+          value: c3RhdGUtc2VjcmV0
+
+  - it: puts oauth app credentials on the integration config, not identity-propagation env
+    templates:
+      - templates/configmap.yaml
+    values:
+      - values/identity-propagation.yaml
+    asserts:
+      - equal:
+          path: data.OCEAN__INTEGRATION__CONFIG__IDENTITY_OAUTH_CLIENT_ID
+          value: gh-id
+      - notExists:
+          path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__GITHUB__CLIENT_ID
+
+  - it: stores oauth client secrets as integration secrets
+    templates:
+      - templates/secret.yaml
+    values:
+      - values/identity-propagation.yaml
+    asserts:
+      - equal:
+          path: data.OCEAN__INTEGRATION__CONFIG__IDENTITY_OAUTH_CLIENT_SECRET
+          value: Z2gtc2VjcmV0
+      - notExists:
+          path: data.OCEAN__IDENTITY_PROPAGATION__OAUTH__GITHUB__CLIENT_SECRET
+
+  - it: uses liveEvents.baseUrl as OCEAN__BASE_URL on the main deployment
+    templates:
+      - templates/deployment.yaml
+    values:
+      - values/identity-propagation.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: OCEAN__BASE_URL
+            value: https://ocean.example.com
+
+  - it: mirrors identity-propagation onto the actions-processor configmap
+    templates:
+      - templates/actions-processor/configmap.yaml
+    values:
+      - values/split.yaml
+      - values/identity-propagation.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__ENABLED
+          value: "true"
+      - equal:
+          path: data.OCEAN__PORT__APP_URL
+          value: https://app.example.com
+      - equal:
+          path: data.OCEAN__INTEGRATION__CONFIG__IDENTITY_OAUTH_CLIENT_ID
+          value: gh-id
+
+  - it: mirrors identity-propagation onto the live-events configmap
+    templates:
+      - templates/configmap-live-events.yaml
+    values:
+      - values/split.yaml
+      - values/identity-propagation.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__ENABLED
+          value: "true"
+      - equal:
+          path: data.OCEAN__BASE_URL
+          value: https://ocean.example.com
+
+  - it: does not put identity-propagation on the incremental configmap
+    templates:
+      - templates/configmap-incremental.yaml
+    values:
+      - values/integration-config-json.yaml
+      - values/identity-propagation.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - notExists:
+          path: data.OCEAN__IDENTITY_PROPAGATION__ENABLED
+
+  - it: fails when enabled without a public base url
+    templates:
+      - templates/configmap.yaml
+    values:
+      - values/single.yaml
+    set:
+      identityPropagation.enabled: true
+      actionsProcessor.enabled: true
+      liveEvents.baseUrl: ""
+    asserts:
+      - failedTemplate:
+          errorMessage: identityPropagation.enabled requires liveEvents.baseUrl
+
+  - it: fails when enabled without the actions processor
+    templates:
+      - templates/configmap.yaml
+    values:
+      - values/single.yaml
+    set:
+      identityPropagation.enabled: true
+      actionsProcessor.enabled: false
+      liveEvents.baseUrl: https://ocean.example.com
+    asserts:
+      - failedTemplate:
+          errorMessage: identityPropagation.enabled requires actionsProcessor.enabled
