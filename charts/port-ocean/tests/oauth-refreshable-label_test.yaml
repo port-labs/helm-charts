@@ -1,0 +1,18 @@
+suite: OAuth refreshable pod label
+templates:
+  - templates/deployment.yaml
+tests:
+  - it: adds oauth-refreshable label when oauth is enabled
+    values:
+      - values/oauth-enabled.yaml
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["ocean.port.io/oauth-refreshable"]
+          value: "true"
+
+  - it: omits oauth-refreshable label when oauth is disabled
+    values:
+      - values/single.yaml
+    asserts:
+      - notExists:
+          path: spec.template.metadata.labels["ocean.port.io/oauth-refreshable"]
