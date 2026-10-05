@@ -41,9 +41,6 @@ spec:
           labels:
             app: {{ include "port-ocean.probe.cronJobName" . }}
             {{- include "port-ocean.labels" . | nindent 12 }}
-            {{- if .Values.integration.oauth.enabled }}
-            ocean.port.io/oauth-refreshable: "true"
-            {{- end }}
         spec:
           {{- if or .Values.podServiceAccount.name .Values.podServiceAccount.create }}
           serviceAccountName: {{ include "port-ocean.serviceAccountName" . }}
