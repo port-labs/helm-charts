@@ -1,16 +1,69 @@
 suite: OAuth refreshable pod label
 templates:
   - templates/deployment.yaml
+  - templates/deployment-live-events.yaml
+  - templates/actions-processor/deployment.yaml
+  - templates/cron-job/cron.yaml
+  - templates/service.yaml
+  - templates/secret.yaml
 tests:
-  - it: adds oauth-refreshable label when oauth is enabled
+  - it: adds oauth-refreshable label to main deployment pod template when oauth is enabled
+    template: templates/deployment.yaml
     values:
       - values/oauth-enabled.yaml
     asserts:
       - equal:
           path: spec.template.metadata.labels["ocean.port.io/oauth-refreshable"]
           value: "true"
+      - notExists:
+          path: metadata.labels["ocean.port.io/oauth-refreshable"]
+
+  - it: adds oauth-refreshable label to live events pod template when oauth is enabled
+    template: templates/deployment-live-events.yaml
+    values:
+      - values/oauth-enabled-split.yaml
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["ocean.port.io/oauth-refreshable"]
+          value: "true"
+      - notExists:
+          path: metadata.labels["ocean.port.io/oauth-refreshable"]
+
+  - it: adds oauth-refreshable label to actions processor pod template when oauth is enabled
+    template: templates/actions-processor/deployment.yaml
+    values:
+      - values/oauth-enabled-split.yaml
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["ocean.port.io/oauth-refreshable"]
+          value: "true"
+      - notExists:
+          path: metadata.labels["ocean.port.io/oauth-refreshable"]
+
+  - it: adds oauth-refreshable label to cron pod template when oauth is enabled
+    template: templates/cron-job/cron.yaml
+    values:
+      - values/oauth-enabled-hybrid-cron.yaml
+    asserts:
+      - equal:
+          path: spec.jobTemplate.spec.template.metadata.labels["ocean.port.io/oauth-refreshable"]
+          value: "true"
+      - notExists:
+          path: metadata.labels["ocean.port.io/oauth-refreshable"]
+
+  - it: omits oauth-refreshable label from non-pod resources when oauth is enabled
+    values:
+      - values/oauth-enabled.yaml
+    asserts:
+      - notExists:
+          path: metadata.labels["ocean.port.io/oauth-refreshable"]
+        template: templates/service.yaml
+      - notExists:
+          path: metadata.labels["ocean.port.io/oauth-refreshable"]
+        template: templates/secret.yaml
 
   - it: omits oauth-refreshable label when oauth is disabled
+    template: templates/deployment.yaml
     values:
       - values/single.yaml
     asserts:

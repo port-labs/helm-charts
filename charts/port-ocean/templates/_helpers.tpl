@@ -43,16 +43,6 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- range $key, $value := .Values.extraLabels }}
 {{$key}}: {{ $value | quote }}
 {{- end }}
-{{- include "port-ocean.oauthRefreshablePodLabel" . }}
-{{- end }}
-
-{{/*
-Pod label for ocean-saas-operator OAuth token refresh job targeting.
-*/}}
-{{- define "port-ocean.oauthRefreshablePodLabel" -}}
-{{- if .Values.integration.oauth.enabled }}
-ocean.port.io/oauth-refreshable: "true"
-{{- end }}
 {{- end }}
 
 {{/*
@@ -69,7 +59,6 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- range $key, $value := .Values.extraLabels }}
 {{$key}}: {{ $value | quote }}
 {{- end }}
-{{- include "port-ocean.oauthRefreshablePodLabel" . }}
 {{- end }}
 {{- end }}
 
@@ -87,7 +76,6 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- range $key, $value := .Values.extraLabels }}
 {{$key}}: {{ $value | quote }}
 {{- end }}
-{{- include "port-ocean.oauthRefreshablePodLabel" . }}
 {{- end }}
 {{- end }}
 
