@@ -313,12 +313,17 @@ OCEAN__PORT__APP_URL: {{ tpl . $ | quote }}
 {{- end }}
 
 {{/*
-Fail the render when identity propagation is on and liveEvents.baseUrl is empty.
-That value is the only OCEAN__BASE_URL; Ocean registers the OAuth broker on it.
+Fail the render when identity propagation is on without the runtime contract Ocean requires.
+liveEvents.baseUrl is the only OCEAN__BASE_URL; Ocean registers the OAuth broker on it.
 */}}
 {{- define "port-ocean.identityPropagation.requirePublicBaseUrl" -}}
-{{- if and .Values.identityPropagation.enabled (not .Values.liveEvents.baseUrl) }}
+{{- if .Values.identityPropagation.enabled }}
+{{- if not .Values.actionsProcessor.enabled }}
+{{- fail "identityPropagation.enabled requires actionsProcessor.enabled" }}
+{{- end }}
+{{- if not .Values.liveEvents.baseUrl }}
 {{- fail "identityPropagation.enabled requires liveEvents.baseUrl" }}
+{{- end }}
 {{- end }}
 {{- end }}
 
@@ -335,11 +340,5 @@ OCEAN__IDENTITY_PROPAGATION__VAULT__AWS_REGION: {{ . | quote }}
 {{- end }}
 {{- with .Values.identityPropagation.vault.endpointUrl }}
 OCEAN__IDENTITY_PROPAGATION__VAULT__ENDPOINT_URL: {{ . | quote }}
-{{- end }}
-{{- with .Values.identityPropagation.oauth.clientId }}
-OCEAN__INTEGRATION__CONFIG__IDENTITY_OAUTH_CLIENT_ID: {{ . | quote }}
-{{- end }}
-{{- with .Values.identityPropagation.oauth.tenantId }}
-OCEAN__INTEGRATION__CONFIG__IDENTITY_OAUTH_TENANT_ID: {{ . | quote }}
 {{- end }}
 {{- end }}

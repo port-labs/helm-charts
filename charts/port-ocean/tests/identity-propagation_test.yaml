@@ -57,7 +57,7 @@ tests:
           path: data.OCEAN__IDENTITY_PROPAGATION__VAULT__AWS_SECRET_ACCESS_KEY
           value: dGVzdA==
 
-  - it: renders the integration oauth client id and tenant id
+  - it: puts oauth app credentials on the integration config
     template: templates/configmap.yaml
     values:
       - values/identity-propagation.yaml
@@ -92,19 +92,6 @@ tests:
       - equal:
           path: data.OCEAN__INTEGRATION__CONFIG__IDENTITY_OAUTH_CLIENT_SECRET
           value: b2F1dGgtc2VjcmV0
-
-  - it: skips the oauth client id when it is empty
-    template: templates/configmap.yaml
-    values:
-      - values/identity-propagation.yaml
-    set:
-      identityPropagation.oauth.clientId: ""
-    asserts:
-      - notExists:
-          path: data.OCEAN__INTEGRATION__CONFIG__IDENTITY_OAUTH_CLIENT_ID
-      - equal:
-          path: data.OCEAN__INTEGRATION__CONFIG__IDENTITY_OAUTH_TENANT_ID
-          value: tenant-1
 
   - it: publishes liveEvents.baseUrl as the only base url
     template: templates/deployment.yaml
@@ -176,6 +163,20 @@ tests:
       - values/single.yaml
     set:
       identityPropagation.enabled: true
+      actionsProcessor.enabled: true
+      liveEvents.baseUrl: ""
     asserts:
       - failedTemplate:
           errorMessage: identityPropagation.enabled requires liveEvents.baseUrl
+
+  - it: fails when identity propagation is enabled without the actions processor
+    template: templates/configmap.yaml
+    values:
+      - values/single.yaml
+    set:
+      identityPropagation.enabled: true
+      actionsProcessor.enabled: false
+      liveEvents.baseUrl: https://ocean.example.com
+    asserts:
+      - failedTemplate:
+          errorMessage: identityPropagation.enabled requires actionsProcessor.enabled

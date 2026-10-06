@@ -5,12 +5,19 @@ integration:
   type: github
   identifier: test-id
   version: 0.1.0
+  config:
+    identityOauthClientId: oauth-id
+    identityOauthTenantId: tenant-1
+  secrets:
+    identityOauthClientSecret: oauth-secret
 workload:
   kind: Deployment
 liveEvents:
   baseUrl: https://ocean.example.com
   worker:
     enabled: false
+actionsProcessor:
+  enabled: true
 identityPropagation:
   enabled: true
   vault:
@@ -22,6 +29,3 @@ identityPropagation:
     awsSecretAccessKey: test
   oauth:
     stateSigningSecret: state-secret
-    clientId: oauth-id
-    clientSecret: oauth-secret
-    tenantId: tenant-1

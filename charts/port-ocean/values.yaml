@@ -208,10 +208,17 @@ incrementalSync:
       cpu: "800m"
   extraConfig: { }
 
-# Identity propagation: integration actions run against the triggering user's own downstream
-# credentials instead of a shared service account. Ocean hosts the OAuth broker that collects
-# those credentials. The broker's public URL is liveEvents.baseUrl (OCEAN__BASE_URL).
-# Render fails when this is enabled and that URL is empty.
+# Identity propagation: integration actions run as the triggering user via one OAuth app
+# instead of a shared service account. Ocean hosts the OAuth broker, so this needs
+# actionsProcessor.enabled and a public liveEvents.baseUrl (that value is OCEAN__BASE_URL).
+# Render fails when either is missing. OAuth app credentials are integration config, not
+# chart-level provider blocks:
+#   integration.config.identityOauthClientId
+#   integration.secrets.identityOauthClientSecret
+#   integration.config.identityOauthTenantId   # Azure DevOps only
+# Scopes and authorize URLs are fixed in the integration. Self-managed GitHub/GitLab hosts
+# stay on integration.config (githubHost / gitlabHost). The callback is
+# {liveEvents.baseUrl}/v1/oauth-broker/callback.
 identityPropagation:
   enabled: false
   vault:
@@ -227,14 +234,6 @@ identityPropagation:
   oauth:
     # Signs the OAuth state parameter. Derived from port.clientSecret when left empty.
     stateSigningSecret: ""
-    # One Ocean process hosts one integration, so there is one OAuth app. These become
-    # integration config (identityOauthClientId / identityOauthClientSecret). Scopes and
-    # authorize URLs are fixed in the integration. The callback is
-    # {liveEvents.baseUrl}/v1/oauth-broker/callback. Self-managed GitHub/GitLab hosts stay
-    # on integration.config (githubHost / gitlabHost); Azure DevOps also needs tenantId.
-    clientId: ""
-    clientSecret: ""
-    tenantId: ""
 
 liveEvents:
   baseUrl: ""
