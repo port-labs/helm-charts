@@ -8,6 +8,10 @@ port:
 
   baseUrl: https://api.getport.io
   ingestUrl: https://ingest.getport.io
+  # Port's app (web UI) URL, e.g. https://app.getport.io. Only needed if identityPropagation is
+  # enabled and this URL can't be derived from port.baseUrl (api.X -> app.X); required whenever the
+  # api/app domains don't follow that convention, e.g. staging.
+  appUrl: ""
 
 deploymentAnnotations: { }
 podAnnotations: { }
@@ -203,6 +207,37 @@ incrementalSync:
       memory: "512Mi"
       cpu: "800m"
   extraConfig: { }
+
+# Identity propagation: integration actions run as the triggering user via one OAuth app
+# instead of a shared service account. Ocean hosts the OAuth broker, so this needs
+# actionsProcessor.enabled and a public liveEvents.baseUrl (that value is OCEAN__BASE_URL).
+# Render fails when either is missing. OAuth app credentials are integration config, not
+# chart-level provider blocks:
+#   integration.config.identityOauthClientId
+#   integration.secrets.identityOauthClientSecret
+#   integration.config.identityOauthTenantId   # Azure DevOps only
+# Scopes and authorize URLs are fixed in the integration. Self-managed GitHub/GitLab hosts
+# stay on integration.config (githubHost / gitlabHost). The callback is
+# {liveEvents.baseUrl}/v1/oauth-broker/callback.
+identityPropagation:
+  enabled: false
+  vault:
+    # aws_secrets_manager uses AWS Secrets Manager. custom is not set up by this chart:
+    # it needs an image that registers its own VaultClient.
+    type: aws_secrets_manager
+    # The pod role needs secretsmanager:CreateSecret, PutSecretValue, and GetSecretValue on {secretPrefix}/*.
+    secretPrefix: port/tokens
+    # Defaults to the pod's ambient AWS region when empty.
+    awsRegion: ""
+    # LocalStack/dev only. Leave empty to talk to real AWS Secrets Manager.
+    endpointUrl: ""
+    # Static keys are written only when secret.create is true. The chart fails if either is set while secret.create is false.
+    awsAccessKeyId: ""
+    awsSecretAccessKey: ""
+  oauth:
+    # Signs the OAuth state parameter. Derived from port.clientSecret when left empty.
+    # Written only when secret.create is true. The chart fails if this is set while secret.create is false.
+    stateSigningSecret: ""
 
 liveEvents:
   baseUrl: ""

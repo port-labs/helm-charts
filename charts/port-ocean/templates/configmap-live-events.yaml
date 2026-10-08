@@ -5,6 +5,9 @@ metadata:
   name: "{{ include "port-ocean.liveEvents.configMapName" . }}"
 data:
   OCEAN__PORT__BASE_URL: {{ tpl .Values.port.baseUrl . | quote }}
+  {{- if .Values.port.appUrl }}
+  {{- include "port-ocean.port.appUrl" . | nindent 2 }}
+  {{- end }}
   # Make sure only sync pods will initialize resources if both are enabled
   {{- if eq .Values.initializePortResources true}}
   OCEAN__INITIALIZE_PORT_RESOURCES: "false"
@@ -41,6 +44,9 @@ data:
   {{- range $key, $value := .Values.liveEvents.extraConfig }}
   {{ $key | snakecase | upper }}: {{ $value | quote }}
   {{- end }}
+  {{- end }}
+  {{- if .Values.identityPropagation.enabled }}
+  {{- include "port-ocean.identityPropagation.config" . | nindent 2 }}
   {{- end }}
   OCEAN__LAKEHOUSE_ENABLED: "{{ .Values.lakehouseEnabled | default true }}"
   OCEAN__PROCESSING_MODE: {{ .Values.processingMode | default "dsp" | quote }}
