@@ -222,17 +222,21 @@ incrementalSync:
 identityPropagation:
   enabled: false
   vault:
-    # aws_secrets_manager, or custom to plug in your own VaultClient implementation.
+    # aws_secrets_manager uses AWS Secrets Manager. custom is not set up by this chart:
+    # it needs an image that registers its own VaultClient.
     type: aws_secrets_manager
+    # The pod role needs secretsmanager:CreateSecret, PutSecretValue, and GetSecretValue on {secretPrefix}/*.
     secretPrefix: port/tokens
     # Defaults to the pod's ambient AWS region when empty.
     awsRegion: ""
     # LocalStack/dev only. Leave empty to talk to real AWS Secrets Manager.
     endpointUrl: ""
+    # Static keys are written only when secret.create is true. The chart fails if either is set while secret.create is false.
     awsAccessKeyId: ""
     awsSecretAccessKey: ""
   oauth:
     # Signs the OAuth state parameter. Derived from port.clientSecret when left empty.
+    # Written only when secret.create is true. The chart fails if this is set while secret.create is false.
     stateSigningSecret: ""
 
 liveEvents:

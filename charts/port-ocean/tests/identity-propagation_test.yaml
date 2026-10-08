@@ -110,9 +110,19 @@ tests:
       - values/identity-propagation.yaml
     set:
       liveEvents.worker.enabled: true
+      extraEnv:
+        - name: HTTPS_PROXY
+          value: http://proxy.example.com
     asserts:
-      - isNull:
+      - contains:
           path: spec.template.spec.containers[0].env
+          content:
+            name: HTTPS_PROXY
+            value: http://proxy.example.com
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: OCEAN__BASE_URL
 
   - it: copies identity propagation onto the live events worker that publishes the base url
     template: templates/configmap-live-events.yaml
@@ -168,6 +178,16 @@ tests:
     asserts:
       - failedTemplate:
           errorMessage: identityPropagation.enabled requires liveEvents.baseUrl
+
+  - it: fails when identity propagation secrets are set but the chart does not create the secret
+    template: templates/secret.yaml
+    values:
+      - values/identity-propagation.yaml
+    set:
+      secret.create: false
+    asserts:
+      - failedTemplate:
+          errorMessage: identityPropagation vault keys and oauth.stateSigningSecret require secret.create
 
   - it: fails when identity propagation is enabled without the actions processor
     template: templates/configmap.yaml
