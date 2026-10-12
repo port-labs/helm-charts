@@ -1,0 +1,31 @@
+port:
+  clientId: test
+  clientSecret: test
+integration:
+  type: github
+  identifier: test-id
+  version: 0.1.0
+  config:
+    identityOauthClientId: oauth-id
+    identityOauthTenantId: tenant-1
+  secrets:
+    identityOauthClientSecret: oauth-secret
+workload:
+  kind: Deployment
+liveEvents:
+  baseUrl: https://ocean.example.com
+  worker:
+    enabled: false
+actionsProcessor:
+  enabled: true
+identityPropagation:
+  enabled: true
+  vault:
+    type: aws_secrets_manager
+    secretPrefix: port/tokens
+    awsRegion: eu-west-1
+    endpointUrl: http://localhost:4566
+    awsAccessKeyId: test
+    awsSecretAccessKey: test
+  oauth:
+    stateSigningSecret: state-secret

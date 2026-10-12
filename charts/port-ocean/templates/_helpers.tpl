@@ -301,3 +301,44 @@ resources:
   {{- toYaml .Values.resources | nindent 2 }}
   {{- end }}
 {{- end -}}
+
+{{/*
+OCEAN__PORT__APP_URL, when port.appUrl is set.
+`with` rebinds `.`, so `$` is the chart root `tpl` needs. Do not change the action below to `tpl . .`.
+*/}}
+{{- define "port-ocean.port.appUrl" -}}
+{{- with .Values.port.appUrl -}}
+OCEAN__PORT__APP_URL: {{ tpl . $ | quote }}
+{{- end }}
+{{- end }}
+
+{{/*
+Fail the render when identity propagation is on without the runtime contract Ocean requires.
+liveEvents.baseUrl is the only OCEAN__BASE_URL; Ocean registers the OAuth broker on it.
+*/}}
+{{- define "port-ocean.identityPropagation.requirePublicBaseUrl" -}}
+{{- if .Values.identityPropagation.enabled }}
+{{- if not .Values.actionsProcessor.enabled }}
+{{- fail "identityPropagation.enabled requires actionsProcessor.enabled" }}
+{{- end }}
+{{- if not .Values.liveEvents.baseUrl }}
+{{- fail "identityPropagation.enabled requires liveEvents.baseUrl" }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Non-sensitive identity-propagation env. Rendered on every workload that serves the
+public base URL or executes actions. Credentials stay in the shared Secret.
+*/}}
+{{- define "port-ocean.identityPropagation.config" -}}
+OCEAN__IDENTITY_PROPAGATION__ENABLED: "true"
+OCEAN__IDENTITY_PROPAGATION__VAULT__TYPE: {{ .Values.identityPropagation.vault.type | default "aws_secrets_manager" | quote }}
+OCEAN__IDENTITY_PROPAGATION__VAULT__SECRET_PREFIX: {{ .Values.identityPropagation.vault.secretPrefix | default "port/tokens" | quote }}
+{{- with .Values.identityPropagation.vault.awsRegion }}
+OCEAN__IDENTITY_PROPAGATION__VAULT__AWS_REGION: {{ . | quote }}
+{{- end }}
+{{- with .Values.identityPropagation.vault.endpointUrl }}
+OCEAN__IDENTITY_PROPAGATION__VAULT__ENDPOINT_URL: {{ . | quote }}
+{{- end }}
+{{- end }}
