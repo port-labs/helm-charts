@@ -342,3 +342,14 @@ OCEAN__IDENTITY_PROPAGATION__VAULT__AWS_REGION: {{ . | quote }}
 OCEAN__IDENTITY_PROPAGATION__VAULT__ENDPOINT_URL: {{ . | quote }}
 {{- end }}
 {{- end }}
+
+{{/*
+Optional envFrom for centralized rate-limiter Redis credentials.
+*/}}
+{{- define "port-ocean.centralizedRateLimiterSecret" -}}
+{{- if .Values.centralizedRateLimiter.redis.credentialsSecretName }}
+- secretRef:
+    name: {{ .Values.centralizedRateLimiter.redis.credentialsSecretName | quote }}
+    optional: true
+{{- end }}
+{{- end }}

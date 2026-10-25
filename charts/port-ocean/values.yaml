@@ -239,6 +239,11 @@ identityPropagation:
     # Written only when secret.create is true. The chart fails if this is set while secret.create is false.
     stateSigningSecret: ""
 
+centralizedRateLimiter:
+  redis:
+    # Secret with OCEAN__CENTRALIZED_RATE_LIMITER__REDIS__* keys. Mounted into all integration workloads.
+    credentialsSecretName: ""
+
 liveEvents:
   baseUrl: ""
   isRedisStreamConsumerEnabled: false

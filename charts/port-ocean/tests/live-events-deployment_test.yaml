@@ -40,3 +40,16 @@ tests:
     asserts:
       - hasDocuments:
           count: 1
+
+  - it: mounts centralized rate limiter redis credentials
+    values:
+      - values/split.yaml
+    set:
+      centralizedRateLimiter.redis.credentialsSecretName: rate-limiter-credentials
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            secretRef:
+              name: rate-limiter-credentials
+              optional: true
