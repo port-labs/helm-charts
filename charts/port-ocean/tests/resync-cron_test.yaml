@@ -25,3 +25,16 @@ tests:
       - equal:
           path: metadata.name
           value: ocean-github-test-id-cron-job
+
+  - it: mounts centralized rate limiter redis credentials
+    values:
+      - values/hybrid-cron.yaml
+    set:
+      centralizedRateLimiter.redis.credentialsSecretName: rate-limiter-credentials
+    asserts:
+      - contains:
+          path: spec.jobTemplate.spec.template.spec.containers[0].envFrom
+          content:
+            secretRef:
+              name: rate-limiter-credentials
+              optional: true

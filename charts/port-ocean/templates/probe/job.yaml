@@ -106,6 +106,7 @@ spec:
               - configMapRef:
                   name: {{ include "port-ocean.configMapName" . }}
               {{- include "port-ocean.additionalSecrets" . | nindent 14 }}
+              {{- include "port-ocean.centralizedRateLimiterSecret" . | nindent 14 }}
             volumeMounts:
               - name: ocean-tmp
                 mountPath: /tmp/ocean

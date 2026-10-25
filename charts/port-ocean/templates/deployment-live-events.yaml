@@ -84,6 +84,7 @@ spec:
           - configMapRef:
               name: {{ include "port-ocean.liveEvents.configMapName" . }}
           {{- include "port-ocean.additionalSecrets" . | nindent 10 }}
+          {{- include "port-ocean.centralizedRateLimiterSecret" . | nindent 10 }}
           {{- if .Values.liveEvents.isRedisStreamConsumerEnabled }}
           - secretRef:
               name: {{ .Values.liveEvents.redis.credentialsSecretName }}
