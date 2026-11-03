@@ -48,7 +48,7 @@ data:
   {{- if .Values.identityPropagation.enabled }}
   {{- include "port-ocean.identityPropagation.config" . | nindent 2 }}
   {{- end }}
-  OCEAN__LAKEHOUSE_ENABLED: "{{ .Values.lakehouseEnabled | default true }}"
+  OCEAN__LAKEHOUSE_ENABLED: "{{ if hasKey .Values "lakehouseEnabled" }}{{ .Values.lakehouseEnabled }}{{ else }}true{{ end }}"
   OCEAN__PROCESSING_MODE: {{ .Values.processingMode | default "dsp" | quote }}
   OCEAN__ACTIONS_PROCESSOR__ENABLED: "{{ .Values.actionsProcessor.enabled | default false }}"
   OCEAN__EVENTS_DEBUG_LOGGING: "{{ .Values.eventsDebugLogging | default false }}"

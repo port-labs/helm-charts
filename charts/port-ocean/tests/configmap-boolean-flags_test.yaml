@@ -1,0 +1,93 @@
+suite: ConfigMap boolean flags
+tests:
+  - it: keeps lakehouse and raw data examples enabled by default on the main configmap
+    templates:
+      - templates/configmap.yaml
+    values:
+      - values/split.yaml
+    asserts:
+      - equal:
+          path: data.OCEAN__LAKEHOUSE_ENABLED
+          value: "true"
+      - equal:
+          path: data.OCEAN__SEND_RAW_DATA_EXAMPLES
+          value: "true"
+
+  - it: renders false for lakehouse and raw data examples on the main configmap
+    templates:
+      - templates/configmap.yaml
+    values:
+      - values/split.yaml
+    set:
+      lakehouseEnabled: false
+      sendRawDataExamples: false
+    asserts:
+      - equal:
+          path: data.OCEAN__LAKEHOUSE_ENABLED
+          value: "false"
+      - equal:
+          path: data.OCEAN__SEND_RAW_DATA_EXAMPLES
+          value: "false"
+
+  - it: falls back to true when the flags are set to null on the main configmap
+    templates:
+      - templates/configmap.yaml
+    values:
+      - values/split.yaml
+    set:
+      lakehouseEnabled: null
+      sendRawDataExamples: null
+    asserts:
+      - equal:
+          path: data.OCEAN__LAKEHOUSE_ENABLED
+          value: "true"
+      - equal:
+          path: data.OCEAN__SEND_RAW_DATA_EXAMPLES
+          value: "true"
+
+  - it: renders false for lakehouse and raw data examples on the incremental configmap
+    templates:
+      - templates/configmap-incremental.yaml
+    values:
+      - values/split.yaml
+    set:
+      incrementalSync.enabled: true
+      lakehouseEnabled: false
+      sendRawDataExamples: false
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: data.OCEAN__LAKEHOUSE_ENABLED
+          value: "false"
+      - equal:
+          path: data.OCEAN__SEND_RAW_DATA_EXAMPLES
+          value: "false"
+
+  - it: renders false for lakehouse on the live-events configmap
+    templates:
+      - templates/configmap-live-events.yaml
+    values:
+      - values/split.yaml
+    set:
+      lakehouseEnabled: false
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: data.OCEAN__LAKEHOUSE_ENABLED
+          value: "false"
+
+  - it: renders false for lakehouse on the actions-processor configmap
+    templates:
+      - templates/actions-processor/configmap.yaml
+    values:
+      - values/split.yaml
+    set:
+      lakehouseEnabled: false
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: data.OCEAN__LAKEHOUSE_ENABLED
+          value: "false"

@@ -15,7 +15,7 @@ data:
   {{- if .Values.clientTimeout }}
   OCEAN__CLIENT_TIMEOUT: "{{ .Values.clientTimeout }}"
   {{- end }}
-  OCEAN__SEND_RAW_DATA_EXAMPLES: "{{ .Values.sendRawDataExamples | default true }}"
+  OCEAN__SEND_RAW_DATA_EXAMPLES: "{{ if hasKey .Values "sendRawDataExamples" }}{{ .Values.sendRawDataExamples }}{{ else }}true{{ end }}"
   OCEAN__EVENT_LISTENER: '{"type":"ONCE"}'
   {{- if .Values.integration.identifier }}
   OCEAN__INTEGRATION__IDENTIFIER: "{{ .Values.integration.identifier }}"
@@ -33,7 +33,7 @@ data:
   {{- end }}
   {{- end }}
   {{- end }}
-  OCEAN__LAKEHOUSE_ENABLED: "{{ .Values.lakehouseEnabled | default true }}"
+  OCEAN__LAKEHOUSE_ENABLED: "{{ if hasKey .Values "lakehouseEnabled" }}{{ .Values.lakehouseEnabled }}{{ else }}true{{ end }}"
   OCEAN__PROCESSING_MODE: "{{ .Values.processingMode | default "dsp" }}"
   OCEAN__ACTIONS_PROCESSOR__ENABLED: "{{ .Values.actionsProcessor.enabled | default false }}"
   {{- if .Values.incrementalSync.extraConfig }}
