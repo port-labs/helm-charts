@@ -2,8 +2,8 @@ apiVersion: v2
 name: port-agent
 description: A Helm chart for Port Agent
 type: application
-version: 0.8.17
-appVersion: "v0.8.13"
+version: 0.8.18
+appVersion: "v0.8.14"
 home: https://port.io/
 sources:
   - https://github.com/port-labs/port-agent
