@@ -25,6 +25,27 @@ tests:
       - equal:
           path: metadata.name
           value: ocean-github-test-id-cron-job
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.initContainers[0].name
+          value: resolve-ocean-image-digest
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.initContainers[0].image
+          value: ghcr.io/port-labs/port-ocean-github:0.1.0
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.initContainers[1].name
+          value: terminate-old-resync-jobs
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.initContainers[1].env[1].name
+          value: POD_NAME
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.initContainers[1].env[2].name
+          value: OCEAN_CONTAINER_NAME
+      - matchRegex:
+          path: spec.jobTemplate.spec.template.spec.initContainers[1].command[2]
+          pattern: rollout_if_image_digest_differs
+      - matchRegex:
+          path: spec.jobTemplate.spec.template.spec.initContainers[1].command[2]
+          pattern: resolve-ocean-image-digest
 
   - it: mounts centralized rate limiter redis credentials
     values:
