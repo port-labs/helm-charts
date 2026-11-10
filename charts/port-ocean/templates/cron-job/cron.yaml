@@ -62,6 +62,13 @@ spec:
             {{- if .Values.extraInitContainers }}
             {{- tpl (toYaml .Values.extraInitContainers) . | nindent 12 }}
             {{- end }}
+            - name: resolve-ocean-image-digest
+              image: {{ include "port-ocean.image" . }}
+              {{- include "port-ocean.initContainer.containerDefaults" . | nindent 14 }}
+              command:
+                - sh
+                - -c
+                - exit 0
             - name: terminate-old-resync-jobs
               image: {{ .Values.workload.cron.kubectlImage }}
               {{- include "port-ocean.initContainer.containerDefaults" . | nindent 14 }}
@@ -70,6 +77,12 @@ spec:
                   valueFrom:
                     fieldRef:
                       fieldPath: metadata.labels['job-name']
+                - name: POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.name
+                - name: OCEAN_CONTAINER_NAME
+                  value: {{ include "port-ocean.containerName" . | quote }}
                 - name: TOKEN
                   valueFrom:
                     secretKeyRef:
@@ -83,7 +96,7 @@ spec:
                   echo "Starting init container"
                   LABEL_SELECTOR="integrationUniqueCronKey={{ .Release.Name }}"
                   NAMESPACE="{{ .Release.Namespace }}"
-                  CURRENT_JOB_NAME=$(JOB_NAME)
+                  CURRENT_JOB_NAME="${JOB_NAME}"
                   DEADLINE=0  # 30 seconds deadline for the jobs to terminate
 
                   echo "kubectl get jobs -l ${LABEL_SELECTOR} -o=json | jq -r \".items[] | select(.status.active > 0) | select(.metadata.name != \"$CURRENT_JOB_NAME\") | .metadata.name\""
@@ -103,24 +116,82 @@ spec:
                     echo "No running resync jobs found. Starting new job: $CURRENT_JOB_NAME"
                   fi
 
-                  # Rollout live events deployment if exists to match integration image versions
-                  rollout_if_exists() {
+                  # Restart worker deployments only when their running image digest differs from the
+                  # integration image digest for this resync (resolved by pulling the integration image).
+                  extract_digest() {
+                    local image_id="$1"
+                    case "$image_id" in
+                      *@sha256:*)
+                        echo "${image_id##*@sha256:}"
+                        ;;
+                      *sha256:*)
+                        echo "${image_id##*sha256:}"
+                        ;;
+                      *)
+                        echo ""
+                        ;;
+                    esac
+                  }
+
+                  resolve_desired_digest() {
+                    local image_id=""
+                    local attempt
+                    for attempt in $(seq 1 15); do
+                      image_id=$(kubectl get pod "$POD_NAME" -n "${NAMESPACE}" --token="$TOKEN" -o=json | jq -r '.status.initContainerStatuses[]? | select(.name=="resolve-ocean-image-digest") | .imageID // empty' | head -n1)
+                      if [ -n "$image_id" ] && [ "$image_id" != "null" ]; then
+                        break
+                      fi
+                      sleep 1
+                    done
+                    extract_digest "$image_id"
+                  }
+
+                  rollout_if_image_digest_differs() {
                     local DEPLOYMENT_NAME=$1
 
                     echo "Running: kubectl get deployment ${DEPLOYMENT_NAME} -o=json | jq -r \".metadata.name\""
                     DEPLOYMENT=$(kubectl get deployment ${DEPLOYMENT_NAME} --token=$TOKEN -o=json | jq -r ".metadata.name")
 
-                    if [ -n "$DEPLOYMENT" ]; then
-                      echo "Found deployment: $DEPLOYMENT"
-                      echo "Rolling out $DEPLOYMENT"
-                      kubectl rollout restart deployment $DEPLOYMENT -n ${NAMESPACE} --token=$TOKEN
-                    else
+                    if [ -z "$DEPLOYMENT" ]; then
                       echo "Deployment $DEPLOYMENT_NAME does not exist. Skipping rollout restart."
+                      return
                     fi
+
+                    echo "Found deployment: $DEPLOYMENT"
+
+                    if [ -z "$DESIRED_DIGEST" ]; then
+                      echo "Could not resolve desired integration image digest; rolling out $DEPLOYMENT"
+                      kubectl rollout restart deployment "$DEPLOYMENT" -n "${NAMESPACE}" --token=$TOKEN
+                      return
+                    fi
+
+                    local pod_image_ids
+                    pod_image_ids=$(kubectl get pods -n "${NAMESPACE}" -l "app=${DEPLOYMENT_NAME}" --field-selector=status.phase=Running --token="$TOKEN" -o=json | jq -r --arg c "$OCEAN_CONTAINER_NAME" '[.items[].status.containerStatuses[]? | select(.name==$c) | .imageID // empty] | unique | .[]')
+
+                    if [ -z "$pod_image_ids" ]; then
+                      echo "No running pods for ${DEPLOYMENT_NAME}; skipping rollout restart."
+                      return
+                    fi
+
+                    local image_id pod_digest
+                    while IFS= read -r image_id; do
+                      [ -z "$image_id" ] && continue
+                      pod_digest=$(extract_digest "$image_id")
+                      if [ -z "$pod_digest" ] || [ "$pod_digest" != "$DESIRED_DIGEST" ]; then
+                        echo "Image digest mismatch for ${DEPLOYMENT_NAME} (pod=${pod_digest:-unknown} desired=${DESIRED_DIGEST}); rolling out"
+                        kubectl rollout restart deployment "$DEPLOYMENT" -n "${NAMESPACE}" --token=$TOKEN
+                        return
+                      fi
+                    done <<< "$pod_image_ids"
+
+                    echo "Running pods already match desired digest for ${DEPLOYMENT_NAME}; skipping rollout restart."
                   }
 
-                  rollout_if_exists {{ include "port-ocean.liveEvents.deploymentName" . }}
-                  rollout_if_exists {{ include "port-ocean.actionsProcessor.deploymentName" . }}
+                  DESIRED_DIGEST=$(resolve_desired_digest)
+                  echo "Desired integration image digest: ${DESIRED_DIGEST:-unresolved}"
+
+                  rollout_if_image_digest_differs {{ include "port-ocean.liveEvents.deploymentName" . }}
+                  rollout_if_image_digest_differs {{ include "port-ocean.actionsProcessor.deploymentName" . }}
 
                   echo "Exiting init container"
           containers:
