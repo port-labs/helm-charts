@@ -47,6 +47,17 @@ tests:
           path: spec.jobTemplate.spec.template.spec.initContainers[1].command[2]
           pattern: resolve-ocean-image-digest
 
+  - it: renders podLabels on the cron pod template
+    values:
+      - values/hybrid-cron.yaml
+    set:
+      podLabels:
+        ocean.port.io/org-tier: ENTERPRISE
+    asserts:
+      - equal:
+          path: spec.jobTemplate.spec.template.metadata.labels["ocean.port.io/org-tier"]
+          value: ENTERPRISE
+
   - it: mounts centralized rate limiter redis credentials
     values:
       - values/hybrid-cron.yaml

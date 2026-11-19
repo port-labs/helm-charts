@@ -29,6 +29,9 @@ spec:
         {{- if .Values.integration.oauth.enabled }}
         ocean.port.io/oauth-refreshable: "true"
         {{- end }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       {{- if or .Values.podServiceAccount.name .Values.podServiceAccount.create }}
       serviceAccountName: {{ include "port-ocean.serviceAccountName" . }}
