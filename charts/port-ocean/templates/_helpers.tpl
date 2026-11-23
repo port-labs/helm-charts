@@ -289,7 +289,6 @@ Get self signed cert secret name
 
 {{/*
 Pod-template labels: chart-owned workload-type plus .Values.podLabels.
-Usage: include "port-ocean.podLabels" (list . "live-events")
 */}}
 {{- define "port-ocean.podLabels" -}}
 {{- $root := .root -}}
