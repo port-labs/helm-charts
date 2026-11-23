@@ -1,0 +1,65 @@
+suite: Incremental-sync CronJob
+templates:
+  - templates/cron-job/incremental-cron.yaml
+tests:
+  - it: does not render when incrementalSync is disabled
+    values:
+      - values/hybrid-cron.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders when incrementalSync is enabled
+    values:
+      - values/hybrid-cron.yaml
+    set:
+      incrementalSync.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.name
+          value: ocean-github-test-id-incr-cron
+
+  - it: stamps workload-type=incremental-sync on the pod template
+    values:
+      - values/hybrid-cron.yaml
+    set:
+      incrementalSync.enabled: true
+    asserts:
+      - equal:
+          path: spec.jobTemplate.spec.template.metadata.labels["ocean.port.io/workload-type"]
+          value: incremental-sync
+
+  - it: workload-type is absent from jobTemplate selector matchLabels
+    values:
+      - values/hybrid-cron.yaml
+    set:
+      incrementalSync.enabled: true
+    asserts:
+      - notExists:
+          path: spec.jobTemplate.spec.selector.matchLabels["ocean.port.io/workload-type"]
+
+  - it: podLabels collision - chart workload-type wins over podLabels entry
+    values:
+      - values/hybrid-cron.yaml
+    set:
+      incrementalSync.enabled: true
+      podLabels:
+        ocean.port.io/workload-type: bogus
+    asserts:
+      - equal:
+          path: spec.jobTemplate.spec.template.metadata.labels["ocean.port.io/workload-type"]
+          value: incremental-sync
+
+  - it: renders podLabels on the pod template
+    values:
+      - values/hybrid-cron.yaml
+    set:
+      incrementalSync.enabled: true
+      podLabels:
+        ocean.port.io/org-tier: ENTERPRISE
+    asserts:
+      - equal:
+          path: spec.jobTemplate.spec.template.metadata.labels["ocean.port.io/org-tier"]
+          value: ENTERPRISE
