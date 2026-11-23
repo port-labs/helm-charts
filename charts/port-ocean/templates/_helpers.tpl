@@ -292,8 +292,8 @@ Pod-template labels: chart-owned workload-type plus .Values.podLabels.
 Usage: include "port-ocean.podLabels" (list . "live-events")
 */}}
 {{- define "port-ocean.podLabels" -}}
-{{- $root := index . 0 -}}
-{{- $type := index . 1 -}}
+{{- $root := .root -}}
+{{- $type := .workloadType -}}
 {{- $extra := omit ($root.Values.podLabels | default dict) "ocean.port.io/workload-type" -}}
 {{- toYaml (merge (dict "ocean.port.io/workload-type" $type) $extra) -}}
 {{- end }}

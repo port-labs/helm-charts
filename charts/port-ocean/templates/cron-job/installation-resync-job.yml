@@ -33,7 +33,7 @@ spec:
       {{- end }}
       labels:
         {{- include "port-ocean.labels" . | nindent 8 }}
-        {{- include "port-ocean.podLabels" (list . "full-sync") | nindent 8 }}
+        {{- include "port-ocean.podLabels" (dict "root" . "workloadType" "full-sync") | nindent 8 }}
     spec:
       {{- if or .Values.podServiceAccount.name .Values.podServiceAccount.create }}
       serviceAccountName: {{ include "port-ocean.serviceAccountName" . }}
