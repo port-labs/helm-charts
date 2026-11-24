@@ -35,6 +35,32 @@ tests:
           path: metadata.annotations["example.com/monitoring"]
           value: enabled
 
+  - it: stamps workload-type=main on the pod template
+    values:
+      - values/single.yaml
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["ocean.port.io/workload-type"]
+          value: main
+
+  - it: workload-type is absent from selector matchLabels
+    values:
+      - values/single.yaml
+    asserts:
+      - notExists:
+          path: spec.selector.matchLabels["ocean.port.io/workload-type"]
+
+  - it: podLabels collision - chart workload-type wins over podLabels entry
+    values:
+      - values/single.yaml
+    set:
+      podLabels:
+        ocean.port.io/workload-type: bogus
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["ocean.port.io/workload-type"]
+          value: main
+
   - it: renders podLabels on the pod template
     values:
       - values/single.yaml

@@ -288,6 +288,17 @@ Get self signed cert secret name
 {{- end }}
 
 {{/*
+Pod-template labels: chart-owned workload-type plus .Values.podLabels.
+Call as: include "port-ocean.podLabels" (list . "main")
+*/}}
+{{- define "port-ocean.podLabels" -}}
+{{- $root := index . 0 -}}
+{{- $type := index . 1 -}}
+{{- $extra := omit ($root.Values.podLabels | default dict) "ocean.port.io/workload-type" -}}
+{{- toYaml (merge (dict "ocean.port.io/workload-type" $type) $extra) -}}
+{{- end }}
+
+{{/*
 Default container settings for chart-managed init containers (pull policy, security context, resources).
 */}}
 {{- define "port-ocean.initContainer.containerDefaults" -}}

@@ -47,6 +47,32 @@ tests:
           path: spec.jobTemplate.spec.template.spec.initContainers[1].command[2]
           pattern: resolve-ocean-image-digest
 
+  - it: stamps workload-type=full-sync on the cron pod template
+    values:
+      - values/hybrid-cron.yaml
+    asserts:
+      - equal:
+          path: spec.jobTemplate.spec.template.metadata.labels["ocean.port.io/workload-type"]
+          value: full-sync
+
+  - it: workload-type is absent from jobTemplate selector matchLabels
+    values:
+      - values/hybrid-cron.yaml
+    asserts:
+      - notExists:
+          path: spec.jobTemplate.spec.selector.matchLabels["ocean.port.io/workload-type"]
+
+  - it: podLabels collision - chart workload-type wins over podLabels entry
+    values:
+      - values/hybrid-cron.yaml
+    set:
+      podLabels:
+        ocean.port.io/workload-type: bogus
+    asserts:
+      - equal:
+          path: spec.jobTemplate.spec.template.metadata.labels["ocean.port.io/workload-type"]
+          value: full-sync
+
   - it: renders podLabels on the cron pod template
     values:
       - values/hybrid-cron.yaml

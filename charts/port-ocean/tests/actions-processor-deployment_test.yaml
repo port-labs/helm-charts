@@ -34,6 +34,32 @@ tests:
           path: spec.template.spec.containers[0].readinessProbe.failureThreshold
           value: 5
 
+  - it: stamps workload-type=actions-processor on the pod template
+    values:
+      - values/split.yaml
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["ocean.port.io/workload-type"]
+          value: actions-processor
+
+  - it: workload-type is absent from selector matchLabels
+    values:
+      - values/split.yaml
+    asserts:
+      - notExists:
+          path: spec.selector.matchLabels["ocean.port.io/workload-type"]
+
+  - it: podLabels collision - chart workload-type wins over podLabels entry
+    values:
+      - values/split.yaml
+    set:
+      podLabels:
+        ocean.port.io/workload-type: bogus
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["ocean.port.io/workload-type"]
+          value: actions-processor
+
   - it: renders podLabels on the pod template
     values:
       - values/split.yaml
