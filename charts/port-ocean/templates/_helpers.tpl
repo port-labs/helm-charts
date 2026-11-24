@@ -326,13 +326,14 @@ OCEAN__PORT__APP_URL: {{ tpl . $ | quote }}
 {{/*
 Fail the render when identity propagation is on without the runtime contract Ocean requires.
 liveEvents.baseUrl is the only OCEAN__BASE_URL; Ocean registers the OAuth broker on it.
+The port vault (SaaS) has no broker in the pod, since Port runs the OAuth flow, so it needs no public base URL.
 */}}
 {{- define "port-ocean.identityPropagation.requirePublicBaseUrl" -}}
 {{- if .Values.identityPropagation.enabled }}
 {{- if not .Values.actionsProcessor.enabled }}
 {{- fail "identityPropagation.enabled requires actionsProcessor.enabled" }}
 {{- end }}
-{{- if not .Values.liveEvents.baseUrl }}
+{{- if and (ne (.Values.identityPropagation.vault.type | default "aws_secrets_manager") "port") (not .Values.liveEvents.baseUrl) }}
 {{- fail "identityPropagation.enabled requires liveEvents.baseUrl" }}
 {{- end }}
 {{- end }}

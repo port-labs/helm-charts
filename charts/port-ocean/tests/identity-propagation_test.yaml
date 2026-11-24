@@ -179,6 +179,49 @@ tests:
       - failedTemplate:
           errorMessage: identityPropagation.enabled requires liveEvents.baseUrl
 
+  - it: renders the port vault type without a public base url
+    template: templates/configmap.yaml
+    values:
+      - values/single.yaml
+    set:
+      identityPropagation.enabled: true
+      identityPropagation.vault.type: port
+      actionsProcessor.enabled: true
+      liveEvents.baseUrl: ""
+    asserts:
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__VAULT__TYPE
+          value: port
+
+  - it: puts the port vault type on the actions processor that exchanges tokens
+    template: templates/actions-processor/configmap.yaml
+    values:
+      - values/single.yaml
+    set:
+      identityPropagation.enabled: true
+      identityPropagation.vault.type: port
+      actionsProcessor.enabled: true
+      actionsProcessor.worker.enabled: true
+      liveEvents.baseUrl: ""
+    asserts:
+      - equal:
+          path: data.OCEAN__IDENTITY_PROPAGATION__VAULT__TYPE
+          value: port
+      - notExists:
+          path: data.OCEAN__BASE_URL
+
+  - it: fails when the port vault type is used without the actions processor
+    template: templates/configmap.yaml
+    values:
+      - values/single.yaml
+    set:
+      identityPropagation.enabled: true
+      identityPropagation.vault.type: port
+      actionsProcessor.enabled: false
+    asserts:
+      - failedTemplate:
+          errorMessage: identityPropagation.enabled requires actionsProcessor.enabled
+
   - it: fails when identity propagation secrets are set but the chart does not create the secret
     template: templates/secret.yaml
     values:
