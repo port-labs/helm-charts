@@ -212,8 +212,9 @@ incrementalSync:
 # Identity propagation: integration actions run as the triggering user via one OAuth app
 # instead of a shared service account. Ocean hosts the OAuth broker, so this needs
 # actionsProcessor.enabled and a public liveEvents.baseUrl (that value is OCEAN__BASE_URL).
-# Render fails when either is missing. OAuth app credentials are integration config, not
-# chart-level provider blocks:
+# Render fails when either is missing. The port vault (Port-hosted Ocean only) needs no
+# liveEvents.baseUrl: Port runs the OAuth flow and keeps the tokens. OAuth app credentials
+# are integration config, not chart-level provider blocks:
 #   integration.config.identityOauthClientId
 #   integration.secrets.identityOauthClientSecret
 #   integration.config.identityOauthTenantId   # Azure DevOps only
@@ -224,7 +225,8 @@ identityPropagation:
   enabled: false
   vault:
     # aws_secrets_manager uses AWS Secrets Manager. custom is not set up by this chart:
-    # it needs an image that registers its own VaultClient.
+    # it needs an image that registers its own VaultClient. port is for Port-hosted Ocean
+    # only: Ocean exchanges the run's identity token with Port, and the settings below are unused.
     type: aws_secrets_manager
     # The pod role needs secretsmanager:CreateSecret, PutSecretValue, and GetSecretValue on {secretPrefix}/*.
     secretPrefix: port/tokens
